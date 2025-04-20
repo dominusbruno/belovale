@@ -17,7 +17,7 @@
 
   <section id="graficos" class="container mx-auto px-4 py-6">
     <h2 class="text-lg font-semibold mb-4">Relatórios Gerados</h2>
-    <div id="chartContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"></div>
+    <div id="chartContainer" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"></div>
   </section>
 
   <script>
@@ -39,6 +39,7 @@
     });
 
     function processarDados(data) {
+      chartContainer.innerHTML = "";
       const grouped = {};
 
       data.forEach(row => {
@@ -62,7 +63,7 @@
 
       Object.entries(grouped).forEach(([titulo, dados], index) => {
         const card = document.createElement('div');
-        card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'w-full', 'aspect-square', 'flex', 'flex-col');
+        card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'aspect-square', 'flex', 'flex-col');
         const canvas = document.createElement('canvas');
         canvas.id = `chart${index}`;
         canvas.classList.add('w-full');
@@ -71,7 +72,9 @@
         card.appendChild(canvas);
         chartContainer.appendChild(card);
 
-        const cores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+        const cores = [
+          '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
+        ];
 
         new Chart(canvas.getContext('2d'), {
           type: dados.grafico,
@@ -91,11 +94,18 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { display: true },
-              title: { display: true, text: titulo }
+              legend: {
+                display: true
+              },
+              title: {
+                display: true,
+                text: titulo
+              }
             },
             scales: ['pie', 'doughnut', 'radar'].includes(dados.grafico) ? {} : {
-              y: { beginAtZero: true }
+              y: {
+                beginAtZero: true
+              }
             }
           }
         });
