@@ -1,58 +1,17 @@
-Tipo,Categoria,Valor
-Produção por Galpão,Galpão 01,10000.0
-Produção por Galpão,Galpão 02,11500.0
-Produção por Galpão,Galpão 03,13000.0
-Produção por Galpão,Galpão 04,14500.0
-Consumo Diário por Lote,Lote A,40.0
-Consumo Diário por Lote,Lote B,45.0
-Consumo Diário por Lote,Lote C,50.0
-Consumo Diário por Lote,Lote D,55.0
-Receita por Tipo de Ovo,Jumbo,-900.0
-Receita por Tipo de Ovo,Extra,600.0
-Receita por Tipo de Ovo,A,1800.0
-Receita por Tipo de Ovo,B,1500.0
-Mortalidade Semanal,Semana 1,2.0
-Mortalidade Semanal,Semana 2,4.0
-Mortalidade Semanal,Semana 3,6.0
-Mortalidade Semanal,Semana 4,8.0
-Mortalidade Semanal,Semana 5,10.0
-Estoque de Ração,Galpão 01,200.0
-Estoque de Ração,Galpão 02,170.0
-Estoque de Ração,Galpão 03,140.0
-Viabilidade por Lote,Lote 1,98.5
-Viabilidade por Lote,Lote 2,97.7
-Viabilidade por Lote,Lote 3,96.9
-Venda Semanal,Semana 1,750.0
-Venda Semanal,Semana 2,800.0
-Venda Semanal,Semana 3,850.0
-Venda Semanal,Semana 4,900.0
-Venda Semanal,Semana 5,950.0
-Venda Semanal,Semana 6,1000.0
-Temperatura Média,Semana 1,25.5
-Temperatura Média,Semana 2,26.0
-Temperatura Média,Semana 3,26.5
-Temperatura Média,Semana 4,27.0
-Temperatura Média,Semana 5,27.5
-Temperatura Média,Semana 6,28.0
-Temperatura Média,Semana 7,28.5
-Umidade Média,Semana 1,66.0
-Umidade Média,Semana 2,67.0
-Umidade Média,Semana 3,68.0
-Umidade Média,Semana 4,69.0
-Umidade Média,Semana 5,70.0
-Umidade Média,Semana 6,71.0
-Umidade Média,Semana 7,72.0
-Custo de Ração por Tipo,Pré,1800.0
-Custo de Ração por Tipo,Pico,2000.0
-Custo de Ração por Tipo,Postura,2200.0
-Peso Médio por Lote,Lote A,1600.0
-Peso Médio por Lote,Lote B,1700.0
-Peso Médio por Lote,Lote C,1800.0
-Rendimento por Galpão,Galpão 01,86.0
-Rendimento por Galpão,Galpão 02,87.0
-Rendimento por Galpão,Galpão 03,88.0
-Rendimento por Galpão,Galpão 04,89.0
-Vacinação por Semana,Semana 1,130.0
-Vacinação por Semana,Semana 2,140.0
-Vacinação por Semana,Semana 3,150.0
-Vacinação por Semana,Semana 4,160.0
+Tipo,Categoria,Valor,Grafico
+Produção por Galpão,Galpão 01,10000.0,bar
+Produção por Galpão,Galpão 02,12000.0,bar
+Produção por Galpão,Galpão 03,13500.0,bar
+Consumo Diário por Lote,Lote A,45.0,line
+Consumo Diário por Lote,Lote B,50.0,line
+Receita por Tipo de Ovo,Jumbo,1800.0,pie
+Receita por Tipo de Ovo,Extra,1600.0,pie
+Receita por Tipo de Ovo,A,1400.0,pie
+Peso Médio por Lote,Lote A,1600.0,line
+Peso Médio por Lote,Lote B,1700.0,line
+Viabilidade por Galpão,Galpão 01,95.3,radar
+Viabilidade por Galpão,Galpão 02,94.1,radar
+Vacinação por Semana,Semana 1,130.0,polarArea
+Vacinação por Semana,Semana 2,145.0,polarArea
+Temperatura Média,Semana 1,25.5,line
+Temperatura Média,Semana 2,26.2,line

@@ -9,17 +9,13 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen">
-  <!-- Cabeçalho -->
   <header class="bg-white shadow-md p-4 sticky top-0 z-50 w-full">
     <div class="container mx-auto flex justify-between items-center px-4">
       <h1 class="text-xl font-bold">Avícola Belo Vale</h1>
-      <nav>
-        <a href="#graficos" class="text-blue-600">Relatórios</a>
-      </nav>
+      <nav><a href="#graficos" class="text-blue-600">Relatórios</a></nav>
     </div>
   </header>
 
-  <!-- Gráficos -->
   <section id="graficos" class="container mx-auto px-4 py-6">
     <h2 class="text-lg font-semibold mb-4">Relatórios Gerados</h2>
     <div id="chartContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
@@ -30,16 +26,13 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       const sharedURL = 'dados.csv';
-
       fetch(sharedURL)
         .then(response => response.text())
         .then(csvText => {
           Papa.parse(csvText, {
             header: true,
             skipEmptyLines: true,
-            complete: (results) => {
-              processarDados(results.data);
-            }
+            complete: (results) => processarDados(results.data)
           });
         })
         .catch(error => {
@@ -49,17 +42,25 @@
 
     function processarDados(data) {
       const grouped = {};
+      const tiposDeGrafico = {};
+
       data.forEach(row => {
         const tipo = row['Tipo'];
         const categoria = row['Categoria'];
         const valor = parseFloat(row['Valor']);
-        if (!grouped[tipo]) grouped[tipo] = { labels: [], valores: [] };
+        const grafico = row['Grafico']?.toLowerCase();
+
+        if (!grouped[tipo]) {
+          grouped[tipo] = { labels: [], valores: [] };
+          tiposDeGrafico[tipo] = grafico || selecionarTipoGrafico(tipo);
+        }
+
         grouped[tipo].labels.push(categoria);
         grouped[tipo].valores.push(isNaN(valor) ? 0 : valor);
       });
 
       Object.entries(grouped).forEach(([titulo, dados], index) => {
-        const tipoGrafico = selecionarTipoGrafico(titulo);
+        const tipoGrafico = tiposDeGrafico[titulo];
         gerarGrafico(dados.labels, dados.valores, titulo, index, tipoGrafico);
       });
     }
@@ -91,7 +92,7 @@
           datasets: [{
             label: title,
             data: valores,
-            backgroundColor: tipo === 'pie' ? [
+            backgroundColor: tipo === 'pie' || tipo === 'polarArea' || tipo === 'doughnut' || tipo === 'radar' ? [
               '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#f472b6', '#10b981'
             ] : 'rgba(59, 130, 246, 0.6)',
             borderColor: tipo === 'pie' ? '#fff' : 'rgba(37, 99, 235, 1)',
@@ -103,17 +104,15 @@
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              display: tipo === 'pie'
+              display: tipo !== 'bar' && tipo !== 'line'
             },
             title: {
               display: true,
               text: title
             }
           },
-          scales: tipo === 'pie' ? {} : {
-            y: {
-              beginAtZero: true
-            }
+          scales: tipo === 'pie' || tipo === 'polarArea' || tipo === 'doughnut' || tipo === 'radar' ? {} : {
+            y: { beginAtZero: true }
           }
         }
       });
