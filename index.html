@@ -9,20 +9,16 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen">
-  <!-- Cabeçalho -->
   <header class="bg-white shadow-md p-4 sticky top-0 z-50 w-full">
     <div class="container mx-auto flex justify-between items-center px-4">
       <h1 class="text-xl font-bold">Avícola Belo Vale</h1>
-      <nav>
-        <a href="#graficos" class="text-blue-600">Relatórios</a>
-      </nav>
+      <nav><a href="#graficos" class="text-blue-600">Relatórios</a></nav>
     </div>
   </header>
 
-  <!-- Gráficos -->
   <section id="graficos" class="container mx-auto px-4 py-6">
     <h2 class="text-lg font-semibold mb-4">Relatórios Gerados</h2>
-    <div id="chartContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"></div>
+    <div id="chartContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
   </section>
 
   <script>
@@ -30,16 +26,13 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       const sharedURL = 'dados.csv';
-
       fetch(sharedURL)
         .then(response => response.text())
         .then(csvText => {
           Papa.parse(csvText, {
             header: true,
             skipEmptyLines: true,
-            complete: (results) => {
-              processarDados(results.data);
-            }
+            complete: (results) => processarDados(results.data)
           });
         })
         .catch(error => {
@@ -82,13 +75,13 @@
 
     function gerarGrafico(labels, valores, title, index, tipo = 'bar') {
       const card = document.createElement('div');
-      card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'w-full', 'aspect-square', 'flex', 'flex-col');
+      card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'w-full', 'flex', 'flex-col');
+      card.style.height = '400px';
 
       const canvas = document.createElement('canvas');
       canvas.id = `chart${index}`;
       canvas.classList.add('w-full');
-      canvas.style.height = '100%';
-      canvas.style.width = '100%';
+      canvas.style.flex = '1';
       card.appendChild(canvas);
       chartContainer.appendChild(card);
 
@@ -99,7 +92,7 @@
           datasets: [{
             label: title,
             data: valores,
-            backgroundColor: tipo === 'pie' ? [
+            backgroundColor: tipo === 'pie' || tipo === 'polarArea' || tipo === 'doughnut' || tipo === 'radar' ? [
               '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#f472b6', '#10b981'
             ] : 'rgba(59, 130, 246, 0.6)',
             borderColor: tipo === 'pie' ? '#fff' : 'rgba(37, 99, 235, 1)',
@@ -111,17 +104,15 @@
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              display: tipo === 'pie'
+              display: tipo !== 'bar' && tipo !== 'line'
             },
             title: {
               display: true,
               text: title
             }
           },
-          scales: tipo === 'pie' ? {} : {
-            y: {
-              beginAtZero: true
-            }
+          scales: tipo === 'pie' || tipo === 'polarArea' || tipo === 'doughnut' || tipo === 'radar' ? {} : {
+            y: { beginAtZero: true }
           }
         }
       });
