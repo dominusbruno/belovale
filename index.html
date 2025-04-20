@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard CSV - Avícola</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script>
-    Chart.register(...Object.values(Chart));
-  </script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
@@ -102,7 +99,7 @@
           datasets: [{
             label: title,
             data: valores,
-            backgroundColor: ['pie', 'polarArea', 'doughnut', 'radar'].includes(tipo) ? [
+            backgroundColor: ['pie', 'doughnut', 'radar'].includes(tipo) ? [
               '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#f472b6', '#10b981'
             ] : 'rgba(59, 130, 246, 0.6)',
             borderColor: tipo === 'pie' ? '#fff' : 'rgba(37, 99, 235, 1)',
