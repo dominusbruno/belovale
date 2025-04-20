@@ -1,3 +1,4 @@
+
 const chartContainer = document.getElementById('chartContainer');
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -42,6 +43,8 @@ function processarDados(data) {
     const card = document.createElement('div');
     card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'flex', 'flex-col');
     card.style.aspectRatio = '1 / 1';
+    card.style.flex = '1 1 30%';
+
     const canvas = document.createElement('canvas');
     canvas.id = `chart${index}`;
     canvas.classList.add('w-full');
@@ -70,18 +73,11 @@ function processarDados(data) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            display: true
-          },
-          title: {
-            display: true,
-            text: titulo
-          }
+          legend: { display: true },
+          title: { display: true, text: titulo }
         },
         scales: ['pie', 'doughnut', 'radar'].includes(dados.grafico) ? {} : {
-          y: {
-            beginAtZero: true
-          }
+          y: { beginAtZero: true }
         }
       }
     });
