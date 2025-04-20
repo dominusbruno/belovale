@@ -1,15 +1,86 @@
 Tipo,Categoria,Valor,Grafico
-Produção por Galpão,Galpão 01,10000.0,bar
-Produção por Galpão,Galpão 02,12000.0,bar
-Produção por Galpão,Galpão 03,13500.0,bar
-Consumo Diário por Lote,Lote A,45.0,line
-Consumo Diário por Lote,Lote B,50.0,line
-Receita por Tipo de Ovo,Jumbo,1800.0,pie
-Receita por Tipo de Ovo,Extra,1600.0,pie
-Receita por Tipo de Ovo,A,1400.0,pie
-Peso Médio por Lote,Lote A,1600.0,line
-Peso Médio por Lote,Lote B,1700.0,line
-Viabilidade por Galpão,Galpão 01,95.3,radar
-Viabilidade por Galpão,Galpão 02,94.1,radar
-Temperatura Média,Semana 1,25.5,line
-Temperatura Média,Semana 2,26.2,line
+Produção Semanal por Galpão,Galpão 1,15316.18,bar
+Produção Semanal por Galpão,Galpão 2,8665.79,bar
+Produção Semanal por Galpão,Galpão 3,13571.78,bar
+Produção Semanal por Galpão,Galpão 4,14574.62,bar
+Produção Semanal por Galpão,Galpão 5,4952.17,bar
+Produção Semanal por Galpão,Galpão 6,15993.43,bar
+Consumo Médio por Lote,Lote 1,2728.49,line
+Consumo Médio por Lote,Lote 2,7485.57,line
+Consumo Médio por Lote,Lote 3,6628.23,line
+Consumo Médio por Lote,Lote 4,5473.62,line
+Consumo Médio por Lote,Lote 5,3480.78,line
+Consumo Médio por Lote,Lote 6,15040.49,line
+Consumo Médio por Lote,Lote 7,1646.47,line
+Consumo Médio por Lote,Lote 8,14856.26,line
+Receita por Tipo de Ovo,Jumbo,101.78,pie
+Receita por Tipo de Ovo,Extra,48.92,pie
+Receita por Tipo de Ovo,A,46.66,pie
+Receita por Tipo de Ovo,B,131.03,pie
+Peso Médio por Semana,Semana 1,17666.29,line
+Peso Médio por Semana,Semana 2,12248.79,line
+Peso Médio por Semana,Semana 3,11922.73,line
+Peso Médio por Semana,Semana 4,19468.15,line
+Peso Médio por Semana,Semana 5,3468.6,line
+Peso Médio por Semana,Semana 6,19307.68,line
+Peso Médio por Semana,Semana 7,12490.06,line
+Peso Médio por Semana,Semana 8,8989.82,line
+Peso Médio por Semana,Semana 9,14633.77,line
+Peso Médio por Semana,Semana 10,8650.37,line
+Viabilidade por Galpão,Galpão 1,71.53,radar
+Viabilidade por Galpão,Galpão 2,66.61,radar
+Viabilidade por Galpão,Galpão 3,33.93,radar
+Viabilidade por Galpão,Galpão 4,31.23,radar
+Rendimento por Galpão,Galpão 1,89.55,doughnut
+Rendimento por Galpão,Galpão 2,137.15,doughnut
+Rendimento por Galpão,Galpão 3,185.78,doughnut
+Rendimento por Galpão,Galpão 4,111.63,doughnut
+Rendimento por Galpão,Galpão 5,156.98,doughnut
+Temperatura Média Semanal,Semana 1,4162.26,line
+Temperatura Média Semanal,Semana 2,8864.29,line
+Temperatura Média Semanal,Semana 3,4298.91,line
+Temperatura Média Semanal,Semana 4,16030.93,line
+Temperatura Média Semanal,Semana 5,15176.46,line
+Temperatura Média Semanal,Semana 6,17985.03,line
+Temperatura Média Semanal,Semana 7,4361.37,line
+Temperatura Média Semanal,Semana 8,1523.16,line
+Temperatura Média Semanal,Semana 9,14636.85,line
+Temperatura Média Semanal,Semana 10,15648.13,line
+Temperatura Média Semanal,Semana 11,4814.3,line
+Temperatura Média Semanal,Semana 12,18204.65,line
+Mortalidade por Lote,Lote 1,7896.79,bar
+Mortalidade por Lote,Lote 2,11725.08,bar
+Mortalidade por Lote,Lote 3,11056.39,bar
+Mortalidade por Lote,Lote 4,14257.01,bar
+Mortalidade por Lote,Lote 5,16982.49,bar
+Mortalidade por Lote,Lote 6,11292.15,bar
+Mortalidade por Lote,Lote 7,16025.46,bar
+Mortalidade por Lote,Lote 8,2255.99,bar
+Vacinação por Semana,Semana 1,67.52,polarArea
+Vacinação por Semana,Semana 2,54.24,polarArea
+Vacinação por Semana,Semana 3,63.34,polarArea
+Vacinação por Semana,Semana 4,98.26,polarArea
+Vacinação por Semana,Semana 5,108.79,polarArea
+Vacinação por Semana,Semana 6,140.44,polarArea
+Umidade por Galpão,Galpão 1,2191.93,bar
+Umidade por Galpão,Galpão 2,4162.9,bar
+Umidade por Galpão,Galpão 3,1572.54,bar
+Umidade por Galpão,Galpão 4,17247.11,bar
+Umidade por Galpão,Galpão 5,2886.32,bar
+Consumo de Água por Lote,Lote 1,4276.55,line
+Consumo de Água por Lote,Lote 2,12256.43,line
+Consumo de Água por Lote,Lote 3,15065.93,line
+Consumo de Água por Lote,Lote 4,1634.75,line
+Consumo de Água por Lote,Lote 5,10880.77,line
+Consumo de Água por Lote,Lote 6,4084.36,line
+Consumo de Água por Lote,Lote 7,17304.05,line
+Estoque de Ração,Galpão 1,2112.99,bar
+Estoque de Ração,Galpão 2,6118.96,bar
+Estoque de Ração,Galpão 3,8609.28,bar
+Estoque de Ração,Galpão 4,19441.34,bar
+Estoque de Ração,Galpão 5,8377.98,bar
+Estoque de Ração,Galpão 6,4202.09,bar
+Custo de Ração por Tipo,Jumbo,151.91,pie
+Custo de Ração por Tipo,Extra,87.63,pie
+Custo de Ração por Tipo,A,152.14,pie
+Custo de Ração por Tipo,B,84.83,pie
