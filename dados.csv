@@ -1,0 +1,36 @@
+Tipo,Categoria,Real,Padrão,Galpão A,Galpão B,Galpão C,Grafico
+Produção Semanal,Semana 1,10215.19,8199.64,9713.45,12620.39,7637.56,line
+Produção Semanal,Semana 2,12231.45,3551.2,12322.73,1410.52,8174.99,line
+Produção Semanal,Semana 3,7987.39,6051.42,9173.81,5500.83,7148.49,line
+Produção Semanal,Semana 4,5105.97,19220.96,19262.27,5279.22,14986.89,line
+Produção Semanal,Semana 5,8591.6,3627.55,8602.07,3318.36,10086.34,line
+Consumo por Lote,Lote 1,11128.59,15840.62,16902.53,14604.35,13833.14,bar
+Consumo por Lote,Lote 2,18540.36,14682.8,6957.64,7450.16,8458.07,bar
+Consumo por Lote,Lote 3,11141.04,3936.55,6487.54,16738.01,16043.72,bar
+Consumo por Lote,Lote 4,10748.69,6158.53,11978.19,13716.24,18348.46,bar
+Consumo por Lote,Lote 5,10749.73,17551.01,12702.99,18528.5,11713.23,bar
+Peso Médio,Semana 1,1355.23,5682.36,1962.69,7856.73,3435.55,line
+Peso Médio,Semana 2,2515.8,18564.13,1180.91,16257.38,5008.07,line
+Peso Médio,Semana 3,17036.75,9093.43,4290.53,10037.85,14834.08,line
+Peso Médio,Semana 4,14157.35,4438.16,18916.99,18928.74,17085.99,line
+Peso Médio,Semana 5,13030.62,1202.67,2389.77,8327.2,15041.51,line
+Rendimento,Galpão 1,14949.44,5646.23,10729.89,6487.41,13508.65,bar
+Rendimento,Galpão 2,5916.24,7751.91,15720.31,18725.82,13146.91,bar
+Rendimento,Galpão 3,15348.19,6813.11,13999.14,18644.07,17235.05,bar
+Rendimento,Galpão 4,7542.88,6509.24,2245.4,8597.18,11518.42,bar
+Rendimento,Galpão 5,8906.6,2717.41,10584.52,5597.84,17952.31,bar
+Viabilidade,Galpão 1,4109.93,16452.43,3703.96,3426.69,12815.46,radar
+Viabilidade,Galpão 2,14964.74,17585.37,9835.11,6387.71,4881.05,radar
+Viabilidade,Galpão 3,2168.61,10970.76,1953.1,1033.32,9574.27,radar
+Viabilidade,Galpão 4,13166.5,8035.49,16233.33,13877.16,8281.71,radar
+Viabilidade,Galpão 5,10262.6,4026.03,11089.82,14446.66,2114.87,radar
+Temperatura Média,Semana 1,18876.74,19012.77,5572.31,13438.66,8309.07,line
+Temperatura Média,Semana 2,16122.4,18105.23,12984.07,12006.09,8395.43,line
+Temperatura Média,Semana 3,7810.2,7435.53,15491.68,12842.8,6679.17,line
+Temperatura Média,Semana 4,12681.36,18743.83,16537.47,2295.03,9199.19,line
+Temperatura Média,Semana 5,8657.17,3480.83,16223.87,13229.07,13158.6,line
+Receita por Tipo de Ovo,Jumbo,10037.74,19087.37,2406.24,1047.2,11472.01,doughnut
+Receita por Tipo de Ovo,Extra,9170.81,5958.45,16035.52,6926.63,7378.57,doughnut
+Receita por Tipo de Ovo,A,18497.09,9428.39,9487.05,1947.96,19478.06,doughnut
+Receita por Tipo de Ovo,B,13902.9,17080.35,10412.5,1762.96,4968.22,doughnut
+Receita por Tipo de Ovo,C,12320.99,14882.58,6833.53,12649.21,4706.24,doughnut
