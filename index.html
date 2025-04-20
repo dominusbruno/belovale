@@ -1,26 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard CSV - Avícola</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Excel - Avícola</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen">
   <input type="file" id="fileInput" accept=".xlsx" hidden />
-  <!-- Cabeçalho -->
   <header class="bg-white shadow-md p-4 sticky top-0 z-50 w-full">
     <div class="container mx-auto flex justify-between items-center px-4">
       <h1 class="text-xl font-bold">Avícola Belo Vale</h1>
-      <nav>
-        <a href="#graficos" class="text-blue-600">Relatórios</a>
-      </nav>
+      <label for="fileInput" class="ml-auto bg-blue-100 p-2 rounded text-sm cursor-pointer">Escolher planilha</label>
     </div>
   </header>
 
-  <!-- Gráficos -->
   <section id="graficos" class="container mx-auto px-4 py-6">
     <h2 class="text-lg font-semibold mb-4">Relatórios Gerados</h2>
     <div id="chartContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"></div>
@@ -28,118 +24,92 @@
 
   <script>
     const chartContainer = document.getElementById('chartContainer');
+    const input = document.getElementById('fileInput');
 
-    window.addEventListener('DOMContentLoaded', () => {
-  const input = document.getElementById('fileInput');
-  if (input && input.files.length > 0) {
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      const data = new Uint8Array(event.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
-      processarDados(jsonData);
-    };
-    reader.readAsArrayBuffer(input.files[0]);
-  } else {
-    const sharedURL = 'dados.csv';
-    fetch(sharedURL)
-      .then(response => response.text())
-      .then(csvText => {
-        Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => processarDados(results.data)
-        });
-      })
-      .catch(error => {
-        chartContainer.innerHTML = `<p class="text-red-600">Erro ao importar: ${error.message}</p>`;
-      });
-  }
-});
-        })
-        .catch(error => {
-          chartContainer.innerHTML = `<p class="text-red-600">Erro ao importar: ${error.message}</p>`;
-        });
+    input.addEventListener('change', () => {
+      if (input.files.length === 0) return;
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+        processarDados(jsonData);
+      };
+      reader.readAsArrayBuffer(input.files[0]);
     });
 
     function processarDados(data) {
+      chartContainer.innerHTML = "";
       const grouped = {};
-      const tiposDeGrafico = {};
 
       data.forEach(row => {
         const tipo = row['Tipo'];
         const categoria = row['Categoria'];
-        const valor = parseFloat(row['Valor']);
-        const grafico = row['Grafico']?.toLowerCase();
+        const grafico = (row['Grafico'] || 'bar').toLowerCase();
 
         if (!grouped[tipo]) {
-          grouped[tipo] = { labels: [], valores: [] };
-          tiposDeGrafico[tipo] = grafico || selecionarTipoGrafico(tipo);
+          grouped[tipo] = { labels: [], datasets: {}, grafico };
         }
 
         grouped[tipo].labels.push(categoria);
-        grouped[tipo].valores.push(isNaN(valor) ? 0 : valor);
+
+        Object.keys(row).forEach(col => {
+          if (!['Tipo', 'Categoria', 'Grafico'].includes(col)) {
+            if (!grouped[tipo].datasets[col]) grouped[tipo].datasets[col] = [];
+            grouped[tipo].datasets[col].push(parseFloat(row[col]) || 0);
+          }
+        });
       });
 
       Object.entries(grouped).forEach(([titulo, dados], index) => {
-        const tipoGrafico = tiposDeGrafico[titulo];
-        gerarGrafico(dados.labels, dados.valores, titulo, index, tipoGrafico);
-      });
-    }
+        const card = document.createElement('div');
+        card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'w-full', 'aspect-square', 'flex', 'flex-col');
+        const canvas = document.createElement('canvas');
+        canvas.id = `chart${index}`;
+        canvas.classList.add('w-full');
+        canvas.style.height = '100%';
+        canvas.style.width = '100%';
+        card.appendChild(canvas);
+        chartContainer.appendChild(card);
 
-    function selecionarTipoGrafico(titulo) {
-      const lower = titulo.toLowerCase();
-      if (lower.includes('produção') || lower.includes('consumo') || lower.includes('rendimento') || lower.includes('custo') || lower.includes('estoque')) return 'bar';
-      if (lower.includes('mortalidade') || lower.includes('peso') || lower.includes('temperatura') || lower.includes('umidade') || lower.includes('venda') || lower.includes('vacinação')) return 'line';
-      if (lower.includes('receita') || lower.includes('por tipo de ovo')) return 'pie';
-      return 'bar';
-    }
+        const cores = [
+          '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
+        ];
 
-    function gerarGrafico(labels, valores, title, index, tipo = 'bar') {
-      const card = document.createElement('div');
-      card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'w-full', 'aspect-square', 'flex', 'flex-col');
-
-      const canvas = document.createElement('canvas');
-      canvas.id = `chart${index}`;
-      canvas.classList.add('w-full');
-      canvas.style.height = '100%';
-      canvas.style.width = '100%';
-      card.appendChild(canvas);
-      chartContainer.appendChild(card);
-
-      new Chart(canvas.getContext('2d'), {
-        type: tipo,
-        data: {
-          labels,
-          datasets: [{
-            label: title,
-            data: valores,
-            backgroundColor: ['pie', 'doughnut', 'radar'].includes(tipo) ? [
-              '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#f472b6', '#10b981'
-            ] : 'rgba(59, 130, 246, 0.6)',
-            borderColor: tipo === 'pie' ? '#fff' : 'rgba(37, 99, 235, 1)',
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: ['pie', 'polarArea', 'doughnut', 'radar'].includes(tipo)
-            },
-            title: {
-              display: true,
-              text: title
-            }
+        new Chart(canvas.getContext('2d'), {
+          type: dados.grafico,
+          data: {
+            labels: dados.labels,
+            datasets: Object.entries(dados.datasets).map(([label, valores], i) => ({
+              label,
+              data: valores,
+              borderColor: cores[i % cores.length],
+              backgroundColor: cores[i % cores.length],
+              borderWidth: 2,
+              fill: false,
+              tension: 0.3
+            }))
           },
-          scales: ['pie', 'polarArea', 'doughnut', 'radar'].includes(tipo) ? {} : {
-            y: {
-              beginAtZero: true
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true
+              },
+              title: {
+                display: true,
+                text: titulo
+              }
+            },
+            scales: ['pie', 'doughnut', 'radar'].includes(dados.grafico) ? {} : {
+              y: {
+                beginAtZero: true
+              }
             }
           }
-        }
+        });
       });
     }
   </script>
