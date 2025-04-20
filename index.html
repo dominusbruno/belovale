@@ -63,7 +63,8 @@
 
       Object.entries(grouped).forEach(([titulo, dados], index) => {
         const card = document.createElement('div');
-        card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'aspect-square', 'flex', 'flex-col');
+        card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'flex', 'flex-col');
+        card.style.aspectRatio = '1 / 1';;
         const canvas = document.createElement('canvas');
         canvas.id = `chart${index}`;
         canvas.classList.add('w-full');
