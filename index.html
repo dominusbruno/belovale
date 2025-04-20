@@ -74,11 +74,13 @@
 
     function gerarGrafico(labels, valores, title, index, tipo = 'bar') {
       const card = document.createElement('div');
-      card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'w-full', 'min-h-[400px]', 'flex', 'flex-col');
+      card.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-4', 'w-full', 'flex', 'flex-col');
+      card.style.height = '400px';
 
       const canvas = document.createElement('canvas');
       canvas.id = `chart${index}`;
-      canvas.classList.add('w-full', 'h-full');
+      canvas.classList.add('w-full');
+      canvas.style.flex = '1';
       card.appendChild(canvas);
       chartContainer.appendChild(card);
 
