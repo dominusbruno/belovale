@@ -4,24 +4,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard CSV - Avícola</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <title>Produtividade por Galpão</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-  <link href="style.css" rel="stylesheet" />
 </head>
-<body>
-  <header class="bg-yellow-500 shadow-md p-4 sticky top-0 z-50 w-full">
-    <div class="flex items-center justify-center">
-      <h1 class="text-2xl font-bold text-white text-center">AVÍCOLA BELO VALE - DASHBOARD</h1>
-    </div>
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+  <header class="bg-yellow-500 shadow-md p-4 sticky top-0 z-50 w-full text-center">
+    <h1 class="text-2xl font-bold text-white">AVÍCOLA BELO VALE - PRODUTIVIDADE (Últimas 10 semanas)</h1>
   </header>
-
   <section id="graficos" class="container mx-auto px-4 py-6">
-    <h2 class="text-lg font-semibold mb-4">Relatórios Gerados</h2>
-    <div id="chartContainer" class="flex flex-wrap justify-center gap-6"></div>
+    <div id="chartContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
   </section>
-
   <script src="script.js"></script>
 </body>
 </html>
