@@ -103,6 +103,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 borderColor: '#3b82f6',
                 borderWidth: 1.5,
                 tension: 0.4,
+                pointRadius: 1,
               },
               {
                 label: 'Padrão',
@@ -111,6 +112,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 borderWidth: 1,
                 borderDash: [5, 5],
                 tension: 0.4,
+                pointRadius: 1,
               }
             ]
           },
