@@ -4,19 +4,68 @@ window.addEventListener('DOMContentLoaded', () => {
   controlContainer.className = 'mb-4 flex justify-end px-4';
   chartContainer.before(controlContainer);
 
-  const select = document.createElement('select');
-  select.className = 'border border-gray-300 rounded px-2 py-1';
+  const selectSemanas = document.createElement('select');
+  selectSemanas.className = 'border border-gray-300 rounded px-2 py-1 mr-2';
   [10, 20, 30, 40].forEach(n => {
     const option = document.createElement('option');
     option.value = n;
     option.textContent = `${n} semanas`;
-    select.appendChild(option);
+    selectSemanas.appendChild(option);
   });
-  controlContainer.appendChild(select);
+  controlContainer.appendChild(selectSemanas);
+
+  const selectLote = document.createElement('select');
+selectLote.className = 'border border-gray-300 rounded px-2 py-1 mr-2';
+controlContainer.appendChild(selectLote);
+
+const selectStatus = document.createElement('select');
+selectStatus.className = 'border border-gray-300 rounded px-2 py-1';
+['ATIVO', 'INATIVO', 'TODOS'].forEach(status => {
+  const option = document.createElement('option');
+  option.value = status;
+  option.textContent = status.charAt(0) + status.slice(1).toLowerCase();
+  if (status === 'ATIVO') option.selected = true;
+  selectStatus.appendChild(option);
+});
+controlContainer.appendChild(selectStatus);
 
   let semanasExibir = 10;
-  select.addEventListener('change', () => {
-    semanasExibir = parseInt(select.value);
+  let loteSelecionado = '';
+  let statusSelecionado = 'ATIVO';
+
+  selectSemanas.addEventListener('change', () => {
+    semanasExibir = parseInt(selectSemanas.value);
+    atualizarGraficos();
+  });
+
+  selectLote.addEventListener('change', () => {
+    loteSelecionado = selectLote.value;
+    atualizarGraficos();
+  });
+
+  selectStatus.addEventListener('change', () => {
+    statusSelecionado = selectStatus.value;
+    atualizarGraficos();
+  });
+
+  Papa.parse('dados.csv', {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+      const lotesUnicos = [...new Set(results.data.map(row => row['LOTE']).filter(Boolean))];
+      selectLote.innerHTML = '<option value="">Todos os lotes</option>';
+      lotesUnicos.forEach(lote => {
+        const option = document.createElement('option');
+        option.value = lote;
+        option.textContent = lote;
+        selectLote.appendChild(option);
+      });
+      renderizarGraficos(results.data);
+    }
+  });
+
+  function atualizarGraficos() {
     chartContainer.innerHTML = '';
     Papa.parse('dados.csv', {
       download: true,
@@ -26,20 +75,12 @@ window.addEventListener('DOMContentLoaded', () => {
         renderizarGraficos(results.data);
       }
     });
-  });
-
-  Papa.parse('dados.csv', {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: function(results) {
-      renderizarGraficos(results.data);
-    }
-  });
+  }
 
   function renderizarGraficos(dataRaw) {
     const dados = dataRaw
-      .filter(row => row['STATUS'] === 'ATIVO')
+      .filter(row => statusSelecionado === 'TODOS' || row['STATUS'] === statusSelecionado)
+      .filter(row => !loteSelecionado || row['LOTE'] === loteSelecionado)
       .map(row => ({
         galpao: row['GALPAO'],
         lote: row['LOTE'],
@@ -49,7 +90,6 @@ window.addEventListener('DOMContentLoaded', () => {
       }));
 
     const agrupado = {};
-        
     dados.forEach(row => {
       const chave = row.lote;
       if (!agrupado[chave]) agrupado[chave] = [];
@@ -58,8 +98,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     Object.entries(agrupado)
       .sort(([, a], [, b]) => {
-        const ga = a.sort((x, y) => y.idade - x.idade)[0].galpao;
-        const gb = b.sort((x, y) => y.idade - x.idade)[0].galpao;
+        const ga = [...a].sort((x, y) => y.idade - x.idade)[0].galpao;
+        const gb = [...b].sort((x, y) => y.idade - x.idade)[0].galpao;
         return ga.localeCompare(gb, 'pt', { numeric: true });
       })
       .forEach(([chave, valores], i) => {
@@ -129,7 +169,6 @@ window.addEventListener('DOMContentLoaded', () => {
             scales: {
               y: {
                 beginAtZero: false,
-                // suggestedMax removido para eixo dinâmico
                 ticks: {
                   callback: value => (value * 100).toFixed(1) + '%'
                 }
