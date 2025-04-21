@@ -4,6 +4,21 @@ window.addEventListener('DOMContentLoaded', () => {
   controlContainer.className = 'mb-4 flex justify-end px-4';
   chartContainer.before(controlContainer);
 
+  const selectStatus = document.createElement('select');
+  selectStatus.className = 'border border-gray-300 rounded px-2 py-1 mr-2';
+  ['ATIVO', 'INATIVO', 'TODOS'].forEach(status => {
+    const option = document.createElement('option');
+    option.value = status;
+    option.textContent = status.charAt(0) + status.slice(1).toLowerCase();
+    if (status === 'ATIVO') option.selected = true;
+    selectStatus.appendChild(option);
+  });
+  controlContainer.appendChild(selectStatus);
+
+  const selectLote = document.createElement('select');
+  selectLote.className = 'border border-gray-300 rounded px-2 py-1 mr-2';
+  controlContainer.appendChild(selectLote);
+
   const selectSemanas = document.createElement('select');
   selectSemanas.className = 'border border-gray-300 rounded px-2 py-1 mr-2';
   [10, 20, 30, 40].forEach(n => {
@@ -13,21 +28,6 @@ window.addEventListener('DOMContentLoaded', () => {
     selectSemanas.appendChild(option);
   });
   controlContainer.appendChild(selectSemanas);
-
-  const selectLote = document.createElement('select');
-selectLote.className = 'border border-gray-300 rounded px-2 py-1 mr-2';
-controlContainer.appendChild(selectLote);
-
-const selectStatus = document.createElement('select');
-selectStatus.className = 'border border-gray-300 rounded px-2 py-1';
-['ATIVO', 'INATIVO', 'TODOS'].forEach(status => {
-  const option = document.createElement('option');
-  option.value = status;
-  option.textContent = status.charAt(0) + status.slice(1).toLowerCase();
-  if (status === 'ATIVO') option.selected = true;
-  selectStatus.appendChild(option);
-});
-controlContainer.appendChild(selectStatus);
 
   let semanasExibir = 10;
   let loteSelecionado = '';
@@ -45,23 +45,50 @@ controlContainer.appendChild(selectStatus);
 
   selectStatus.addEventListener('change', () => {
     statusSelecionado = selectStatus.value;
-    atualizarGraficos();
+    carregarLotesFiltrados();
   });
+
+  function carregarLotesFiltrados() {
+    Papa.parse('dados.csv', {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const loteMaisRecentePorLote = {};
+        results.data
+          .filter(row => statusSelecionado === 'TODOS' || row['STATUS'] === statusSelecionado)
+          .forEach(row => {
+            const lote = row['LOTE'];
+            const idade = parseInt(row['IDADE']);
+            if (!loteMaisRecentePorLote[lote] || idade > loteMaisRecentePorLote[lote].idade) {
+              loteMaisRecentePorLote[lote] = {
+                galpao: row['GALPAO'],
+                idade,
+                lote
+              };
+            }
+          });
+
+        const lotesFiltrados = Object.values(loteMaisRecentePorLote).sort((a, b) => `${a.galpao}-${a.lote}`.localeCompare(`${b.galpao}-${b.lote}`, 'pt', { numeric: true }));
+        selectLote.innerHTML = '<option value="">Todos os lotes</option>';
+        lotesFiltrados.forEach(lote => {
+          const option = document.createElement('option');
+          option.value = lote.lote;
+          option.textContent = `${lote.galpao} - ${lote.lote}`;
+          selectLote.appendChild(option);
+        });
+
+        atualizarGraficos();
+      }
+    });
+  }
 
   Papa.parse('dados.csv', {
     download: true,
     header: true,
     skipEmptyLines: true,
     complete: function(results) {
-      const lotesUnicos = [...new Set(results.data.map(row => row['LOTE']).filter(Boolean))];
-      selectLote.innerHTML = '<option value="">Todos os lotes</option>';
-      lotesUnicos.forEach(lote => {
-        const option = document.createElement('option');
-        option.value = lote;
-        option.textContent = lote;
-        selectLote.appendChild(option);
-      });
-      renderizarGraficos(results.data);
+      carregarLotesFiltrados();
     }
   });
 
