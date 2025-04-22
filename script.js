@@ -114,7 +114,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const resetButton = document.createElement('button');
   resetButton.textContent = 'Resetar Filtros';
-  resetButton.className = 'bg-gray-200 hover:bg-gray-300 text-sm px-4 py-1 rounded border border-gray-300 w-full sm:w-auto sm:text-left';
+  resetButton.className = 'bg-gray-200 hover:bg-gray-300 text-sm px-4 py-1 rounded border border-gray-300 w-full sm:w-auto sm:text-left self-center';
   controlContainer.appendChild(resetButton);
 
   let semanasExibir = 100;
