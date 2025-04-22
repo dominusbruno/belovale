@@ -5,28 +5,94 @@ window.addEventListener('DOMContentLoaded', () => {
   const corDeFundoCard = 'bg-white';
   const chartContainer = document.getElementById('chartContainer');
   const controlContainer = document.createElement('div');
-  controlContainer.className = 'mb-4 flex justify-center gap-2 px-4 flex-wrap';
+  controlContainer.className = 'mb-4 flex flex-wrap justify-center sm:justify-center items-start gap-2 px-4';
   chartContainer.before(controlContainer);
 
-  const selectStatus = document.createElement('select');
-  selectStatus.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto sm:text-left text-center';
-  ['ATIVO', 'INATIVO', 'TODOS'].forEach(status => {
-    const option = document.createElement('option');
-    option.value = status;
-    option.textContent = status.charAt(0) + status.slice(1).toLowerCase();
-    if (status === 'ATIVO') option.selected = true;
-    selectStatus.appendChild(option);
-  });
-  controlContainer.appendChild(selectStatus);
+  // Menu STATUS personalizado
+  const statusWrapper = document.createElement('div');
+  statusWrapper.className = 'relative';
 
+  const statusToggle = document.createElement('button');
+  statusToggle.textContent = 'Status: ATIVO';
+  statusToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white text-left w-full sm:w-48';
+  statusToggle.setAttribute('aria-expanded', 'false');
+  statusToggle.setAttribute('aria-controls', 'statusMenu');
+  statusWrapper.appendChild(statusToggle);
+
+  const statusMenu = document.createElement('div');
+  statusMenu.id = 'statusMenu';
+  statusMenu.className = 'absolute mt-1 w-full sm:w-40 bg-white border border-gray-300 rounded shadow z-10 hidden';
+  ['ATIVO', 'INATIVO', 'TODOS'].forEach(status => {
+    const option = document.createElement('div');
+    option.className = 'px-2 py-1 hover:bg-gray-100 cursor-pointer';
+    option.textContent = status;
+    option.addEventListener('click', () => {
+      statusSelecionado = status;
+      statusToggle.textContent = `Status: ${status}`;
+      statusMenu.classList.add('hidden');
+      carregarLotesFiltrados(() => {
+        lotesSelecionados = Array.from(dropdownMenu.querySelectorAll('input:checked')).map(cb => cb.value);
+        atualizarGraficos();
+      });
+    });
+    statusMenu.appendChild(option);
+  });
+  statusWrapper.appendChild(statusMenu);
+  controlContainer.appendChild(statusWrapper);
+
+  statusToggle.addEventListener('click', () => {
+    const isExpanded = statusMenu.classList.toggle('hidden') === false;
+    statusToggle.setAttribute('aria-expanded', isExpanded);
+  });
+  document.addEventListener('click', (e) => {
+    if (!statusWrapper.contains(e.target)) statusMenu.classList.add('hidden');
+  });
+
+  // Menu SEMANAS personalizado
+  const semanasWrapper = document.createElement('div');
+  semanasWrapper.className = 'relative';
+
+  const semanasToggle = document.createElement('button');
+  semanasToggle.textContent = 'Semanas: 100';
+  semanasToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white text-left w-full sm:w-48';
+  semanasToggle.setAttribute('aria-expanded', 'false');
+  semanasToggle.setAttribute('aria-controls', 'semanasMenu');
+  semanasWrapper.appendChild(semanasToggle);
+
+  const semanasMenu = document.createElement('div');
+  semanasMenu.id = 'semanasMenu';
+  semanasMenu.className = 'absolute mt-1 w-full sm:w-40 bg-white border border-gray-300 rounded shadow z-10 hidden';
+  [10, 20, 30, 40, 60, 80, 100].forEach(semana => {
+    const option = document.createElement('div');
+    option.className = 'px-2 py-1 hover:bg-gray-100 cursor-pointer';
+    option.textContent = `${semana} semanas`;
+    option.addEventListener('click', () => {
+      semanasExibir = semana;
+      semanasToggle.textContent = `Semanas: ${semana}`;
+      semanasMenu.classList.add('hidden');
+      atualizarGraficos();
+    });
+    semanasMenu.appendChild(option);
+  });
+  semanasWrapper.appendChild(semanasMenu);
+  controlContainer.appendChild(semanasWrapper);
+
+  semanasToggle.addEventListener('click', () => {
+    const isExpanded = semanasMenu.classList.toggle('hidden') === false;
+    semanasToggle.setAttribute('aria-expanded', isExpanded);
+  });
+  document.addEventListener('click', (e) => {
+    if (!semanasWrapper.contains(e.target)) semanasMenu.classList.add('hidden');
+  });
+
+  // Dropdown de lotes (já estava personalizado)
   const dropdownWrapper = document.createElement('div');
   dropdownWrapper.className = 'relative';
   dropdownWrapper.classList.add('w-full', 'sm:w-auto');
 
-
   const dropdownToggle = document.createElement('button');
   dropdownToggle.textContent = 'Selecionar Lotes';
-  dropdownToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto sm:text-left text-center';
+  dropdownToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white text-left w-full sm:w-48';
   dropdownToggle.setAttribute('aria-expanded', 'false');
   dropdownToggle.setAttribute('aria-controls', 'dropdownMenu');
   dropdownWrapper.appendChild(dropdownToggle);
@@ -42,51 +108,25 @@ window.addEventListener('DOMContentLoaded', () => {
     const isExpanded = dropdownMenu.classList.toggle('hidden') === false;
     dropdownToggle.setAttribute('aria-expanded', isExpanded);
   });
-
   document.addEventListener('click', (e) => {
     if (!dropdownWrapper.contains(e.target)) dropdownMenu.classList.add('hidden');
   });
 
-  const selectSemanas = document.createElement('select');
-  selectSemanas.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto sm:text-left text-center';
-  [10, 20, 30, 40, 60, 80, 100].forEach(n => {
-    const option = document.createElement('option');
-    option.value = n;
-    option.textContent = `${n} semanas`;
-    selectSemanas.appendChild(option);
-  });
-  controlContainer.appendChild(selectSemanas);
-
   const resetButton = document.createElement('button');
   resetButton.textContent = 'Resetar Filtros';
-  resetButton.className = 'bg-gray-200 hover:bg-gray-300 text-sm px-4 py-1 rounded border border-gray-300 w-full sm:w-auto sm:text-left text-center';
+  resetButton.className = 'bg-gray-200 hover:bg-gray-300 text-sm px-4 py-1 rounded border border-gray-300 w-full sm:w-auto sm:text-left';
   controlContainer.appendChild(resetButton);
 
-  let semanasExibir = 10;
+  let semanasExibir = 100;
   let lotesSelecionados = [];
   let statusSelecionado = 'ATIVO';
 
   resetButton.addEventListener('click', () => {
     console.log('Resetando filtros...');
-    selectStatus.value = 'ATIVO';
-    selectSemanas.value = 10;
-    semanasExibir = 10;
+    semanasExibir = 100;
     statusSelecionado = 'ATIVO';
-    carregarLotesFiltrados(() => {
-      lotesSelecionados = Array.from(dropdownMenu.querySelectorAll('input:checked')).map(cb => cb.value);
-      atualizarGraficos();
-    });
-  });
-
-  selectSemanas.addEventListener('change', () => {
-    semanasExibir = parseInt(selectSemanas.value);
-    console.log('Semanas para exibir:', semanasExibir);
-    atualizarGraficos();
-  });
-
-  selectStatus.addEventListener('change', () => {
-    statusSelecionado = selectStatus.value;
-    console.log('Status selecionado:', statusSelecionado);
+    statusToggle.textContent = 'Status: ATIVO';
+    semanasToggle.textContent = 'Semanas: 100';
     carregarLotesFiltrados(() => {
       lotesSelecionados = Array.from(dropdownMenu.querySelectorAll('input:checked')).map(cb => cb.value);
       atualizarGraficos();
@@ -94,7 +134,6 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   function carregarLotesFiltrados(callback) {
-    console.log('Carregando lotes filtrados...');
     Papa.parse('dados.csv', {
       download: true,
       header: true,
@@ -111,34 +150,49 @@ window.addEventListener('DOMContentLoaded', () => {
           ? results.data 
           : results.data.filter(row => row['STATUS'] === statusSelecionado);
 
-        const lotesUnicos = [...new Set(dadosFiltrados.map(row => row['LOTE']))].sort();
+        const ultimoGalpaoPorLote = {};
+  dadosFiltrados.forEach(row => {
+    const lote = row['LOTE'];
+    const idade = parseInt(row['IDADE']);
+    if (!ultimoGalpaoPorLote[lote] || idade > ultimoGalpaoPorLote[lote].idade) {
+      ultimoGalpaoPorLote[lote] = { galpao: row['GALPAO'], idade };
+    }
+  });
 
-        lotesUnicos.forEach(lote => {
-          const item = document.createElement('div');
-          item.className = 'px-2 py-1 hover:bg-gray-100 flex flex-col items-center text-center';
+  const lotesUnicos = Object.entries(ultimoGalpaoPorLote)
+  .map(([lote, info]) => `${info.galpao}|${lote}`)
+  .sort((a, b) => {
+    const [galpaoA, loteA] = a.split('|');
+    const [galpaoB, loteB] = b.split('|');
+    return galpaoA.localeCompare(galpaoB, 'pt', { numeric: true }) || loteA.localeCompare(loteB, 'pt', { numeric: true });
+  });
 
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.value = lote;
-          checkbox.id = `lote-${lote}`;
-          checkbox.className = 'mr-2 mb-1 sm:mb-0';
+        lotesUnicos.forEach(entry => {
+  const [galpao, lote] = entry.split('|');
+  const labelTexto = `${galpao} - ${lote}`;
+  const item = document.createElement('div');
+  item.className = 'px-2 py-1 hover:bg-gray-100 flex items-center';
 
-          const label = document.createElement('label');
-          label.htmlFor = `lote-${lote}`;
-          label.className = '';
-          label.textContent = lote;
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.value = lote;
+  checkbox.id = `lote-${lote}`;
+  checkbox.className = 'mr-2 mb-1 sm:mb-0';
 
-          item.appendChild(checkbox);
-          item.appendChild(label);
-          dropdownMenu.appendChild(item);
+  const label = document.createElement('label');
+  label.htmlFor = `lote-${lote}`;
+  label.className = 'ml-2';
+  label.textContent = labelTexto;
 
-          checkbox.addEventListener('change', () => {
-            lotesSelecionados = Array.from(dropdownMenu.querySelectorAll('input:checked')).map(cb => cb.value);
-            console.log('Lotes selecionados:', lotesSelecionados);
-            atualizarGraficos();
-          });
-        });
+  item.appendChild(checkbox);
+  item.appendChild(label);
+  dropdownMenu.appendChild(item);
 
+  checkbox.addEventListener('change', () => {
+    lotesSelecionados = Array.from(dropdownMenu.querySelectorAll('input:checked')).map(cb => cb.value);
+    atualizarGraficos();
+  });
+});
         if (callback) callback();
       }
     });
@@ -146,7 +200,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function atualizarGraficos() {
     chartContainer.innerHTML = '';
-    console.log('Atualizando gráficos...');
     Papa.parse('dados.csv', {
       download: true,
       header: true,
@@ -158,7 +211,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderizarGraficos(dataRaw) {
-    console.log('Renderizando gráficos...');
     const dados = dataRaw
       .filter(row => statusSelecionado === 'TODOS' || row['STATUS'] === statusSelecionado)
       .filter(row => lotesSelecionados.length === 0 || lotesSelecionados.includes(row['LOTE']))
@@ -216,7 +268,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div');
         card.className = `${corDeFundoCard} shadow-md rounded-xl p-4 ${largura} min-w-[300px]`;
         const canvas = document.createElement('canvas');
-        canvas.id = "grafico" + i;
+        canvas.id = 'grafico' + i;
         card.appendChild(canvas);
         chartContainer.appendChild(card);
 
@@ -231,7 +283,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 borderColor: '#3b82f6',
                 borderWidth: 1.5,
                 tension: 0.4,
-                pointRadius: 1,
+                pointRadius: 1
               },
               {
                 label: 'Padrão',
@@ -240,7 +292,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 borderWidth: 1,
                 borderDash: [5, 5],
                 tension: 0.4,
-                pointRadius: 1,
+                pointRadius: 1
               }
             ]
           },
@@ -250,7 +302,7 @@ window.addEventListener('DOMContentLoaded', () => {
             plugins: {
               title: {
                 display: true,
-                text: `${valores.sort((a,b)=>b.idade-a.idade)[0].galpao} - ${chave}`
+                text: `${valores.sort((a, b) => b.idade - a.idade)[0].galpao} - ${chave}`
               },
               legend: {
                 display: false
