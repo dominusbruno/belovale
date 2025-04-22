@@ -289,7 +289,8 @@ window.addEventListener('DOMContentLoaded', () => {
             dados: dadosDetalhados
           }));
 
-          window.open('detalhe.html', '_blank');
+          window.location.href = 'detalhe.html';
+
         });
         chartContainer.appendChild(card);
 
@@ -311,7 +312,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 data: padrao,
                 borderColor: '#f97316',
                 borderWidth: 1,
-                //borderDash: [5, 5],
                 tension: 0.4,
                 pointRadius: false
               }
