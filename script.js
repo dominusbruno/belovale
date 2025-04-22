@@ -1,6 +1,6 @@
 window.addEventListener('DOMContentLoaded', () => {
   document.body.classList.add('bg-blue-100');
-  const corDeFundoCard = 'bg-yellow-50';
+  const corDeFundoCard = 'bg-white';
   const chartContainer = document.getElementById('chartContainer');
   const controlContainer = document.createElement('div');
   controlContainer.className = 'mb-4 flex justify-center gap-2 px-4 flex-wrap';
