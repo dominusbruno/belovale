@@ -1,4 +1,6 @@
 window.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM totalmente carregado');
+
   document.body.classList.add('bg-blue-100');
   const corDeFundoCard = 'bg-white';
   const chartContainer = document.getElementById('chartContainer');
@@ -7,7 +9,7 @@ window.addEventListener('DOMContentLoaded', () => {
   chartContainer.before(controlContainer);
 
   const selectStatus = document.createElement('select');
-  selectStatus.className = 'border border-gray-300 rounded px-2 py-1 bg-white';
+  selectStatus.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto';
   ['ATIVO', 'INATIVO', 'TODOS'].forEach(status => {
     const option = document.createElement('option');
     option.value = status;
@@ -22,18 +24,21 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const dropdownToggle = document.createElement('button');
   dropdownToggle.textContent = 'Selecionar Lotes';
-  dropdownToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white';
-
+  dropdownToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto';
+  dropdownToggle.setAttribute('aria-expanded', 'false');
+  dropdownToggle.setAttribute('aria-controls', 'dropdownMenu');
   dropdownWrapper.appendChild(dropdownToggle);
 
   const dropdownMenu = document.createElement('div');
-  dropdownMenu.className = 'absolute mt-1 w-56 bg-white border border-gray-300 rounded shadow z-10 hidden max-h-60 overflow-y-auto';
+  dropdownMenu.id = 'dropdownMenu';
+  dropdownMenu.className = 'absolute mt-1 w-full sm:w-56 bg-white border border-gray-300 rounded shadow z-10 hidden max-h-60 overflow-y-auto';
   dropdownWrapper.appendChild(dropdownMenu);
 
   controlContainer.appendChild(dropdownWrapper);
 
   dropdownToggle.addEventListener('click', () => {
-    dropdownMenu.classList.toggle('hidden');
+    const isExpanded = dropdownMenu.classList.toggle('hidden') === false;
+    dropdownToggle.setAttribute('aria-expanded', isExpanded);
   });
 
   document.addEventListener('click', (e) => {
@@ -41,7 +46,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   const selectSemanas = document.createElement('select');
-  selectSemanas.className = 'border border-gray-300 rounded px-2 py-1 bg-white';
+  selectSemanas.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto';
   [10, 20, 30, 40, 60, 80, 100].forEach(n => {
     const option = document.createElement('option');
     option.value = n;
@@ -52,7 +57,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const resetButton = document.createElement('button');
   resetButton.textContent = 'Resetar Filtros';
-  resetButton.className = 'bg-gray-200 hover:bg-gray-300 text-sm px-4 py-1 rounded border border-gray-300';
+  resetButton.className = 'bg-gray-200 hover:bg-gray-300 text-sm px-4 py-1 rounded border border-gray-300 w-full sm:w-auto';
   controlContainer.appendChild(resetButton);
 
   let semanasExibir = 10;
@@ -60,6 +65,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let statusSelecionado = 'ATIVO';
 
   resetButton.addEventListener('click', () => {
+    console.log('Resetando filtros...');
     selectStatus.value = 'ATIVO';
     selectSemanas.value = 10;
     semanasExibir = 10;
@@ -72,11 +78,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
   selectSemanas.addEventListener('change', () => {
     semanasExibir = parseInt(selectSemanas.value);
+    console.log('Semanas para exibir:', semanasExibir);
     atualizarGraficos();
   });
 
   selectStatus.addEventListener('change', () => {
     statusSelecionado = selectStatus.value;
+    console.log('Status selecionado:', statusSelecionado);
     carregarLotesFiltrados(() => {
       lotesSelecionados = Array.from(dropdownMenu.querySelectorAll('input:checked')).map(cb => cb.value);
       atualizarGraficos();
@@ -84,65 +92,58 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   function carregarLotesFiltrados(callback) {
+    console.log('Carregando lotes filtrados...');
     Papa.parse('dados.csv', {
       download: true,
       header: true,
       skipEmptyLines: true,
       complete: function(results) {
-        const loteMaisRecentePorLote = {};
-        results.data
-          .filter(row => statusSelecionado === 'TODOS' || row['STATUS'] === statusSelecionado)
-          .forEach(row => {
-            const lote = row['LOTE'];
-            const idade = parseInt(row['IDADE']);
-            if (!loteMaisRecentePorLote[lote] || idade > loteMaisRecentePorLote[lote].idade) {
-              loteMaisRecentePorLote[lote] = {
-                galpao: row['GALPAO'],
-                idade,
-                lote
-              };
-            }
-          });
+        const colReal = results.meta.fields.find(col => col.toUpperCase().includes('REAL'));
+        if (colReal) {
+          const titulo = colReal.split(' ')[0].toUpperCase();
+          document.querySelector('header h1').textContent = `AVÍCOLA BELO VALE - ${titulo} (Últimas ${semanasExibir} semanas)`;
+        }
 
-        const lotesFiltrados = Object.values(loteMaisRecentePorLote).sort((a, b) => `${a.galpao}-${a.lote}`.localeCompare(`${b.galpao}-${b.lote}`, 'pt', { numeric: true }));
         dropdownMenu.innerHTML = '';
-        lotesFiltrados.forEach(lote => {
-          const label = document.createElement('label');
-          label.className = 'flex items-center px-3 py-1 hover:bg-gray-100 cursor-pointer';
+        const dadosFiltrados = statusSelecionado === 'TODOS' 
+          ? results.data 
+          : results.data.filter(row => row['STATUS'] === statusSelecionado);
+
+        const lotesUnicos = [...new Set(dadosFiltrados.map(row => row['LOTE']))].sort();
+
+        lotesUnicos.forEach(lote => {
+          const item = document.createElement('div');
+          item.className = 'px-2 py-1 hover:bg-gray-100';
 
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
-          checkbox.value = lote.lote;
+          checkbox.value = lote;
+          checkbox.id = `lote-${lote}`;
           checkbox.className = 'mr-2';
 
+          const label = document.createElement('label');
+          label.htmlFor = `lote-${lote}`;
+          label.textContent = lote;
+
+          item.appendChild(checkbox);
+          item.appendChild(label);
+          dropdownMenu.appendChild(item);
+
           checkbox.addEventListener('change', () => {
-            const selected = dropdownMenu.querySelectorAll('input:checked');
-            lotesSelecionados = Array.from(selected).map(cb => cb.value);
+            lotesSelecionados = Array.from(dropdownMenu.querySelectorAll('input:checked')).map(cb => cb.value);
+            console.log('Lotes selecionados:', lotesSelecionados);
             atualizarGraficos();
           });
-
-          label.appendChild(checkbox);
-          label.appendChild(document.createTextNode(`${lote.galpao} - ${lote.lote}`));
-          dropdownMenu.appendChild(label);
         });
+
         if (callback) callback();
       }
     });
   }
 
-  Papa.parse('dados.csv', {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: function(results) {
-      carregarLotesFiltrados(() => {
-        atualizarGraficos();
-      });
-    }
-  });
-
   function atualizarGraficos() {
     chartContainer.innerHTML = '';
+    console.log('Atualizando gráficos...');
     Papa.parse('dados.csv', {
       download: true,
       header: true,
@@ -154,6 +155,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderizarGraficos(dataRaw) {
+    console.log('Renderizando gráficos...');
     const dados = dataRaw
       .filter(row => statusSelecionado === 'TODOS' || row['STATUS'] === statusSelecionado)
       .filter(row => lotesSelecionados.length === 0 || lotesSelecionados.includes(row['LOTE']))
@@ -174,8 +176,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const total = Object.keys(agrupado).length;
     let largura = 'w-full';
-    if (total >= 3 && total < 5) largura = 'lg:w-1/2';
-    else if (total >= 5) largura = 'lg:w-1/3';
+    if (total >= 3 && total < 4) largura = 'lg:w-1/2';
+    else if (total >= 4) largura = 'lg:w-1/3';
 
     chartContainer.className = 'flex flex-wrap gap-4 justify-center items-start';
 
@@ -272,4 +274,8 @@ window.addEventListener('DOMContentLoaded', () => {
         card.style.height = '250px';
       });
   }
+
+  carregarLotesFiltrados(() => {
+    atualizarGraficos();
+  });
 });
