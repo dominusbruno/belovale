@@ -9,7 +9,7 @@ window.addEventListener('DOMContentLoaded', () => {
   chartContainer.before(controlContainer);
 
   const selectStatus = document.createElement('select');
-  selectStatus.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto';
+  selectStatus.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto sm:text-left text-center';
   ['ATIVO', 'INATIVO', 'TODOS'].forEach(status => {
     const option = document.createElement('option');
     option.value = status;
@@ -21,10 +21,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const dropdownWrapper = document.createElement('div');
   dropdownWrapper.className = 'relative';
+  dropdownWrapper.classList.add('w-full', 'sm:w-auto');
+
 
   const dropdownToggle = document.createElement('button');
   dropdownToggle.textContent = 'Selecionar Lotes';
-  dropdownToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto';
+  dropdownToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto sm:text-left text-center';
   dropdownToggle.setAttribute('aria-expanded', 'false');
   dropdownToggle.setAttribute('aria-controls', 'dropdownMenu');
   dropdownWrapper.appendChild(dropdownToggle);
@@ -46,7 +48,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   const selectSemanas = document.createElement('select');
-  selectSemanas.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto';
+  selectSemanas.className = 'border border-gray-300 rounded px-2 py-1 bg-white w-full sm:w-auto sm:text-left text-center';
   [10, 20, 30, 40, 60, 80, 100].forEach(n => {
     const option = document.createElement('option');
     option.value = n;
@@ -57,7 +59,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const resetButton = document.createElement('button');
   resetButton.textContent = 'Resetar Filtros';
-  resetButton.className = 'bg-gray-200 hover:bg-gray-300 text-sm px-4 py-1 rounded border border-gray-300 w-full sm:w-auto';
+  resetButton.className = 'bg-gray-200 hover:bg-gray-300 text-sm px-4 py-1 rounded border border-gray-300 w-full sm:w-auto sm:text-left text-center';
   controlContainer.appendChild(resetButton);
 
   let semanasExibir = 10;
@@ -113,16 +115,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
         lotesUnicos.forEach(lote => {
           const item = document.createElement('div');
-          item.className = 'px-2 py-1 hover:bg-gray-100';
+          item.className = 'px-2 py-1 hover:bg-gray-100 flex flex-col items-center text-center';
 
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
           checkbox.value = lote;
           checkbox.id = `lote-${lote}`;
-          checkbox.className = 'mr-2';
+          checkbox.className = 'mr-2 mb-1 sm:mb-0';
 
           const label = document.createElement('label');
           label.htmlFor = `lote-${lote}`;
+          label.className = '';
           label.textContent = lote;
 
           item.appendChild(checkbox);
