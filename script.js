@@ -1,11 +1,13 @@
 window.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.add('bg-blue-100');
+  const corDeFundoCard = 'bg-yellow-50';
   const chartContainer = document.getElementById('chartContainer');
   const controlContainer = document.createElement('div');
-  controlContainer.className = 'mb-4 flex justify-end gap-2 px-4 flex-wrap';
+  controlContainer.className = 'mb-4 flex justify-center gap-2 px-4 flex-wrap';
   chartContainer.before(controlContainer);
 
   const selectStatus = document.createElement('select');
-  selectStatus.className = 'border border-gray-300 rounded px-2 py-1';
+  selectStatus.className = 'border border-gray-300 rounded px-2 py-1 bg-white';
   ['ATIVO', 'INATIVO', 'TODOS'].forEach(status => {
     const option = document.createElement('option');
     option.value = status;
@@ -16,31 +18,31 @@ window.addEventListener('DOMContentLoaded', () => {
   controlContainer.appendChild(selectStatus);
 
   const dropdownWrapper = document.createElement('div');
-dropdownWrapper.className = 'relative';
+  dropdownWrapper.className = 'relative';
 
-const dropdownToggle = document.createElement('button');
-dropdownToggle.textContent = 'Selecionar Lotes';
-dropdownToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white';
+  const dropdownToggle = document.createElement('button');
+  dropdownToggle.textContent = 'Selecionar Lotes';
+  dropdownToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white';
 
-dropdownWrapper.appendChild(dropdownToggle);
+  dropdownWrapper.appendChild(dropdownToggle);
 
-const dropdownMenu = document.createElement('div');
-dropdownMenu.className = 'absolute mt-1 w-56 bg-white border border-gray-300 rounded shadow z-10 hidden max-h-60 overflow-y-auto';
-dropdownWrapper.appendChild(dropdownMenu);
+  const dropdownMenu = document.createElement('div');
+  dropdownMenu.className = 'absolute mt-1 w-56 bg-white border border-gray-300 rounded shadow z-10 hidden max-h-60 overflow-y-auto';
+  dropdownWrapper.appendChild(dropdownMenu);
 
-controlContainer.appendChild(dropdownWrapper);
+  controlContainer.appendChild(dropdownWrapper);
 
-dropdownToggle.addEventListener('click', () => {
-  dropdownMenu.classList.toggle('hidden');
-});
+  dropdownToggle.addEventListener('click', () => {
+    dropdownMenu.classList.toggle('hidden');
+  });
 
-document.addEventListener('click', (e) => {
-  if (!dropdownWrapper.contains(e.target)) dropdownMenu.classList.add('hidden');
-});
+  document.addEventListener('click', (e) => {
+    if (!dropdownWrapper.contains(e.target)) dropdownMenu.classList.add('hidden');
+  });
 
   const selectSemanas = document.createElement('select');
-  selectSemanas.className = 'border border-gray-300 rounded px-2 py-1';
-  [10, 20, 30, 40].forEach(n => {
+  selectSemanas.className = 'border border-gray-300 rounded px-2 py-1 bg-white';
+  [10, 20, 30, 40, 60, 80, 100].forEach(n => {
     const option = document.createElement('option');
     option.value = n;
     option.textContent = `${n} semanas`;
@@ -81,7 +83,6 @@ document.addEventListener('click', (e) => {
     });
   });
 
-
   function carregarLotesFiltrados(callback) {
     Papa.parse('dados.csv', {
       download: true,
@@ -105,25 +106,25 @@ document.addEventListener('click', (e) => {
 
         const lotesFiltrados = Object.values(loteMaisRecentePorLote).sort((a, b) => `${a.galpao}-${a.lote}`.localeCompare(`${b.galpao}-${b.lote}`, 'pt', { numeric: true }));
         dropdownMenu.innerHTML = '';
-lotesFiltrados.forEach(lote => {
-  const label = document.createElement('label');
-  label.className = 'flex items-center px-3 py-1 hover:bg-gray-100 cursor-pointer';
+        lotesFiltrados.forEach(lote => {
+          const label = document.createElement('label');
+          label.className = 'flex items-center px-3 py-1 hover:bg-gray-100 cursor-pointer';
 
-  const checkbox = document.createElement('input');
-  checkbox.type = 'checkbox';
-  checkbox.value = lote.lote;
-  checkbox.className = 'mr-2';
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.value = lote.lote;
+          checkbox.className = 'mr-2';
 
-  checkbox.addEventListener('change', () => {
-    const selected = dropdownMenu.querySelectorAll('input:checked');
-    lotesSelecionados = Array.from(selected).map(cb => cb.value);
-    atualizarGraficos();
-  });
+          checkbox.addEventListener('change', () => {
+            const selected = dropdownMenu.querySelectorAll('input:checked');
+            lotesSelecionados = Array.from(selected).map(cb => cb.value);
+            atualizarGraficos();
+          });
 
-  label.appendChild(checkbox);
-  label.appendChild(document.createTextNode(`${lote.galpao} - ${lote.lote}`));
-  dropdownMenu.appendChild(label);
-});
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(`${lote.galpao} - ${lote.lote}`));
+          dropdownMenu.appendChild(label);
+        });
         if (callback) callback();
       }
     });
@@ -171,6 +172,13 @@ lotesFiltrados.forEach(lote => {
       agrupado[chave].push(row);
     });
 
+    const total = Object.keys(agrupado).length;
+    let largura = 'w-full';
+    if (total >= 3 && total < 5) largura = 'lg:w-1/2';
+    else if (total >= 5) largura = 'lg:w-1/3';
+
+    chartContainer.className = 'flex flex-wrap gap-4 justify-center items-start';
+
     Object.entries(agrupado)
       .sort(([, a], [, b]) => {
         const ga = [...a].sort((x, y) => y.idade - x.idade)[0].galpao;
@@ -201,7 +209,7 @@ lotesFiltrados.forEach(lote => {
         const padrao = ultimas.map(p => p.padrao);
 
         const card = document.createElement('div');
-        card.className = "bg-white shadow-md rounded-xl p-4 w-full h-[400px]";
+        card.className = `${corDeFundoCard} shadow-md rounded-xl p-4 ${largura} min-w-[300px]`;
         const canvas = document.createElement('canvas');
         canvas.id = "grafico" + i;
         card.appendChild(canvas);
@@ -232,6 +240,8 @@ lotesFiltrados.forEach(lote => {
             ]
           },
           options: {
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
               title: {
                 display: true,
@@ -257,6 +267,9 @@ lotesFiltrados.forEach(lote => {
             }
           }
         });
+
+        card.style.minHeight = '200px';
+        card.style.height = '250px';
       });
   }
 });
