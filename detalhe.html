@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalhamento do Gráfico</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+  <div class="container mx-auto p-4">
+    <h1 id="titulo" class="text-2xl font-bold mb-6 text-center"></h1>
+    <div class="bg-white rounded shadow p-4 mb-8">
+      <canvas id="graficoDetalhado" height="150"></canvas>
+    </div>
+    <div class="bg-white rounded shadow p-4">
+      <h2 class="text-xl font-semibold mb-4">Dados Detalhados</h2>
+      <table class="min-w-full table-auto border border-gray-300">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="px-4 py-2 border">IDADE</th>
+            <th class="px-4 py-2 border">PROD. REAL</th>
+            <th class="px-4 py-2 border">PROD. PADRÃO</th>
+            <th class="px-4 py-2 border">DIFERENÇA</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaDados"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const dados = JSON.parse(localStorage.getItem('graficoDetalhado'));
+    if (dados) {
+      document.getElementById('titulo').textContent = `${dados.galpao} - ${dados.lote}`;
+
+      new Chart(document.getElementById('graficoDetalhado').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: dados.labels,
+          datasets: [
+            {
+              label: 'Real',
+              data: dados.real,
+              borderColor: '#3b82f6',
+              tension: 0.4,
+              borderWidth: 1.5,
+              pointRadius: 2,
+            },
+            {
+              label: 'Padrão',
+              data: dados.padrao,
+              borderColor: '#f97316',
+              borderWidth: 1,
+              borderDash: [5, 5],
+              tension: 0.4,
+              pointRadius: 2,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: value => (value * 100).toFixed(1) + '%'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Idade (semanas)'
+              }
+            }
+          }
+        }
+      });
+
+      const corpoTabela = document.getElementById('tabelaDados');
+      dados.dados.forEach(row => {
+        const tr = document.createElement('tr');
+        ['idade', 'real', 'padrao', 'diferenca'].forEach(col => {
+          const td = document.createElement('td');
+          td.textContent = col === 'idade' ? row[col] : `${row[col]}%`;
+          td.className = 'px-4 py-2 border text-center';
+          tr.appendChild(td);
+        });
+        corpoTabela.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>

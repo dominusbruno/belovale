@@ -53,7 +53,7 @@ window.addEventListener('DOMContentLoaded', () => {
   semanasWrapper.className = 'relative';
 
   const semanasToggle = document.createElement('button');
-  semanasToggle.textContent = 'Semanas: 100';
+  semanasToggle.textContent = '100 semanas';
   semanasToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white text-left w-full sm:w-48';
   semanasToggle.setAttribute('aria-expanded', 'false');
   semanasToggle.setAttribute('aria-controls', 'semanasMenu');
@@ -68,7 +68,7 @@ window.addEventListener('DOMContentLoaded', () => {
     option.textContent = `${semana} semanas`;
     option.addEventListener('click', () => {
       semanasExibir = semana;
-      semanasToggle.textContent = `Semanas: ${semana}`;
+      semanasToggle.textContent = `${semana} semanas`;
       semanasMenu.classList.add('hidden');
       atualizarGraficos();
     });
@@ -126,7 +126,7 @@ window.addEventListener('DOMContentLoaded', () => {
     semanasExibir = 100;
     statusSelecionado = 'ATIVO';
     statusToggle.textContent = 'Status: ATIVO';
-    semanasToggle.textContent = 'Semanas: 100';
+    semanasToggle.textContent = '100 semanas';
     carregarLotesFiltrados(() => {
       lotesSelecionados = Array.from(dropdownMenu.querySelectorAll('input:checked')).map(cb => cb.value);
       atualizarGraficos();
@@ -270,6 +270,27 @@ window.addEventListener('DOMContentLoaded', () => {
         const canvas = document.createElement('canvas');
         canvas.id = 'grafico' + i;
         card.appendChild(canvas);
+
+        // Clique no gráfico para abrir nova página com detalhes
+        card.addEventListener('click', () => {
+          const dadosDetalhados = ultimas.map((p, idx) => ({
+            idade: p.idade,
+            real: (p.real * 100).toFixed(2).replace('.', ','),
+            padrao: (p.padrao * 100).toFixed(2).replace('.', ','),
+            diferenca: ((p.real - p.padrao) * 100).toFixed(2).replace('.', ',')
+          }));
+
+          localStorage.setItem('graficoDetalhado', JSON.stringify({
+            lote: chave,
+            galpao: valores.sort((a,b)=>b.idade-a.idade)[0].galpao,
+            labels,
+            real,
+            padrao,
+            dados: dadosDetalhados
+          }));
+
+          window.open('detalhe.html', '_blank');
+        });
         chartContainer.appendChild(card);
 
         new Chart(canvas.getContext('2d'), {
