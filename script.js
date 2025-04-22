@@ -283,16 +283,16 @@ window.addEventListener('DOMContentLoaded', () => {
                 borderColor: '#3b82f6',
                 borderWidth: 1.5,
                 tension: 0.4,
-                pointRadius: 1
+                pointRadius: false
               },
               {
                 label: 'Padrão',
                 data: padrao,
                 borderColor: '#f97316',
                 borderWidth: 1,
-                borderDash: [5, 5],
+                //borderDash: [5, 5],
                 tension: 0.4,
-                pointRadius: 1
+                pointRadius: false
               }
             ]
           },
