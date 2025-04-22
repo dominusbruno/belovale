@@ -1,11 +1,11 @@
 window.addEventListener('DOMContentLoaded', () => {
   const chartContainer = document.getElementById('chartContainer');
   const controlContainer = document.createElement('div');
-  controlContainer.className = 'mb-4 flex justify-end px-4';
+  controlContainer.className = 'mb-4 flex justify-end gap-2 px-4 flex-wrap';
   chartContainer.before(controlContainer);
 
   const selectStatus = document.createElement('select');
-  selectStatus.className = 'border border-gray-300 rounded px-2 py-1 mr-2';
+  selectStatus.className = 'border border-gray-300 rounded px-2 py-1';
   ['ATIVO', 'INATIVO', 'TODOS'].forEach(status => {
     const option = document.createElement('option');
     option.value = status;
@@ -15,12 +15,31 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   controlContainer.appendChild(selectStatus);
 
-  const selectLote = document.createElement('select');
-  selectLote.className = 'border border-gray-300 rounded px-2 py-1 mr-2';
-  controlContainer.appendChild(selectLote);
+  const dropdownWrapper = document.createElement('div');
+dropdownWrapper.className = 'relative';
+
+const dropdownToggle = document.createElement('button');
+dropdownToggle.textContent = 'Selecionar Lotes';
+dropdownToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white';
+
+dropdownWrapper.appendChild(dropdownToggle);
+
+const dropdownMenu = document.createElement('div');
+dropdownMenu.className = 'absolute mt-1 w-56 bg-white border border-gray-300 rounded shadow z-10 hidden max-h-60 overflow-y-auto';
+dropdownWrapper.appendChild(dropdownMenu);
+
+controlContainer.appendChild(dropdownWrapper);
+
+dropdownToggle.addEventListener('click', () => {
+  dropdownMenu.classList.toggle('hidden');
+});
+
+document.addEventListener('click', (e) => {
+  if (!dropdownWrapper.contains(e.target)) dropdownMenu.classList.add('hidden');
+});
 
   const selectSemanas = document.createElement('select');
-  selectSemanas.className = 'border border-gray-300 rounded px-2 py-1 mr-2';
+  selectSemanas.className = 'border border-gray-300 rounded px-2 py-1';
   [10, 20, 30, 40].forEach(n => {
     const option = document.createElement('option');
     option.value = n;
@@ -29,26 +48,41 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   controlContainer.appendChild(selectSemanas);
 
+  const resetButton = document.createElement('button');
+  resetButton.textContent = 'Resetar Filtros';
+  resetButton.className = 'bg-gray-200 hover:bg-gray-300 text-sm px-4 py-1 rounded border border-gray-300';
+  controlContainer.appendChild(resetButton);
+
   let semanasExibir = 10;
-  let loteSelecionado = '';
+  let lotesSelecionados = [];
   let statusSelecionado = 'ATIVO';
+
+  resetButton.addEventListener('click', () => {
+    selectStatus.value = 'ATIVO';
+    selectSemanas.value = 10;
+    semanasExibir = 10;
+    statusSelecionado = 'ATIVO';
+    carregarLotesFiltrados(() => {
+      lotesSelecionados = Array.from(dropdownMenu.querySelectorAll('input:checked')).map(cb => cb.value);
+      atualizarGraficos();
+    });
+  });
 
   selectSemanas.addEventListener('change', () => {
     semanasExibir = parseInt(selectSemanas.value);
     atualizarGraficos();
   });
 
-  selectLote.addEventListener('change', () => {
-    loteSelecionado = selectLote.value;
-    atualizarGraficos();
-  });
-
   selectStatus.addEventListener('change', () => {
     statusSelecionado = selectStatus.value;
-    carregarLotesFiltrados();
+    carregarLotesFiltrados(() => {
+      lotesSelecionados = Array.from(dropdownMenu.querySelectorAll('input:checked')).map(cb => cb.value);
+      atualizarGraficos();
+    });
   });
 
-  function carregarLotesFiltrados() {
+
+  function carregarLotesFiltrados(callback) {
     Papa.parse('dados.csv', {
       download: true,
       header: true,
@@ -70,15 +104,27 @@ window.addEventListener('DOMContentLoaded', () => {
           });
 
         const lotesFiltrados = Object.values(loteMaisRecentePorLote).sort((a, b) => `${a.galpao}-${a.lote}`.localeCompare(`${b.galpao}-${b.lote}`, 'pt', { numeric: true }));
-        selectLote.innerHTML = '<option value="">Todos os lotes</option>';
-        lotesFiltrados.forEach(lote => {
-          const option = document.createElement('option');
-          option.value = lote.lote;
-          option.textContent = `${lote.galpao} - ${lote.lote}`;
-          selectLote.appendChild(option);
-        });
+        dropdownMenu.innerHTML = '';
+lotesFiltrados.forEach(lote => {
+  const label = document.createElement('label');
+  label.className = 'flex items-center px-3 py-1 hover:bg-gray-100 cursor-pointer';
 
-        atualizarGraficos();
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.value = lote.lote;
+  checkbox.className = 'mr-2';
+
+  checkbox.addEventListener('change', () => {
+    const selected = dropdownMenu.querySelectorAll('input:checked');
+    lotesSelecionados = Array.from(selected).map(cb => cb.value);
+    atualizarGraficos();
+  });
+
+  label.appendChild(checkbox);
+  label.appendChild(document.createTextNode(`${lote.galpao} - ${lote.lote}`));
+  dropdownMenu.appendChild(label);
+});
+        if (callback) callback();
       }
     });
   }
@@ -88,7 +134,9 @@ window.addEventListener('DOMContentLoaded', () => {
     header: true,
     skipEmptyLines: true,
     complete: function(results) {
-      carregarLotesFiltrados();
+      carregarLotesFiltrados(() => {
+        atualizarGraficos();
+      });
     }
   });
 
@@ -107,7 +155,7 @@ window.addEventListener('DOMContentLoaded', () => {
   function renderizarGraficos(dataRaw) {
     const dados = dataRaw
       .filter(row => statusSelecionado === 'TODOS' || row['STATUS'] === statusSelecionado)
-      .filter(row => !loteSelecionado || row['LOTE'] === loteSelecionado)
+      .filter(row => lotesSelecionados.length === 0 || lotesSelecionados.includes(row['LOTE']))
       .map(row => ({
         galpao: row['GALPAO'],
         lote: row['LOTE'],
