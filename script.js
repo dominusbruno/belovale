@@ -53,7 +53,7 @@ window.addEventListener('DOMContentLoaded', () => {
   semanasWrapper.className = 'relative';
 
   const semanasToggle = document.createElement('button');
-  semanasToggle.textContent = '100 semanas';
+  semanasToggle.textContent = '120 semanas';
   semanasToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white text-left w-full sm:w-48';
   semanasToggle.setAttribute('aria-expanded', 'false');
   semanasToggle.setAttribute('aria-controls', 'semanasMenu');
@@ -62,7 +62,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const semanasMenu = document.createElement('div');
   semanasMenu.id = 'semanasMenu';
   semanasMenu.className = 'absolute mt-1 w-full sm:w-40 bg-white border border-gray-300 rounded shadow z-10 hidden';
-  [10, 20, 30, 40, 60, 80, 100].forEach(semana => {
+  [30, 60, 90, 120].forEach(semana => {
     const option = document.createElement('div');
     option.className = 'px-2 py-1 hover:bg-gray-100 cursor-pointer';
     option.textContent = `${semana} semanas`;
@@ -117,7 +117,7 @@ window.addEventListener('DOMContentLoaded', () => {
   resetButton.className = 'bg-gray-200 hover:bg-gray-300 text-sm px-4 py-1 rounded border border-gray-300 w-full sm:w-auto sm:text-left self-center';
   controlContainer.appendChild(resetButton);
 
-  let semanasExibir = 100;
+  let semanasExibir = 120;
   let lotesSelecionados = [];
   let statusSelecionado = 'ATIVO';
 
@@ -257,9 +257,9 @@ window.addEventListener('DOMContentLoaded', () => {
         });
 
         const ultimas = medias
-          .sort((a, b) => b.idade - a.idade)
-          .slice(0, semanasExibir)
-          .sort((a, b) => a.idade - b.idade);
+  .sort((a, b) => b.idade - a.idade)
+  .slice(0, semanasExibir)
+  .sort((a, b) => a.idade - b.idade);
 
         const labels = ultimas.map(p => `${p.idade}`);
         const real = ultimas.map(p => p.real);
@@ -283,10 +283,15 @@ window.addEventListener('DOMContentLoaded', () => {
           localStorage.setItem('graficoDetalhado', JSON.stringify({
             lote: chave,
             galpao: valores.sort((a,b)=>b.idade-a.idade)[0].galpao,
-            labels,
-            real,
-            padrao,
-            dados: dadosDetalhados
+            labels: medias.map(p => p.idade),
+            real: medias.map(p => p.real),
+            padrao: medias.map(p => p.padrao),
+            dados: medias.map(p => ({
+              idade: p.idade,
+              real: (p.real * 100).toFixed(2).replace('.', ','),
+              padrao: (p.padrao * 100).toFixed(2).replace('.', ','),
+              diferenca: ((p.real - p.padrao) * 100).toFixed(2).replace('.', ',')
+            }))
           }));
 
           window.location.href = 'detalhe.html';
