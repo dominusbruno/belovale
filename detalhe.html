@@ -7,7 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen">
+<body class="bg-yellow-50 text-gray-800 min-h-screen">
   <header class="bg-blue-500 text-white shadow-md p-4 sticky top-0 z-50">
     <div class="container mx-auto flex items-center justify-between">
       <button onclick="window.history.back()" class="text-sm sm:text-base hover:underline">← Voltar</button>
@@ -27,7 +27,7 @@
     </div>
     
     <div class="bg-white rounded shadow p-4 mb-8">
-      <canvas id="graficoDetalhado" height="150"></canvas>
+      <canvas id="graficoDetalhado" height="100"></canvas>
     </div>
     <div class="bg-white rounded shadow p-4">
       <h2 class="text-xl font-semibold mb-4">PRODUTIVIDADE DETALHADA</h2>
@@ -77,11 +77,12 @@
       options: {
         responsive: true,
         plugins: {
-          legend: { position: 'top' },
+          legend: { position: false },
           title: { display: false }
         },
         scales: {
           y: {
+            beginAtZero: false,
             ticks: {
               callback: value => (value * 100).toFixed(1) + '%'
             }
