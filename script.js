@@ -104,6 +104,51 @@ window.addEventListener('DOMContentLoaded', () => {
 
   controlContainer.appendChild(dropdownWrapper);
 
+  // Menu INDICADOR
+  const indicadorWrapper = document.createElement('div');
+  indicadorWrapper.className = 'relative';
+
+  const indicadorToggle = document.createElement('button');
+  indicadorToggle.textContent = 'Indicador: PRODUTIVIDADE';
+  indicadorToggle.className = 'border border-gray-300 rounded px-2 py-1 bg-white text-left w-full sm:w-60';
+  indicadorToggle.setAttribute('aria-expanded', 'false');
+  indicadorToggle.setAttribute('aria-controls', 'indicadorMenu');
+  indicadorWrapper.appendChild(indicadorToggle);
+
+  const indicadorMenu = document.createElement('div');
+  indicadorMenu.id = 'indicadorMenu';
+  indicadorMenu.className = 'absolute mt-1 w-full sm:w-60 bg-white border border-gray-300 rounded shadow z-10 hidden';
+  const indicadoresDisponiveis = ['PRODUTIVIDADE', 'VIABILIDADE', 'PESO'];
+
+  let indicadorSelecionado = 'PRODUTIVIDADE';
+  let campoReal = 'PRODUTIVIDADE REAL';
+  let campoPadrao = 'PRODUTIVIDADE PADRAO';
+
+  indicadoresDisponiveis.forEach(indicador => {
+    const option = document.createElement('div');
+    option.className = 'px-2 py-1 hover:bg-gray-100 cursor-pointer';
+    option.textContent = indicador;
+    option.addEventListener('click', () => {
+      indicadorSelecionado = indicador;
+      campoReal = `${indicador} REAL`;
+      campoPadrao = `${indicador} PADRAO`;
+      indicadorToggle.textContent = `Indicador: ${indicador}`;
+      indicadorMenu.classList.add('hidden');
+      carregarLotesFiltrados(() => atualizarGraficos());
+    });
+    indicadorMenu.appendChild(option);
+  });
+  indicadorWrapper.appendChild(indicadorMenu);
+  controlContainer.appendChild(indicadorWrapper);
+
+  indicadorToggle.addEventListener('click', () => {
+    const isExpanded = indicadorMenu.classList.toggle('hidden') === false;
+    indicadorToggle.setAttribute('aria-expanded', isExpanded);
+  });
+  document.addEventListener('click', (e) => {
+    if (!indicadorWrapper.contains(e.target)) indicadorMenu.classList.add('hidden');
+  });
+
   dropdownToggle.addEventListener('click', () => {
     const isExpanded = dropdownMenu.classList.toggle('hidden') === false;
     dropdownToggle.setAttribute('aria-expanded', isExpanded);
@@ -214,12 +259,13 @@ window.addEventListener('DOMContentLoaded', () => {
     const dados = dataRaw
       .filter(row => statusSelecionado === 'TODOS' || row['STATUS'] === statusSelecionado)
       .filter(row => lotesSelecionados.length === 0 || lotesSelecionados.includes(row['LOTE']))
+      .filter(row => row[campoReal] && row[campoPadrao])
       .map(row => ({
         galpao: row['GALPAO'],
         lote: row['LOTE'],
         idade: parseInt(row['IDADE']),
-        real: parseFloat(row['PRODUTIVIDADE REAL'].replace('%','').replace(',', '.')) / 100,
-        padrao: parseFloat(row['PRODUTIVIDADE PADRAO'].replace('%','').replace(',', '.')) / 100
+        real: row[campoReal] ? parseFloat(row[campoReal].replace('%','').replace(',', '.')) / 100 : null,
+        padrao: row[campoPadrao] ? parseFloat(row[campoPadrao].replace('%','').replace(',', '.')) / 100 : null
       }));
 
     const agrupado = {};
