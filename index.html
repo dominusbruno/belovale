@@ -9,37 +9,57 @@
   <style>
     /* Cores customizadas centralizadas para fácil manutenção */
     :root {
-      --color-navbar-bg: #f97316; /* gema */
-      --color-submenu-bg: #fdba74; /* laranja claro */
-      --color-submenu-hover: #fcd34d; /* laranja mais clara */
-      --color-text-dark: #1f2937; /* gray-800 */
-      --color-text-light: #ffffff;
+      --color-navbar-bg-desktop: #f97316;
+      --color-navbar-bg-mobile: #fb923c;
+      --color-submenu-hover-desktop: #fca157;
+      --color-submenu-bg-desktop: #fb923c;
+      --color-submenu-bg-mobile: #fef3c7;
+      --color-text-navbar-desktop: #ffffff;
+      --color-text-navbar-mobile: #ffffff;
+      --color-text-submenu-desktop: #f9fafb;
+      --color-text-submenu-mobile: #f9fafb;
     }
 
     .bg-navbar {
-      background-color: var(--color-navbar-bg);
+      background-color: var(--color-navbar-bg-desktop);
     }
 
     .bg-submenu {
-      background-color: var(--color-submenu-bg);
-      color: var(--color-text-dark);
+      background-color: var(--color-submenu-bg-desktop);
+      color: var(--color-text-submenu-desktop);
     }
 
     .bg-submenu-hover:hover {
-      background-color: var(--color-submenu-hover);
+      background-color: var(--color-submenu-hover-desktop);
     }
 
     .text-navbar {
-      color: var(--color-text-light);
+      color: var(--color-text-navbar-desktop);
     }
 
     .bg-mobile-menu {
-      background-color: var(--color-submenu-bg);
-      color: var(--color-text-light);
+      background-color: var(--color-navbar-bg-mobile);
+      color: var(--color-text-navbar-mobile);
+    }
+
+    .transition-base {
+      transition: all 0.3s ease-in-out;
+    }
+
+    .group-hover\:block {
+      transition: all 0.3s ease;
+    }
+
+    details[open] > summary {
+      transition: background-color 0.3s ease;
     }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
+<!-- Exemplo de uso futuro:
+<nav class="bg-[var(--color-navbar-bg-desktop)] text-[var(--color-text-navbar-desktop)]">
+<div class="bg-[var(--color-submenu-bg-mobile)] text-[var(--color-text-submenu-mobile)]">
+-->
 
   <nav class="bg-navbar shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between md:flex-nowrap md:justify-between text-center md:text-left gap-4">
@@ -68,21 +88,21 @@
         <li><a href="#" onclick="navigateTo('inicial')" class="text-navbar hover:underline"><i class="fas fa-home mr-1 min-w-[1.25rem] text-center"></i>INICIAL</a></li>
         <li class="relative group">
           <button class="text-white hover:underline"><i class="fas fa-chart-line mr-1 min-w-[1.25rem] text-center"></i>RELATÓRIOS</button>
-          <ul class="absolute left-0 top-full hidden group-hover:block bg-submenu border shadow-md z-10 w-56">
+          <ul class="absolute left-0 top-full hidden group-hover:block bg-submenu border shadow-md z-10 w-56 transition-base">
             <li><a href="#" onclick="navigateTo('rel-produtividade')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-sun mr-1 min-w-[1.25rem] text-center"></i>Produtividade</a></li>
-            <li><a href="#" onclick="navigateTo('rel-producao')" class="flex items-center gap-3 px-4 py-2 hover:bg-orange-200"><i class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a></li>
-            <li><a href="#" onclick="navigateTo('rel-peso')" class="flex items-center gap-3 px-4 py-2 hover:bg-orange-200"><i class="fas fa-weight mr-1 min-w-[1.25rem] text-center"></i>Peso</a></li>
-            <li><a href="#" onclick="navigateTo('rel-consumo')" class="flex items-center gap-3 px-4 py-2 hover:bg-orange-200"><i class="fas fa-drumstick-bite mr-1 min-w-[1.25rem] text-center"></i>Consumo</a></li>
-            <li><a href="#" onclick="navigateTo('rel-estoques')" class="flex items-center gap-3 px-4 py-2 hover:bg-orange-200"><i class="fas fa-boxes mr-1 min-w-[1.25rem] text-center"></i>Estoques</a></li>
-            <li><a href="#" onclick="navigateTo('rel-financeiro')" class="flex items-center gap-3 px-4 py-2 hover:bg-orange-200"><i class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a></li>
+            <li><a href="#" onclick="navigateTo('rel-producao')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a></li>
+            <li><a href="#" onclick="navigateTo('rel-peso')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-weight mr-1 min-w-[1.25rem] text-center"></i>Peso</a></li>
+            <li><a href="#" onclick="navigateTo('rel-consumo')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-drumstick-bite mr-1 min-w-[1.25rem] text-center"></i>Consumo</a></li>
+            <li><a href="#" onclick="navigateTo('rel-estoques')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-boxes mr-1 min-w-[1.25rem] text-center"></i>Estoques</a></li>
+            <li><a href="#" onclick="navigateTo('rel-financeiro')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a></li>
           </ul>
         </li>
         <li class="relative group">
           <button class="text-white hover:underline"><i class="fas fa-edit mr-1 min-w-[1.25rem] text-center"></i>FORMULÁRIOS</button>
-          <ul class="absolute left-0 top-full hidden group-hover:block bg-orange-300 text-gray-800 border shadow-md z-10 w-56">
-            <li><a href="#" onclick="navigateTo('form-producao')" class="flex items-center gap-3 px-4 py-2 hover:bg-orange-200"><i class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a></li>
-            <li><a href="#" onclick="navigateTo('form-vendas')" class="flex items-center gap-3 px-4 py-2 hover:bg-orange-200"><i class="fas fa-shopping-cart mr-1 min-w-[1.25rem] text-center"></i>Vendas</a></li>
-            <li><a href="#" onclick="navigateTo('form-financeiro')" class="flex items-center gap-3 px-4 py-2 hover:bg-orange-200"><i class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a></li>
+          <ul class="absolute left-0 top-full hidden group-hover:block bg-submenu border shadow-md z-10 w-56 transition-base">
+            <li><a href="#" onclick="navigateTo('form-producao')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a></li>
+            <li><a href="#" onclick="navigateTo('form-vendas')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-shopping-cart mr-1 min-w-[1.25rem] text-center"></i>Vendas</a></li>
+            <li><a href="#" onclick="navigateTo('form-financeiro')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a></li>
           </ul>          
         </li>
       </ul>
@@ -94,7 +114,7 @@
       </button>
     </div>
 
-    <div id="mobileMenu" class="hidden px-4 pb-4 md:hidden space-y-2 bg-mobile-menu">
+    <div id="mobileMenu" class="hidden px-4 pb-4 md:hidden space-y-2 bg-mobile-menu transition-base">
       <a href="#" onclick="navigateTo('inicial')" class="block py-2"><i class="fas fa-home mr-1 min-w-[1.25rem] text-center"></i>INICIAL</a>
       <details>
         <summary class="font-semibold cursor-pointer"><i class="fas fa-chart-line mr-1 min-w-[1.25rem] text-center"></i>RELATÓRIOS</summary>
@@ -136,9 +156,15 @@
 
   <script>
     function navigateTo(id) {
-      document.querySelectorAll('.spa-section').forEach(sec => sec.classList.add('hidden'));
-      document.getElementById(id).classList.remove('hidden');
-    }
+  document.querySelectorAll('.spa-section').forEach(sec => sec.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+
+  // Fecha o menu mobile ao clicar em qualquer link
+  const mobileMenu = document.getElementById('mobileMenu');
+  if (window.innerWidth < 768 && !mobileMenu.classList.contains('hidden')) {
+    mobileMenu.classList.add('hidden');
+  }
+}
 
     document.getElementById('menuToggle').addEventListener('click', () => {
       document.getElementById('mobileMenu').classList.toggle('hidden');
