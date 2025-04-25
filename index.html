@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,6 +10,12 @@
   <style>
     /* Cores customizadas centralizadas para fácil manutenção */
     :root {
+      --color-alerta-bg: #ee5959;
+      --color-alerta-text: #ffffff;
+      --color-informacao-bg: #f5c168;
+      --color-informacao-text: #ffffff;
+      --color-feedback-bg: #2abd60;
+      --color-feedback-text: #ffffff;
       --color-navbar-bg-desktop: #f97316;
       --color-navbar-bg-mobile: #fb923c;
       --color-submenu-hover-desktop: #fca157;
@@ -50,89 +57,158 @@
       transition: all 0.3s ease;
     }
 
-    details[open] > summary {
+    details[open]>summary {
       transition: background-color 0.3s ease;
+    }
+
+    .animate-fade-in-down {
+      animation: fade-in-down 1.0s ease-out;
+    }
+
+    @keyframes fade-in-down {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
     }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
-<!-- Exemplo de uso futuro:
-<nav class="bg-[var(--color-navbar-bg-desktop)] text-[var(--color-text-navbar-desktop)]">
-<div class="bg-[var(--color-submenu-bg-mobile)] text-[var(--color-text-submenu-mobile)]">
--->
 
+<body class="bg-gray-100 text-gray-800">
   <nav class="bg-navbar shadow-md">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between md:flex-nowrap md:justify-between text-center md:text-left gap-4">
+    <div
+      class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between md:flex-nowrap md:justify-between text-center md:text-left gap-4">
       <div class="flex items-center gap-2 justify-center md:justify-start">
-        <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" class="w-8 h-8" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd" viewBox="0 0 512 512" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" class="w-8 h-8" version="1.1"
+          style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+          viewBox="0 0 512 512" xmlns:xlink="http://www.w3.org/1999/xlink">
           <defs>
-           <style type="text/css">
-            
-             .fil0 {fill:black}
-             .fil3 {fill:#E2BE06}
-             .fil1 {fill:#F6F4F7}
-             .fil2 {fill:#FBD307}
-            
-           </style>
+            <style type="text/css">
+              .fil0 {
+                fill: black
+              }
+
+              .fil3 {
+                fill: #E2BE06
+              }
+
+              .fil1 {
+                fill: #F6F4F7
+              }
+
+              .fil2 {
+                fill: #FBD307
+              }
+            </style>
           </defs>
           <g id="Layer_x0020_1">
-           <metadata id="CorelCorpID_0Corel-Layer"></metadata>
-           <polygon class="fil0" points="95,84 95,84 "></polygon>
-           <path class="fil1" d="M212 488c-1,0 -1,0 -2,0 -46,-1 -107,-21 -135,-110 -15,-49 -36,-80 -52,-102 -16,-22 -27,-38 -22,-58 4,-19 23,-39 66,-71 13,-10 13,-16 13,-27 -1,-10 -1,-22 9,-40 20,-33 63,-31 105,-29 28,1 57,3 75,-7 20,-11 52,-23 89,-19 43,4 83,30 118,77 17,24 29,54 34,85 5,31 1,61 -9,85 -15,32 -42,51 -77,53 -55,4 -78,41 -102,81 -24,40 -50,82 -110,82z"></path>
-           <path class="fil2" d="M202 382c-62,0 -112,-50 -112,-112 0,-30 12,-59 33,-80 21,-21 49,-33 79,-33 62,0 113,51 113,113 0,62 -51,112 -113,112z"></path>
-           <path class="fil3" d="M259 263c-4,0 -7,-3 -7,-7 0,-24 -19,-43 -42,-43 -7,0 -15,2 -21,6 -4,2 -8,1 -10,-2 -2,-4 -1,-8 3,-10 8,-5 19,-8 28,-8 15,0 29,6 40,17 10,10 16,25 16,40 0,4 -3,7 -7,7z"></path>
+            <metadata id="CorelCorpID_0Corel-Layer"></metadata>
+            <polygon class="fil0" points="95,84 95,84 "></polygon>
+            <path class="fil1"
+              d="M212 488c-1,0 -1,0 -2,0 -46,-1 -107,-21 -135,-110 -15,-49 -36,-80 -52,-102 -16,-22 -27,-38 -22,-58 4,-19 23,-39 66,-71 13,-10 13,-16 13,-27 -1,-10 -1,-22 9,-40 20,-33 63,-31 105,-29 28,1 57,3 75,-7 20,-11 52,-23 89,-19 43,4 83,30 118,77 17,24 29,54 34,85 5,31 1,61 -9,85 -15,32 -42,51 -77,53 -55,4 -78,41 -102,81 -24,40 -50,82 -110,82z">
+            </path>
+            <path class="fil2"
+              d="M202 382c-62,0 -112,-50 -112,-112 0,-30 12,-59 33,-80 21,-21 49,-33 79,-33 62,0 113,51 113,113 0,62 -51,112 -113,112z">
+            </path>
+            <path class="fil3"
+              d="M259 263c-4,0 -7,-3 -7,-7 0,-24 -19,-43 -42,-43 -7,0 -15,2 -21,6 -4,2 -8,1 -10,-2 -2,-4 -1,-8 3,-10 8,-5 19,-8 28,-8 15,0 29,6 40,17 10,10 16,25 16,40 0,4 -3,7 -7,7z">
+            </path>
           </g>
-         </svg><h1 class="text-2xl font-bold text-white">POSTURAVES</h1>
-</div>
+        </svg>
+        <h1 class="text-2xl font-bold text-white">POSTURAVES</h1>
+      </div>
       <ul class="hidden md:flex space-x-6">
-        <li><a href="#" onclick="navigateTo('inicial')" class="text-navbar hover:underline"><i class="fas fa-home mr-1 min-w-[1.25rem] text-center"></i>INICIAL</a></li>
+        <li><a href="#" onclick="navigateTo('inicial')" class="text-navbar hover:underline"><i
+              class="fas fa-home mr-1 min-w-[1.25rem] text-center"></i>INICIAL</a></li>
         <li class="relative group">
-          <button class="text-white hover:underline"><i class="fas fa-chart-line mr-1 min-w-[1.25rem] text-center"></i>RELATÓRIOS</button>
-          <ul class="absolute left-0 top-full hidden group-hover:block bg-submenu border shadow-md z-10 w-56 transition-base">
-            <li><a href="#" onclick="navigateTo('rel-produtividade')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-sun mr-1 min-w-[1.25rem] text-center"></i>Produtividade</a></li>
-            <li><a href="#" onclick="navigateTo('rel-producao')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a></li>
-            <li><a href="#" onclick="navigateTo('rel-peso')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-weight mr-1 min-w-[1.25rem] text-center"></i>Peso</a></li>
-            <li><a href="#" onclick="navigateTo('rel-consumo')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-drumstick-bite mr-1 min-w-[1.25rem] text-center"></i>Consumo</a></li>
-            <li><a href="#" onclick="navigateTo('rel-estoques')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-boxes mr-1 min-w-[1.25rem] text-center"></i>Estoques</a></li>
-            <li><a href="#" onclick="navigateTo('rel-financeiro')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a></li>
+          <button class="text-white hover:underline"><i
+              class="fas fa-chart-line mr-1 min-w-[1.25rem] text-center"></i>RELATÓRIOS</button>
+          <ul
+            class="absolute left-0 top-full hidden group-hover:block bg-submenu border shadow-md z-10 w-56 transition-base">
+            <li><a href="#" onclick="navigateTo('rel-produtividade')"
+                class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i
+                  class="fas fa-sun mr-1 min-w-[1.25rem] text-center"></i>Produtividade</a></li>
+            <li><a href="#" onclick="navigateTo('rel-producao')"
+                class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i
+                  class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a></li>
+            <li><a href="#" onclick="navigateTo('rel-peso')"
+                class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i
+                  class="fas fa-weight mr-1 min-w-[1.25rem] text-center"></i>Peso</a></li>
+            <li><a href="#" onclick="navigateTo('rel-consumo')"
+                class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i
+                  class="fas fa-drumstick-bite mr-1 min-w-[1.25rem] text-center"></i>Consumo</a></li>
+            <li><a href="#" onclick="navigateTo('rel-estoques')"
+                class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i
+                  class="fas fa-boxes mr-1 min-w-[1.25rem] text-center"></i>Estoques</a></li>
+            <li><a href="#" onclick="navigateTo('rel-financeiro')"
+                class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i
+                  class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a></li>
           </ul>
         </li>
         <li class="relative group">
-          <button class="text-white hover:underline"><i class="fas fa-edit mr-1 min-w-[1.25rem] text-center"></i>FORMULÁRIOS</button>
-          <ul class="absolute left-0 top-full hidden group-hover:block bg-submenu border shadow-md z-10 w-56 transition-base">
-            <li><a href="#" onclick="navigateTo('form-producao')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a></li>
-            <li><a href="#" onclick="navigateTo('form-vendas')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-shopping-cart mr-1 min-w-[1.25rem] text-center"></i>Vendas</a></li>
-            <li><a href="#" onclick="navigateTo('form-financeiro')" class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a></li>
-          </ul>          
+          <button class="text-white hover:underline"><i
+              class="fas fa-edit mr-1 min-w-[1.25rem] text-center"></i>FORMULÁRIOS</button>
+          <ul
+            class="absolute left-0 top-full hidden group-hover:block bg-submenu border shadow-md z-10 w-56 transition-base">
+            <li><a href="#" onclick="navigateTo('form-lotes')"
+                class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i
+                  class="fas fa-layer-group mr-1 min-w-[1.25rem] text-center"></i>Lotes</a></li>
+            <li><a href="#" onclick="navigateTo('form-producao')"
+                class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i
+                  class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a></li>
+            <li><a href="#" onclick="navigateTo('form-vendas')"
+                class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i
+                  class="fas fa-shopping-cart mr-1 min-w-[1.25rem] text-center"></i>Vendas</a></li>
+            <li><a href="#" onclick="navigateTo('form-financeiro')"
+                class="flex items-center gap-3 px-4 py-2 bg-submenu-hover"><i
+                  class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a></li>
+          </ul>
         </li>
       </ul>
       <button id="menuToggle" class="md:hidden text-white">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
     </div>
 
     <div id="mobileMenu" class="hidden px-4 pb-4 md:hidden space-y-2 bg-mobile-menu transition-base">
-      <a href="#" onclick="navigateTo('inicial')" class="block py-2"><i class="fas fa-home mr-1 min-w-[1.25rem] text-center"></i>INICIAL</a>
+      <a href="#" onclick="navigateTo('inicial')" class="block py-2"><i
+          class="fas fa-home mr-1 min-w-[1.25rem] text-center"></i>INICIAL</a>
       <details>
-        <summary class="font-semibold cursor-pointer"><i class="fas fa-chart-line mr-1 min-w-[1.25rem] text-center"></i>RELATÓRIOS</summary>
+        <summary class="font-semibold cursor-pointer"><i
+            class="fas fa-chart-line mr-1 min-w-[1.25rem] text-center"></i>RELATÓRIOS</summary>
         <div class="ml-4">
-          <a href="#" onclick="navigateTo('rel-produtividade')" class="flex items-center gap-2 py-1"><i class="fas fa-sun mr-1 min-w-[1.25rem] text-center"></i>Produtividade</a>
-          <a href="#" onclick="navigateTo('rel-producao')" class="flex items-center gap-2 py-1"><i class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a>
-          <a href="#" onclick="navigateTo('rel-peso')" class="flex items-center gap-2 py-1"><i class="fas fa-weight mr-1 min-w-[1.25rem] text-center"></i>Peso</a>
-          <a href="#" onclick="navigateTo('rel-consumo')" class="flex items-center gap-2 py-1"><i class="fas fa-drumstick-bite mr-1 min-w-[1.25rem] text-center"></i>Consumo</a>
-          <a href="#" onclick="navigateTo('rel-estoques')" class="flex items-center gap-2 py-1"><i class="fas fa-boxes mr-1 min-w-[1.25rem] text-center"></i>Estoques</a>
-          <a href="#" onclick="navigateTo('rel-financeiro')" class="flex items-center gap-2 py-1"><i class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a>
+          <a href="#" onclick="navigateTo('rel-produtividade')" class="flex items-center gap-2 py-1"><i
+              class="fas fa-sun mr-1 min-w-[1.25rem] text-center"></i>Produtividade</a>
+          <a href="#" onclick="navigateTo('rel-producao')" class="flex items-center gap-2 py-1"><i
+              class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a>
+          <a href="#" onclick="navigateTo('rel-peso')" class="flex items-center gap-2 py-1"><i
+              class="fas fa-weight mr-1 min-w-[1.25rem] text-center"></i>Peso</a>
+          <a href="#" onclick="navigateTo('rel-consumo')" class="flex items-center gap-2 py-1"><i
+              class="fas fa-drumstick-bite mr-1 min-w-[1.25rem] text-center"></i>Consumo</a>
+          <a href="#" onclick="navigateTo('rel-estoques')" class="flex items-center gap-2 py-1"><i
+              class="fas fa-boxes mr-1 min-w-[1.25rem] text-center"></i>Estoques</a>
+          <a href="#" onclick="navigateTo('rel-financeiro')" class="flex items-center gap-2 py-1"><i
+              class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a>
         </div>
       </details>
       <details>
-        <summary class="font-semibold cursor-pointer"><i class="fas fa-edit mr-1 min-w-[1.25rem] text-center"></i>FORMULÁRIOS</summary>
+        <summary class="font-semibold cursor-pointer"><i
+            class="fas fa-edit mr-1 min-w-[1.25rem] text-center"></i>FORMULÁRIOS</summary>
         <div class="ml-4">
-          <a href="#" onclick="navigateTo('form-producao')" class="flex items-center gap-2 py-1"><i class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a>
-          <a href="#" onclick="navigateTo('form-vendas')" class="flex items-center gap-2 py-1"><i class="fas fa-shopping-cart mr-1 min-w-[1.25rem] text-center"></i>Vendas</a>
-          <a href="#" onclick="navigateTo('form-financeiro')" class="flex items-center gap-2 py-1"><i class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a>
+          <a href="#" onclick="navigateTo('form-lotes')" class="flex items-center gap-2 py-1"><i
+              class="fas fa-layer-group mr-1 min-w-[1.25rem] text-center"></i>Lotes</a>
+          <a href="#" onclick="navigateTo('form-producao')" class="flex items-center gap-2 py-1"><i
+              class="fas fa-egg mr-1 min-w-[1.25rem] text-center"></i>Produção</a>
+          <a href="#" onclick="navigateTo('form-vendas')" class="flex items-center gap-2 py-1"><i
+              class="fas fa-shopping-cart mr-1 min-w-[1.25rem] text-center"></i>Vendas</a>
+          <a href="#" onclick="navigateTo('form-financeiro')" class="flex items-center gap-2 py-1"><i
+              class="fas fa-dollar-sign mr-1 min-w-[1.25rem] text-center"></i>Financeiro</a>
         </div>
       </details>
     </div>
@@ -143,28 +219,123 @@
       <h2 class="text-xl font-bold mb-2">Painel Inicial</h2>
       <p>Bem-vindo ao POSTURAVES!</p>
     </section>
-    <section id="rel-produtividade" class="spa-section hidden"><h2>Relatório de Produtividade</h2></section>
-    <section id="rel-producao" class="spa-section hidden"><h2>Relatório de Produção</h2></section>
-    <section id="rel-peso" class="spa-section hidden"><h2>Relatório de Peso</h2></section>
-    <section id="rel-consumo" class="spa-section hidden"><h2>Relatório de Consumo</h2></section>
-    <section id="rel-estoques" class="spa-section hidden"><h2>Relatório de Estoques</h2></section>
-    <section id="rel-financeiro" class="spa-section hidden"><h2>Relatório Financeiro</h2></section>
-    <section id="form-producao" class="spa-section hidden"><h2>Formulário de Produção</h2></section>
-    <section id="form-vendas" class="spa-section hidden"><h2>Formulário de Vendas</h2></section>
-    <section id="form-financeiro" class="spa-section hidden"><h2>Formulário Financeiro</h2></section>
+    <section id="rel-produtividade" class="spa-section hidden">
+      <h2>Relatório de Produtividade</h2>
+    </section>
+    <section id="rel-producao" class="spa-section hidden">
+      <h2>Relatório de Produção</h2>
+    </section>
+    <section id="rel-peso" class="spa-section hidden">
+      <h2>Relatório de Peso</h2>
+    </section>
+    <section id="rel-consumo" class="spa-section hidden">
+      <h2>Relatório de Consumo</h2>
+    </section>
+    <section id="rel-estoques" class="spa-section hidden">
+      <h2>Relatório de Estoques</h2>
+    </section>
+    <section id="rel-financeiro" class="spa-section hidden">
+      <h2>Relatório Financeiro</h2>
+    </section>
+    <section id="form-lotes" class="spa-section hidden">
+      <h2 class="text-xl font-bold mb-4">Cadastro de Lotes</h2>
+      <form id="formLote"
+        class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-white shadow-md p-6 rounded">
+        <div>
+          <label for="idlote" class="block text-sm font-medium mb-1">ID</label>
+          <input id="idlote" type="text" class="w-full border rounded px-3 py-2" required />
+        </div>
+        <div>
+          <label for="status" class="block text-sm font-medium mb-1">STATUS</label>
+          <select id="status" class="w-full border rounded px-3 py-2">
+            <option>Ativo</option>
+            <option>Inativo</option>
+          </select>
+        </div>
+        <div>
+          <label for="galpao" class="block text-sm font-medium mb-1">GALPÃO</label>
+          <input id="galpao" type="text" class="w-full border rounded px-3 py-2" required />
+        </div>
+        <div>
+          <label for="proprietario" class="block text-sm font-medium mb-1">PROPRIETÁRIO</label>
+          <input id="proprietario" type="text" class="w-full border rounded px-3 py-2" required />
+        </div>
+        <div>
+          <label for="linhagem" class="block text-sm font-medium mb-1">LINHAGEM</label>
+          <input id="linhagem" type="text" class="w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label for="nascimento" class="block text-sm font-medium mb-1">NASCIMENTO</label>
+          <input id="nascimento" type="date" class="w-full border rounded px-3 py-2" required />
+        </div>
+        <div>
+          <label for="chegada" class="block text-sm font-medium mb-1">CHEGADA/ENTREGA</label>
+          <input id="chegada" type="date" class="w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label for="quantidade" class="block text-sm font-medium mb-1">QUANTIDADE DE AVES</label>
+          <input id="quantidade" type="number" class="w-full border rounded px-3 py-2" required />
+        </div>
+        <div class="col-span-full">
+          <button type="submit"
+            class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Salvar</button>
+        </div>
+      </form>
+      <!-- Listagem dos lotes cadastrados -->
+      <div id="listaLotes" class="mt-10 max-w-4xl mx-auto bg-white shadow rounded overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-200 text-left">
+            <tr>
+              <th class="p-3 text-center">GALPÃO</th>
+              <th class="p-3 text-center">IDENTIFICADOR</th>
+              <th class="p-3 text-center">IDADE</th>
+              <th class="p-3 text-center">LINHAGEM</th>
+              <th class="p-3 text-center">QUANT. AVES</th>
+              <th class="p-3 text-center">PROPRIETÁRIO</th>
+              <th class="p-3 text-center">STATUS</th>
+              <th class="p-3 text-center">AÇÕES</th>
+            </tr>
+          </thead>
+          <tbody id="corpoListaLotes">
+            <!-- Linhas serão inseridas via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="form-producao" class="spa-section hidden">
+      <h2 class="text-xl font-bold mb-4">Formulário de Produção</h2>
+      <form class="max-w-xl mx-auto space-y-4 bg-white shadow-md p-6 rounded">
+        <div>
+          <label for="data" class="block text-sm font-medium mb-1">Data</label>
+          <input id="data" type="date" class="w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label for="responsavel" class="block text-sm font-medium mb-1">Responsável</label>
+          <input id="responsavel" type="text" class="w-full border rounded px-3 py-2"
+            placeholder="Nome do responsável" />
+        </div>
+      </form>
+    </section>
+    <section id="form-vendas" class="spa-section hidden">
+      <h2>Formulário de Vendas</h2>
+    </section>
+    <section id="form-financeiro" class="spa-section hidden">
+      <h2>Formulário Financeiro</h2>
+    </section>
   </main>
 
   <script>
     function navigateTo(id) {
-  document.querySelectorAll('.spa-section').forEach(sec => sec.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
+      document.querySelectorAll('.spa-section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
 
-  // Fecha o menu mobile ao clicar em qualquer link
-  const mobileMenu = document.getElementById('mobileMenu');
-  if (window.innerWidth < 768 && !mobileMenu.classList.contains('hidden')) {
-    mobileMenu.classList.add('hidden');
-  }
-}
+      // Fecha o menu mobile ao clicar em qualquer link
+      const mobileMenu = document.getElementById('mobileMenu');
+      if (window.innerWidth < 768 && !mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.add('hidden');
+      }
+    }
 
     document.getElementById('menuToggle').addEventListener('click', () => {
       document.getElementById('mobileMenu').classList.toggle('hidden');
@@ -187,5 +358,160 @@
       });
     });
   </script>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBptELfvnAhLjdvXqNm4HZjbkgn-gWrmSk",
+      authDomain: "posturaves-spa.firebaseapp.com",
+      projectId: "posturaves-spa",
+      storageBucket: "posturaves-spa.firebasestorage.app",
+      messagingSenderId: "224817282928",
+      appId: "1:224817282928:web:91302d7c7fcd7eb32fd9b5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Formulário de Lotes
+    const formLote = document.getElementById("formLote");
+    if (formLote) {
+      formLote.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = {
+          idlote: formLote.idlote.value,
+          status: formLote.status.value,
+          galpao: formLote.galpao.value,
+          proprietario: formLote.proprietario.value,
+          linhagem: formLote.linhagem.value,
+          nascimento: formLote.nascimento.value,
+          chegada: formLote.chegada.value,
+          quantidade: parseInt(formLote.quantidade.value)
+        };
+
+        try {
+          const existe = await getDocs(collection(db, "bdlotes"));
+          const duplicado = existe.docs.find(doc => doc.data().idlote === data.idlote && doc.id !== formLote.dataset.editingId);
+          if (duplicado) {
+            mostrarAlerta("Já existe um lote com este ID. Use outro ou edite o existente.", "alerta");
+            return;
+          }
+          if (formLote.dataset.editingId) {
+            const docRef = doc(db, "bdlotes", formLote.dataset.editingId);
+            await setDoc(docRef, data);
+            mostrarAlerta("Lote atualizado com sucesso!", "feedback");
+            formLote.removeAttribute("data-editing-id");
+          } else {
+            await addDoc(collection(db, "bdlotes"), data);
+            mostrarAlerta("Lote salvo com sucesso!", "feedback");
+          }
+          // mostrarAlerta("Lote salvo com sucesso!"); (já está sendo chamado corretamente acima)
+          formLote.reset();
+          carregarLotes();
+        } catch (error) {
+          console.error("Erro ao salvar lote:", error);
+          mostrarAlerta("Erro ao salvar o lote. Verifique o console.", "alerta");
+        }
+      });
+    }
+
+    // Função para carregar e exibir os lotes cadastrados
+    async function carregarLotes() {
+      const tabela = document.getElementById("corpoListaLotes");
+      if (!tabela) return;
+      tabela.innerHTML = "";
+      const snapshot = await getDocs(collection(db, "bdlotes"));
+      snapshot.forEach((doc) => {
+        const lote = doc.data();
+        const linha = document.createElement("tr");
+        linha.innerHTML = `
+          <td class="border-t px-3 py-2 text-center">${lote.galpao}</td>
+          <td class="border-t px-3 py-2 text-center">${lote.idlote}</td>
+          <td class="border-t px-3 py-2 text-center">${lote.idade}</td>
+          <td class="border-t px-3 py-2 text-center">${lote.linhagem}</td>
+          <td class="border-t px-3 py-2 text-center">${lote.quantidade}</td>
+          <td class="border-t px-3 py-2 text-center">${lote.proprietario}</td>
+          <td class="border-t px-3 py-2 text-center">${lote.status}</td>
+          <td class="border-t px-3 py-2 text-center">
+            <button onclick="editarLote('${doc.id}')" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></button>
+          </td>
+
+    `;
+        tabela.appendChild(linha);
+      });
+    }
+
+    // Torna editarLote acessível globalmente
+    window.editarLote = async function (id) {
+      try {
+        const docRef = doc(db, "bdlotes", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const dados = docSnap.data();
+          formLote.dataset.editingId = id;
+          formLote.idlote.value = dados.idlote;
+          formLote.status.value = dados.status;
+          formLote.galpao.value = dados.galpao;
+          formLote.proprietario.value = dados.proprietario;
+          formLote.linhagem.value = dados.linhagem;
+          formLote.nascimento.value = dados.nascimento;
+          formLote.chegada.value = dados.chegada;
+          formLote.quantidade.value = dados.quantidade;
+          navigateTo('form-lotes');
+        } else {
+          mostrarAlerta("Lote não encontrado", "alerta");
+        }
+      } catch (err) {
+        console.error("Erro ao carregar lote:", err);
+        mostrarAlerta("Erro ao carregar lote para edição.", "alerta");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", carregarLotes);
+
+
+  </script>
+  <div id="alerta"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded shadow-md hidden z-50 text-white bg-opacity-90 flex items-center gap-2">
+    <i id="alertaIcon" class="fas fa-check-circle"></i>
+    <span id="alertaTexto"></span>
+  </div>
+
+  <script>
+    function mostrarAlerta(mensagem, tipo = 'feedback') {
+      const alerta = document.getElementById("alerta");
+      const alertaTexto = document.getElementById("alertaTexto");
+      const alertaIcon = document.getElementById("alertaIcon");
+
+      alerta.classList.remove("bg-green-600", "bg-red-600", "bg-yellow-500");
+      alerta.style.backgroundColor = "";
+      alerta.style.color = "";
+      alertaIcon.className = "fas";
+
+      if (tipo === 'feedback') {
+        alerta.style.backgroundColor = "var(--color-feedback-bg)";
+        alerta.style.color = "var(--color-feedback-text)";
+        alertaIcon.classList.add("fa-check-circle");
+      } else if (tipo === 'alerta') {
+        alerta.style.backgroundColor = "var(--color-alerta-bg)";
+        alerta.style.color = "var(--color-alerta-text)";
+        alertaIcon.classList.add("fa-exclamation-triangle");
+      } else if (tipo === 'informacao') {
+        alerta.style.backgroundColor = "var(--color-informacao-bg)";
+        alerta.style.color = "var(--color-informacao-text)";
+        alertaIcon.classList.add("fa-info-circle");
+      }
+
+      alertaTexto.textContent = mensagem;
+      alerta.classList.remove("hidden");
+      alerta.classList.add("animate-fade-in-down");
+      setTimeout(() => alerta.classList.add("hidden"), 3000);
+    }
+  </script>
+
 </body>
+
 </html>
