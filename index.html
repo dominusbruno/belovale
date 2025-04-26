@@ -396,7 +396,7 @@
           const existe = await getDocs(collection(db, "bdlotes"));
           const duplicado = existe.docs.find(doc => doc.data().idlote === data.idlote && doc.id !== formLote.dataset.editingId);
           if (duplicado) {
-            mostrarAlerta("Já existe um lote com este ID. Use outro ou edite o existente.", "alerta");
+            mostrarAlerta("Já existe um lote com este ID.", "alerta");
             return;
           }
           if (formLote.dataset.editingId) {
@@ -418,6 +418,15 @@
       });
     }
 
+    // Função para calcular a idade do lote com base em sua data de nascimento.
+    function calcularIdadeAtual(dataNascimento) {
+      const nascimento = new Date(dataNascimento);
+      const hoje = new Date();
+      const diferencaDias = Math.floor((hoje - nascimento) / (1000 * 60 * 60 * 24));
+      const semanas = Math.floor((diferencaDias + 6) / 7); // adiciona 6 para sempre arredondar para cima
+      return semanas;
+    }
+
     // Função para carregar e exibir os lotes cadastrados
     async function carregarLotes() {
       const tabela = document.getElementById("corpoListaLotes");
@@ -426,11 +435,12 @@
       const snapshot = await getDocs(collection(db, "bdlotes"));
       snapshot.forEach((doc) => {
         const lote = doc.data();
+        const idadeSemanas = calcularIdadeAtual(lote.nascimento);
         const linha = document.createElement("tr");
         linha.innerHTML = `
           <td class="border-t px-3 py-2 text-center">${lote.galpao}</td>
           <td class="border-t px-3 py-2 text-center">${lote.idlote}</td>
-          <td class="border-t px-3 py-2 text-center">${lote.idade}</td>
+          <td class="border-t px-3 py-2 text-center">${idadeSemanas} sem</td>
           <td class="border-t px-3 py-2 text-center">${lote.linhagem}</td>
           <td class="border-t px-3 py-2 text-center">${lote.quantidade}</td>
           <td class="border-t px-3 py-2 text-center">${lote.proprietario}</td>
@@ -475,7 +485,7 @@
 
   </script>
   <div id="alerta"
-    class="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded shadow-md hidden z-50 text-white bg-opacity-90 flex items-center gap-2">
+    class="fixed top-20 left-1/2 -translate-x-1/2 px-6 py-3 rounded shadow-md hidden z-50 text-white bg-opacity-90 flex items-center gap-2">
     <i id="alertaIcon" class="fas fa-check-circle"></i>
     <span id="alertaTexto"></span>
   </div>
@@ -511,7 +521,6 @@
       setTimeout(() => alerta.classList.add("hidden"), 3000);
     }
   </script>
-
 </body>
 
 </html>
