@@ -238,53 +238,81 @@
       <h2>Relatório Financeiro</h2>
     </section>
     <section id="form-lotes" class="spa-section hidden">
-      <h2 class="text-xl font-bold mb-4">Cadastro de Lotes</h2>
-      <form id="formLote"
-        class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-white shadow-md p-6 rounded">
-        <div>
-          <label for="idlote" class="block text-sm font-medium mb-1">ID</label>
-          <input id="idlote" type="text" class="w-full border rounded px-3 py-2" required />
+
+      <form id="formLote" class="max-w-4xl mx-auto bg-white shadow-md rounded overflow-hidden">
+        <!-- Cabeçalho do formulário -->
+        <div class="bg-gray-800 text-white text-center py-2">
+          <h2 class="text-xl font-bold">CADASTRO DE LOTES</h2>
         </div>
-        <div>
-          <label for="status" class="block text-sm font-medium mb-1">STATUS</label>
-          <select id="status" class="w-full border rounded px-3 py-2">
-            <option>Ativo</option>
-            <option>Inativo</option>
-          </select>
-        </div>
-        <div>
-          <label for="galpao" class="block text-sm font-medium mb-1">GALPÃO</label>
-          <input id="galpao" type="text" class="w-full border rounded px-3 py-2" required />
-        </div>
-        <div>
-          <label for="proprietario" class="block text-sm font-medium mb-1">PROPRIETÁRIO</label>
-          <input id="proprietario" type="text" class="w-full border rounded px-3 py-2" required />
-        </div>
-        <div>
-          <label for="linhagem" class="block text-sm font-medium mb-1">LINHAGEM</label>
-          <input id="linhagem" type="text" class="w-full border rounded px-3 py-2" />
-        </div>
-        <div>
-          <label for="nascimento" class="block text-sm font-medium mb-1">NASCIMENTO</label>
-          <input id="nascimento" type="date" class="w-full border rounded px-3 py-2" required />
-        </div>
-        <div>
-          <label for="chegada" class="block text-sm font-medium mb-1">CHEGADA/ENTREGA</label>
-          <input id="chegada" type="date" class="w-full border rounded px-3 py-2" />
-        </div>
-        <div>
-          <label for="quantidade" class="block text-sm font-medium mb-1">QUANTIDADE DE AVES</label>
-          <input id="quantidade" type="number" class="w-full border rounded px-3 py-2" required />
-        </div>
-        <div class="col-span-full flex justify-end">
-          <button type="submit"
-            class="w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Salvar</button>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
+
+
+          <div>
+            <label for="idlote" class="block text-sm font-medium mb-1">ID</label>
+            <input id="idlote" type="text" class="w-full border rounded px-3 py-2" required />
+          </div>
+          <div>
+            <label for="status" class="block text-sm font-medium mb-1">STATUS</label>
+            <select id="status" class="w-full border rounded px-3 py-2">
+              <option>Ativo</option>
+              <option>Inativo</option>
+            </select>
+          </div>
+          <div>
+            <label for="galpao" class="block text-sm font-medium mb-1">GALPÃO</label>
+            <select id="galpao" class="w-full border rounded px-3 py-2" required>
+              <option value="">Selecione...</option>
+              <option value="PINTEIRO">PINTEIRO</option>
+              <option value="RECRIA">RECRIA</option>
+              <option value="01">01</option>
+              <option value="02">02</option>
+              <option value="03">03</option>
+              <option value="04">04</option>
+              <option value="05">05</option>
+            </select>
+          </div>
+          <div>
+            <label for="proprietario" class="block text-sm font-medium mb-1">PROPRIETÁRIO</label>
+            <select id="proprietario" class="w-full border rounded px-3 py-2 overflow-y-auto" multiple size="3"
+              required>
+              <option value="Alex">Alex</option>
+              <option value="Bruno">Bruno</option>
+              <option value="Carlos">Carlos</option>
+            </select>
+          </div>
+          <div>
+            <label for="linhagem" class="block text-sm font-medium mb-1">LINHAGEM</label>
+            <input id="linhagem" type="text" class="w-full border rounded px-3 py-2" />
+          </div>
+          <div>
+            <label for="nascimento" class="block text-sm font-medium mb-1">NASCIMENTO</label>
+            <input id="nascimento" type="date" class="w-full border rounded px-3 py-2" required />
+          </div>
+          <div>
+            <label for="chegada" class="block text-sm font-medium mb-1">CHEGADA/ENTREGA</label>
+            <input id="chegada" type="date" class="w-full border rounded px-3 py-2" />
+          </div>
+          <div>
+            <label for="quantidade" class="block text-sm font-medium mb-1">QUANTIDADE DE AVES</label>
+            <input id="quantidade" type="number" class="w-full border rounded px-3 py-2" min="4000" max="5500"
+              required />
+          </div>
+          <div class="col-span-full flex justify-end">
+            <button type="submit"
+              class="w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Salvar</button>
+          </div>
         </div>
       </form>
       <!-- Listagem dos lotes cadastrados -->
       <div id="listaLotes" class="mt-10 max-w-4xl mx-auto bg-white shadow rounded overflow-x-auto">
+        <div class="flex items-center justify-start bg-gray-800 p-2">
+          <label class="flex items-center gap-2">
+            <input type="checkbox" id="filtroAtivos" class="h-5 w-5 text-green-600 border-gray-300 rounded">
+            <span class="text-sm font-medium text-white">SOMENTE ATIVOS? </span>
+          </label>
+        </div>
         <table class="w-full text-sm">
-          <thead class="bg-gray-200 text-left">
+          <thead class="bg-gray-800 text-left text-white">
             <tr>
               <th class="p-3 text-center">GALPÃO</th>
               <th class="p-3 text-center">IDENTIFICADOR</th>
@@ -361,7 +389,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 
     const firebaseConfig = {
@@ -385,7 +413,7 @@
           idlote: formLote.idlote.value,
           status: formLote.status.value,
           galpao: formLote.galpao.value,
-          proprietario: formLote.proprietario.value,
+          proprietario: Array.from(formLote.proprietario.selectedOptions).map(opt => opt.value),
           linhagem: formLote.linhagem.value,
           nascimento: formLote.nascimento.value,
           chegada: formLote.chegada.value,
@@ -426,33 +454,59 @@
       const semanas = Math.floor((diferencaDias + 6) / 7); // adiciona 6 para sempre arredondar para cima
       return semanas;
     }
-
-    // Função para carregar e exibir os lotes cadastrados
-    async function carregarLotes() {
+    async function carregarLotes(mostrarApenasAtivos = false) {
       const tabela = document.getElementById("corpoListaLotes");
       if (!tabela) return;
       tabela.innerHTML = "";
-      const snapshot = await getDocs(collection(db, "bdlotes"));
-      snapshot.forEach((doc) => {
-        const lote = doc.data();
+
+      const q = query(collection(db, "bdlotes"), orderBy("galpao"));
+      const snapshot = await getDocs(q);
+
+      let lotes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      if (mostrarApenasAtivos) {
+        lotes = lotes.filter(lote => lote.status.toLowerCase() === "ativo");
+      }
+
+      // Primeiro ordena por status (ativos primeiro), depois por galpão
+      lotes.sort((a, b) => {
+        if (a.status.toLowerCase() !== b.status.toLowerCase()) {
+          return a.status.toLowerCase() === "ativo" ? -1 : 1;
+        }
+        if (a.galpao < b.galpao) return -1;
+        if (a.galpao > b.galpao) return 1;
+        return 0;
+      });
+
+      lotes.forEach((lote) => {
         const idadeSemanas = calcularIdadeAtual(lote.nascimento);
         const linha = document.createElement("tr");
+
+        if (lote.status.toLowerCase() === "ativo") {
+          linha.classList.add("bg-green-100");
+        } else {
+          linha.classList.add("bg-red-100");
+        }
+
         linha.innerHTML = `
           <td class="border-t px-3 py-2 text-center">${lote.galpao}</td>
           <td class="border-t px-3 py-2 text-center">${lote.idlote}</td>
           <td class="border-t px-3 py-2 text-center">${idadeSemanas} sem</td>
           <td class="border-t px-3 py-2 text-center">${lote.linhagem}</td>
           <td class="border-t px-3 py-2 text-center">${lote.quantidade}</td>
-          <td class="border-t px-3 py-2 text-center">${lote.proprietario}</td>
+          <td class="border-t px-3 py-2 text-center">${Array.isArray(lote.proprietario) ? lote.proprietario.join(", ") : lote.proprietario}</td>
           <td class="border-t px-3 py-2 text-center">${lote.status}</td>
           <td class="border-t px-3 py-2 text-center">
-            <button onclick="editarLote('${doc.id}')" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></button>
+            <button onclick="editarLote('${lote.id}')" class="text-blue-800 hover:text-red-600">
+              <i class="fas fa-edit text-xl"></i>
+            </button>
           </td>
+        `;
 
-    `;
         tabela.appendChild(linha);
       });
     }
+
 
     // Torna editarLote acessível globalmente
     window.editarLote = async function (id) {
@@ -465,7 +519,9 @@
           formLote.idlote.value = dados.idlote;
           formLote.status.value = dados.status;
           formLote.galpao.value = dados.galpao;
-          formLote.proprietario.value = dados.proprietario;
+          Array.from(formLote.proprietario.options).forEach(option => {
+            option.selected = dados.proprietario.includes(option.value);
+          });
           formLote.linhagem.value = dados.linhagem;
           formLote.nascimento.value = dados.nascimento;
           formLote.chegada.value = dados.chegada;
@@ -480,7 +536,20 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", carregarLotes);
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarLotes(); // Carrega normal sem filtro
+
+      const filtroAtivos = document.getElementById("filtroAtivos");
+      if (filtroAtivos) {
+        filtroAtivos.addEventListener("change", (e) => {
+          e.preventDefault(); // Impede que o navegador tente submeter o formulário
+          carregarLotes(e.target.checked); // Atualiza a lista com o filtro
+        });
+      }
+
+    });
+
+
 
 
   </script>
