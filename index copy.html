@@ -361,7 +361,7 @@
 
           <div>
             <label for="fornecedor" class="block text-sm font-medium mb-1">Fornecedor</label>
-            <input id="fornecedor" type="text" class="w-full border rounded px-3 py-2" required
+            <input id="fornecedor" type="text" class="w-full border rounded px-3 py-2"
               placeholder="Digite ou selecione">
           </div>
 
@@ -372,8 +372,7 @@
 
           <div>
             <label for="categoria" class="block text-sm font-medium mb-1">Categoria</label>
-            <input id="categoria" type="text" class="w-full border rounded px-3 py-2" required
-              placeholder="Digite ou selecione">
+            <input id="categoria" type="text" class="w-full border rounded px-3 py-2" placeholder="Digite ou selecione">
           </div>
 
           <div>
@@ -441,20 +440,317 @@
     </section>
   </main>
 
-  <!-- Popup de Alerta -->
+
+
+  <!-- MENU MOBILE -->
+  <script>
+    function navigateTo(id) {
+      document.querySelectorAll('.spa-section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+
+      // Fecha o menu mobile ao clicar em qualquer link
+      const mobileMenu = document.getElementById('mobileMenu');
+      if (window.innerWidth < 768 && !mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.add('hidden');
+      }
+    }
+
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      document.getElementById('mobileMenu').classList.toggle('hidden');
+    });
+
+    navigateTo('inicial');
+  </script>
+
+  <!-- ATIVA/DESATIVA O MENU MOBILE -->
+  <script>
+    // Ativa apenas um submenu mobile aberto por vez após o DOM estar carregado
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('#mobileMenu details').forEach(detail => {
+        detail.addEventListener('toggle', () => {
+          if (detail.open) {
+            document.querySelectorAll('#mobileMenu details').forEach(d => {
+              if (d !== detail) d.removeAttribute('open');
+            });
+          }
+        });
+      });
+    });
+  </script>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBptELfvnAhLjdvXqNm4HZjbkgn-gWrmSk",
+      authDomain: "posturaves-spa.firebaseapp.com",
+      projectId: "posturaves-spa",
+      storageBucket: "posturaves-spa.firebasestorage.app",
+      messagingSenderId: "224817282928",
+      appId: "1:224817282928:web:91302d7c7fcd7eb32fd9b5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Formulário de Lotes
+    const formLote = document.getElementById("formLote");
+    if (formLote) {
+      formLote.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = {
+          idlote: formLote.idlote.value,
+          status: formLote.status.value,
+          galpao: formLote.galpao.value,
+          proprietario: Array.from(formLote.proprietario.selectedOptions).map(opt => opt.value),
+          linhagem: formLote.linhagem.value,
+          nascimento: formLote.nascimento.value,
+          chegada: formLote.chegada.value,
+          quantidade: parseInt(formLote.quantidade.value)
+        };
+
+        try {
+          const existe = await getDocs(collection(db, "bdlotes"));
+          const duplicado = existe.docs.find(doc => doc.data().idlote === data.idlote && doc.id !== formLote.dataset.editingId);
+          if (duplicado) {
+            mostrarAlerta("Já existe um lote com este ID.", "alerta");
+            return;
+          }
+          if (formLote.dataset.editingId) {
+            const docRef = doc(db, "bdlotes", formLote.dataset.editingId);
+            await setDoc(docRef, data);
+            mostrarAlerta("Lote atualizado com sucesso!", "feedback");
+            formLote.removeAttribute("data-editing-id");
+          } else {
+            await addDoc(collection(db, "bdlotes"), data);
+            mostrarAlerta("Lote salvo com sucesso!", "feedback");
+          }
+          // mostrarAlerta("Lote salvo com sucesso!"); (já está sendo chamado corretamente acima)
+          formLote.reset();
+          carregarLotes();
+        } catch (error) {
+          console.error("Erro ao salvar lote:", error);
+          mostrarAlerta("Erro ao salvar o lote. Verifique o console.", "alerta");
+        }
+      });
+    }
+
+    // Função para calcular a idade do lote com base em sua data de nascimento.
+    function calcularIdadeAtual(dataNascimento) {
+      const nascimento = new Date(dataNascimento);
+      const hoje = new Date();
+      const diferencaDias = Math.floor((hoje - nascimento) / (1000 * 60 * 60 * 24));
+      const semanas = Math.floor((diferencaDias + 6) / 7); // adiciona 6 para sempre arredondar para cima
+      return semanas;
+    }
+    async function carregarLotes(mostrarApenasAtivos = false) {
+      const tabela = document.getElementById("corpoListaLotes");
+      if (!tabela) return;
+      tabela.innerHTML = "";
+
+      const q = query(collection(db, "bdlotes"), orderBy("galpao"));
+      const snapshot = await getDocs(q);
+
+      let lotes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      if (mostrarApenasAtivos) {
+        lotes = lotes.filter(lote => lote.status.toLowerCase() === "ativo");
+      }
+
+      // Primeiro ordena por status (ativos primeiro), depois por galpão
+      lotes.sort((a, b) => {
+        if (a.status.toLowerCase() !== b.status.toLowerCase()) {
+          return a.status.toLowerCase() === "ativo" ? -1 : 1;
+        }
+        if (a.galpao < b.galpao) return -1;
+        if (a.galpao > b.galpao) return 1;
+        return 0;
+      });
+
+      lotes.forEach((lote) => {
+        const idadeSemanas = calcularIdadeAtual(lote.nascimento);
+        const linha = document.createElement("tr");
+
+        if (lote.status.toLowerCase() === "ativo") {
+          linha.classList.add("bg-green-100");
+        } else {
+          linha.classList.add("bg-red-100");
+        }
+
+        linha.innerHTML = `
+          <td class="border-t px-3 py-2 text-center">${lote.galpao}</td>
+          <td class="border-t px-3 py-2 text-center">${lote.idlote}</td>
+          <td class="border-t px-3 py-2 text-center">${idadeSemanas} sem</td>
+          <td class="border-t px-3 py-2 text-center">${lote.linhagem}</td>
+          <td class="border-t px-3 py-2 text-center">${lote.quantidade}</td>
+          <td class="border-t px-3 py-2 text-center">${Array.isArray(lote.proprietario) ? lote.proprietario.join(", ") : lote.proprietario}</td>
+          <td class="border-t px-3 py-2 text-center">${lote.status}</td>
+          <td class="border-t px-3 py-2 text-center">
+            <button onclick="editarLote('${lote.id}')" class="text-blue-800 hover:text-red-600">
+              <i class="fas fa-edit text-xl"></i>
+            </button>
+          </td>
+        `;
+
+        tabela.appendChild(linha);
+      });
+    }
+
+
+    // Torna editarLote acessível globalmente
+    window.editarLote = async function (id) {
+      try {
+        const docRef = doc(db, "bdlotes", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const dados = docSnap.data();
+          formLote.dataset.editingId = id;
+          formLote.idlote.value = dados.idlote;
+          formLote.status.value = dados.status;
+          formLote.galpao.value = dados.galpao;
+          Array.from(formLote.proprietario.options).forEach(option => {
+            option.selected = dados.proprietario.includes(option.value);
+          });
+          formLote.linhagem.value = dados.linhagem;
+          formLote.nascimento.value = dados.nascimento;
+          formLote.chegada.value = dados.chegada;
+          formLote.quantidade.value = dados.quantidade;
+          navigateTo('form-lotes');
+        } else {
+          mostrarAlerta("Lote não encontrado", "alerta");
+        }
+      } catch (err) {
+        console.error("Erro ao carregar lote:", err);
+        mostrarAlerta("Erro ao carregar lote para edição.", "alerta");
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarLotes(); // Carrega normal sem filtro
+
+      const filtroAtivos = document.getElementById("filtroAtivos");
+      if (filtroAtivos) {
+        filtroAtivos.addEventListener("change", (e) => {
+          e.preventDefault(); // Impede que o navegador tente submeter o formulário
+          carregarLotes(e.target.checked); // Atualiza a lista com o filtro
+        });
+      }
+
+    });
+
+
+
+
+  </script>
+
+
+  <!-- POPUP DE ALERTA -->
   <div id="alerta"
     class="fixed top-20 left-1/2 -translate-x-1/2 px-6 py-3 rounded shadow-md hidden z-50 text-white bg-opacity-90 flex items-center gap-2">
     <i id="alertaIcon" class="fas fa-check-circle"></i>
     <span id="alertaTexto"></span>
   </div>
+  <script>
+    function mostrarAlerta(mensagem, tipo = 'feedback') {
+      const alerta = document.getElementById("alerta");
+      const alertaTexto = document.getElementById("alertaTexto");
+      const alertaIcon = document.getElementById("alertaIcon");
 
-  <!-- Scripts -->
-  <script type="module" src="./js/firebaseConfig.js"></script>
-  <script type="module" src="./js/menu.js"></script>
-  <script type="module" src="./js/submenu.js"></script>
-  <script type="module" src="./js/alerta.js"></script>
-  <script type="module" src="./js/formfinanceiro.js"></script>
-  <script type="module" src="./js/formlotes.js"></script>
+      alerta.classList.remove("bg-green-600", "bg-red-600", "bg-yellow-500");
+      alerta.style.backgroundColor = "";
+      alerta.style.color = "";
+      alertaIcon.className = "fas";
+
+      if (tipo === 'feedback') {
+        alerta.style.backgroundColor = "var(--color-feedback-bg)";
+        alerta.style.color = "var(--color-feedback-text)";
+        alertaIcon.classList.add("fa-check-circle");
+      } else if (tipo === 'alerta') {
+        alerta.style.backgroundColor = "var(--color-alerta-bg)";
+        alerta.style.color = "var(--color-alerta-text)";
+        alertaIcon.classList.add("fa-exclamation-triangle");
+      } else if (tipo === 'informacao') {
+        alerta.style.backgroundColor = "var(--color-informacao-bg)";
+        alerta.style.color = "var(--color-informacao-text)";
+        alertaIcon.classList.add("fa-info-circle");
+      }
+
+      alertaTexto.textContent = mensagem;
+      alerta.classList.remove("hidden");
+      alerta.classList.add("animate-fade-in-down");
+      setTimeout(() => alerta.classList.add("hidden"), 3000);
+    }
+  </script>
+
+  <!-- FORMULÁRIO FINANCEIRO -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const produtosTabela = document.getElementById('produtosFinanceiro');
+      const btnAddProduto = document.getElementById('addProduto');
+      const pagamentosTabela = document.getElementById('pagamentosFinanceiro');
+      const btnAddPagamento = document.getElementById('addPagamento');
+      const totalGeralProdutos = document.getElementById('totalGeralProdutos');
+
+      btnAddProduto.addEventListener('click', () => {
+        const novaLinha = document.createElement('tr');
+        novaLinha.innerHTML = `
+          <td class="border p-2"><input type="text" class="w-full border rounded px-2 py-1" placeholder="Produto"></td>
+          <td class="border p-2"><input type="number" class="w-full border rounded px-2 py-1" placeholder="Quantidade" min="0" step="0.01"></td>
+          <td class="border p-2"><input type="number" class="w-full border rounded px-2 py-1" placeholder="Preço" min="0" step="0.01"></td>
+          <td class="border p-2"><input type="text" class="w-full border rounded px-2 py-1 bg-gray-100" placeholder="Total" readonly></td>
+        `;
+        produtosTabela.appendChild(novaLinha);
+
+        const inputs = novaLinha.querySelectorAll('input');
+        inputs[1].addEventListener('input', atualizarTotal);
+        inputs[2].addEventListener('input', atualizarTotal);
+
+        function atualizarTotal() {
+          const quantidade = parseFloat(inputs[1].value) || 0;
+          const preco = parseFloat(inputs[2].value) || 0;
+          const total = quantidade * preco;
+          inputs[3].value = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+          atualizarTotalGeral();
+        }
+      });
+
+      function atualizarTotalGeral() {
+        let total = 0;
+        produtosTabela.querySelectorAll('tr').forEach(tr => {
+          const totalInput = tr.querySelectorAll('input')[3];
+          if (totalInput && totalInput.value) {
+            // CORRETO: Remove o R$, espaços e pontos de milhar e troca vírgula decimal por ponto
+            const valorFormatado = totalInput.value.replace(/\s/g, '').replace('R$', '').replace(/\./g, '').replace(',', '.');
+            const valor = parseFloat(valorFormatado) || 0;
+            total += valor;
+          }
+        });
+        totalGeralProdutos.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      }
+
+
+      btnAddPagamento.addEventListener('click', () => {
+        const novaLinha = document.createElement('tr');
+        novaLinha.innerHTML = `
+          <td class="border p-2"><input type="text" class="w-full border rounded px-2 py-1" placeholder="Parcela"></td>
+          <td class="border p-2"><input type="date" class="w-full border rounded px-2 py-1"></td>
+          <td class="border p-2"><input type="text" class="w-full border rounded px-2 py-1" placeholder="Setor/Lote"></td>
+        `;
+        pagamentosTabela.appendChild(novaLinha);
+      });
+    });
+  </script>
+
+
+  <script type="module" src="firebaseConfig.js"></script>
+  <script type="module" src="/js/formlotes.js"></script>
+  <script type="module" src="/js/formfinanceiro.js"></script>
+
+
+
 
 </body>
 
