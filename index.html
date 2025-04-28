@@ -361,8 +361,9 @@
 
           <div>
             <label for="fornecedor" class="block text-sm font-medium mb-1">Fornecedor</label>
-            <input id="fornecedor" type="text" class="w-full border rounded px-3 py-2" required
+            <input id="fornecedor" list="listaFornecedores" type="text" class="w-full border rounded px-3 py-2" required
               placeholder="Digite ou selecione">
+            <datalist id="listaFornecedores"></datalist>
           </div>
 
           <div>
@@ -372,14 +373,16 @@
 
           <div>
             <label for="categoria" class="block text-sm font-medium mb-1">Categoria</label>
-            <input id="categoria" type="text" class="w-full border rounded px-3 py-2" required
+            <input id="categoria" list="listaCategorias" type="text" class="w-full border rounded px-3 py-2" required
               placeholder="Digite ou selecione">
+            <datalist id="listaCategorias"></datalist>
           </div>
 
           <div>
             <label for="subcategoria" class="block text-sm font-medium mb-1">Subcategoria</label>
-            <input id="subcategoria" type="text" class="w-full border rounded px-3 py-2"
+            <input id="subcategoria" list="listaSubcategorias" type="text" class="w-full border rounded px-3 py-2"
               placeholder="Digite ou selecione">
+            <datalist id="listaSubcategorias"></datalist>
           </div>
 
           <div class="md:col-span-2 lg:col-span-3">
@@ -393,7 +396,7 @@
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-lg font-bold">Produtos/Serviços</h3>
             <div class="font-semibold text-green-700">
-              Total Geral: <span id="totalGeralProdutos">R$ 0,00</span>
+              TOTAL: <span id="totalGeralProdutos">R$ 0,00</span>
             </div>
           </div>
 
@@ -410,9 +413,13 @@
               <!-- Linhas adicionadas via JS -->
             </tbody>
           </table>
+
+          <datalist id="listaProdutos"></datalist>
+
           <button type="button" id="addProduto"
             class="mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Adicionar Produto</button>
         </div>
+
 
         <!-- 3ª Parte: Sobre pagamento -->
         <div class="p-6">
@@ -438,6 +445,17 @@
             Cadastro</button>
         </div>
       </form>
+      <!-- TABELA DE REGISTROS FINANCEIROS -->
+      <div id="tabelaFinanceiros" class="mt-8 hidden max-w-4xl mx-auto bg-white shadow-md rounded overflow-hidden">
+        <div class="bg-gray-800 text-white text-center py-2">
+          <h2 class="text-xl font-bold">Cadastros Financeiros</h2>
+        </div>
+        <div id="listaFinanceiros" class="p-6 grid grid-cols-1 gap-4">
+          <!-- Os cartões de cadastro serão inseridos aqui via JavaScript -->
+        </div>
+      </div>
+
+
     </section>
   </main>
 
