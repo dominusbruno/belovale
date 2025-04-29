@@ -272,8 +272,9 @@
       <h2>Formulário de Vendas</h2>
     </section>
 
-    <!-- FORMULÁRIO FINANCEIRO -->
+    <!-- PÁGINA DO FORMULÁRIO FINANCEIRO -->
     <section id="form-financeiro" class="spa-section hidden">
+      <!-- FORMULÁRIO FINANCEIRO -->
       <form id="formFinanceiro" class="max-w-4xl mx-auto bg-white shadow-md rounded overflow-hidden">
         <!-- Cabeçalho do formulário -->
         <div class="bg-gray-800 text-white text-center py-2">
@@ -383,34 +384,114 @@
         </div>
       </form>
       <!-- TABELA DE REGISTROS FINANCEIROS -->
-
       <div id="tabelaFinanceiros" class="mt-8 hidden max-w-4xl mx-auto bg-white shadow-md rounded overflow-hidden">
-        <div class="bg-gray-800 text-white flex items-center justify-between px-4 py-2">
-          <h2 class="text-xl font-bold">REGISTROS</h2>
-          <div class="flex items-center">
-            <select id="registrosPorPagina" class="border rounded px-2 py-1 text-black">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
+        <!-- Cabeçalho -->
+        <div class="bg-gray-800 text-white flex flex-col gap-2 p-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold">REGISTROS</h2>
+            <div class="flex items-center gap-2">
+              <select id="registrosPorPagina" class="border rounded px-2 py-1 text-black">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
           </div>
+
+          <!-- Seção de Filtros compacta -->
+          <details class="bg-gray-700 rounded overflow-hidden">
+            <summary class="cursor-pointer font-semibold px-4 py-2 text-base hover:bg-gray-600 transition-all rounded">
+              FILTROS
+            </summary>
+
+            <!-- Conteúdo interno dos filtros -->
+            <div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+
+              <!-- Filtro por Status -->
+              <div>
+                <label class="block font-semibold mb-1">STATUS</label>
+                <div class="flex flex-col gap-1 text-white">
+                  <label><input type="checkbox" class="filtro-status" value="PAGO"> Pago</label>
+                  <label><input type="checkbox" class="filtro-status" value="PENDENTE"> Pendente</label>
+                  <label><input type="checkbox" class="filtro-status" value="AGENDADO"> Agendado</label>
+                </div>
+              </div>
+
+              <!-- Filtro por Intervalo de Vencimentos -->
+              <div>
+                <label class="block font-semibold mb-1">VENCIMENTO (INÍCIO)</label>
+                <input type="date" id="filtroVencimentoInicio" class="w-full border rounded px-2 py-1 text-black">
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">VENCIMENTO (FIM)</label>
+                <input type="date" id="filtroVencimentoFim" class="w-full border rounded px-2 py-1 text-black">
+              </div>
+
+              <!-- Filtro por Fornecedor -->
+              <div>
+                <label class="block font-semibold mb-1">FORNECEDOR</label>
+                <input type="text" id="filtroFornecedor" class="w-full border rounded px-2 py-1 text-black"
+                  placeholder="Buscar fornecedor...">
+              </div>
+
+              <!-- Filtro por Produto -->
+              <div>
+                <label class="block font-semibold mb-1">PRODUTO</label>
+                <input type="text" id="filtroProduto" class="w-full border rounded px-2 py-1 text-black"
+                  placeholder="Buscar produto...">
+              </div>
+
+              <!-- Ordenação -->
+              <div>
+                <label class="block font-semibold mb-1">ORDENAÇÃO</label>
+                <select id="ordenacaoRegistros" class="w-full border rounded px-2 py-1 text-black">
+                  <option value="cadastro_desc">Cadastro (Mais recente)</option>
+                  <option value="cadastro_asc">Cadastro (Mais antigo)</option>
+                  <option value="vencimento_desc">Vencimento (Mais recente)</option>
+                  <option value="vencimento_asc">Vencimento (Mais antigo)</option>
+                </select>
+              </div>
+
+              <!-- Botão Aplicar/Limpar Filtros -->
+              <div class="col-span-full flex justify-end gap-4 mt-4">
+                <button id="btnLimparFiltros"
+                  class="bg-gray-500 hover:bg-gray-600 text-white font-semibold px-6 py-2 rounded transition">
+                  LIMPAR
+                </button>
+
+                <button id="btnAplicarFiltros"
+                  class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded transition">
+                  APLICAR
+                </button>
+              </div>
+
+            </div>
+
+          </details>
         </div>
 
+
+        <!-- Lista com os cartões de registro -->
         <div id="listaFinanceiros" class="p-6 grid grid-cols-1 gap-4">
-          <!-- Os cartões de cadastro serão inseridos aqui via JavaScript -->
+          <!-- Cards -->
         </div>
       </div>
       <!-- Botões de paginação -->
       <div class="flex justify-center items-center gap-4 py-4" id="paginacaoFinanceiros">
         <button id="btnAnterior"
           class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-          disabled>Anterior</button>
+          disabled>ANTERIOR</button>
+
+        <!-- Contador de Página -->
+        <span id="contadorPagina" class="text-black font-semibold"></span>
+
         <button id="btnProximo"
           class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-          disabled>Próximo</button>
+          disabled>PRÓXIMO</button>
       </div>
+
 
 
 

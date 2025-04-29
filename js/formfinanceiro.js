@@ -3,6 +3,7 @@ import { db } from './firebaseConfig.js';
 import { mostrarAlerta } from './alerta.js';
 import { collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
+//Função para converter para a data brasileira
 function formatarDataBR(dataInput) {
   const data = new Date(dataInput);
   const dia = String(data.getDate()).padStart(2, '0');
@@ -10,6 +11,13 @@ function formatarDataBR(dataInput) {
   const ano = String(data.getFullYear());
   return `${dia}/${mes}/${ano}`;
 }
+  //Função para converter data brasileira para ISO
+  function converterDataBRparaISO(dataBR) {
+    if (!dataBR) return new Date(0);
+    const [dia, mes, ano] = dataBR.split('/');
+    return new Date(`${ano}-${mes}-${dia}`);
+  }
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -32,6 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let registros = [];
   let paginaAtual = 1;
   let registrosPorPagina = 10;
+  let registrosFiltrados = []; // Resultado do filtro
+
 
   // Função que busca na lista de lotes os que stiverem ativos no momento.
   async function buscarLotesAtivos() {
@@ -99,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-
   // Função para preencher datalist usando cache
   async function preencherDatalist(colecao, idDatalist, cacheArray) {
     const lista = document.getElementById(idDatalist);
@@ -139,30 +148,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Função principal: buscar todos os registros financeiros
   async function listarCadastrosFinanceiros() {
-    listaFinanceiros.innerHTML = ""; // Limpa a lista
-    registros = []; // Reseta o array de registros
-
-    const q = query(collection(db, 'bdFinanceiro'), orderBy('timestamp', 'desc'));
+    const lista = document.getElementById('listaFinanceiros');
+    const tabelaDiv = document.getElementById('tabelaFinanceiros');
+    lista.innerHTML = "";
+  
+    const q = query(collection(db, 'bdFinanceiro'), orderBy('timestamp', 'desc')); // Ordenado pela data de cadastro decrescente
     const snapshot = await getDocs(q);
-
+  
+    registros = []; // Zera registros para não acumular
     if (!snapshot.empty) {
-      tabelaFinanceiros.classList.remove('hidden');
-      snapshot.forEach(doc => registros.push(doc.data()));
-      exibirPagina(paginaAtual); // Mostra a primeira página
+      snapshot.forEach(doc => {
+        registros.push(doc.data());
+      });
+  
+      registrosFiltrados = registros.slice(); // Começamos com todos
+      paginaAtual = 1; // Começamos sempre da primeira página
+  
+      exibirPagina(paginaAtual); // Exibe a primeira página carregada
     } else {
-      tabelaFinanceiros.classList.add('hidden');
+      tabelaDiv.classList.add('hidden');
     }
   }
+  
 
   // Função para exibir os registros da página atual
   function exibirPagina(pagina) {
     listaFinanceiros.innerHTML = ""; // Limpa lista antes de mostrar
-
+  
+    const tabelaDiv = document.getElementById('tabelaFinanceiros');
+    const registrosPorPagina = parseInt(document.getElementById('registrosPorPagina').value) || 10;
     const inicio = (pagina - 1) * registrosPorPagina;
     const fim = inicio + registrosPorPagina;
-    const registrosPagina = registros.slice(inicio, fim); // Fatia do array
-
+  
+    const registrosPagina = registrosFiltrados.slice(inicio, fim); // Agora fatiamos registros filtrados
+  
+    if (registrosPagina.length === 0) {
+      tabelaDiv.classList.remove('hidden');
+      listaFinanceiros.innerHTML = `<div class="text-center text-red-400 font-semibold mt-6">Nenhum registro encontrado.</div>`;
+      atualizarContagemRegistros();
+      return;
+    }
+  
     registrosPagina.forEach(data => {
+      // Filtro dos pagamentos visíveis, conforme filtro STATUS
+      const { statusSelecionados } = capturarFiltros();
+      const pagamentosFiltrados = statusSelecionados.length > 0
+        ? data.pagamentos.filter(p => statusSelecionados.includes(p.status))
+        : data.pagamentos;
+  
       const produtosHtml = data.produtos.map(p => `
         <tr class="text-center">
           <td class="border p-1">${p.produto}</td>
@@ -171,14 +204,13 @@ document.addEventListener('DOMContentLoaded', () => {
           <td class="border p-1">${p.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
         </tr>
       `).join('');
-
-      const pagamentosHtml = data.pagamentos.map(p => {
-        // Define a classe CSS conforme o status
+  
+      const pagamentosHtml = pagamentosFiltrados.map(p => {
         let classeStatus = '';
         if (p.status === 'PAGO') classeStatus = 'status-pago';
         else if (p.status === 'PENDENTE') classeStatus = 'status-pendente';
         else if (p.status === 'AGENDADO') classeStatus = 'status-agendado';
-      
+  
         return `
           <tr class="text-center">
             <td class="border p-1">${p.parcela}</td>
@@ -189,15 +221,15 @@ document.addEventListener('DOMContentLoaded', () => {
           </tr>
         `;
       }).join('');
-
-
+  
       const card = `
         <div class="border rounded shadow p-5">
           <div class="flex justify-between font-bold mb-2">
             <span>${data.dataFormatada}</span>
             <span>${data.fornecedor} | ${data.nota || 'Sem Nota'}</span>
-            <span class="text-blue-700"> ${data.produtos.reduce((acc, p) => acc + (p.total || 0), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+            <span class="text-blue-700">${data.produtos.reduce((acc, p) => acc + (p.total || 0), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
           </div>
+  
           <h3 class="text-gray-700 font-semibold mt-4 mb-1">PRODUTOS</h3>
           <table class="w-full text-sm border mb-1">
             <thead class="bg-gray-200">
@@ -210,6 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </thead>
             <tbody>${produtosHtml}</tbody>
           </table>
+  
           <h3 class="text-gray-700 font-semibold mt-4 mb-1">PAGAMENTOS</h3>
           <table class="w-full text-sm border">
             <thead class="bg-gray-200">
@@ -225,11 +258,15 @@ document.addEventListener('DOMContentLoaded', () => {
           </table>
         </div>
       `;
+  
       listaFinanceiros.innerHTML += card;
     });
-
+  
+    tabelaDiv.classList.remove('hidden');
+    atualizarContagemRegistros();
     atualizarControlesPaginacao();
   }
+  
 
   // Atualiza botões e texto de paginação
   function atualizarControlesPaginacao() {
@@ -259,12 +296,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Botão Próximo
   document.getElementById('btnProximo').addEventListener('click', () => {
-    const totalPaginas = Math.ceil(registros.length / registrosPorPagina);
+    const registrosPorPagina = parseInt(document.getElementById('registrosPorPagina').value) || 10;
+    const totalPaginas = Math.ceil(registrosFiltrados.length / registrosPorPagina);
     if (paginaAtual < totalPaginas) {
       paginaAtual++;
       exibirPagina(paginaAtual);
     }
   });
+
 
   // Select de quantidade por página
   document.getElementById('registrosPorPagina').addEventListener('change', () => {
@@ -272,6 +311,33 @@ document.addEventListener('DOMContentLoaded', () => {
     paginaAtual = 1; // volta para a primeira página
     exibirPagina(paginaAtual);
   });
+
+  //FILTRO: Botão "Aplicar Filtros"
+  document.getElementById('btnAplicarFiltros').addEventListener('click', aplicarFiltrosEOrdenacao);
+
+  //FILTRO: Botão "Limpar Filtros"
+  document.getElementById('btnLimparFiltros').addEventListener('click', () => {
+    // Desmarca todos os checkboxes de status
+    document.querySelectorAll('.filtro-status').forEach(cb => cb.checked = false);
+  
+    // Limpa vencimentos
+    document.getElementById('filtroVencimentoInicio').value = "";
+    document.getElementById('filtroVencimentoFim').value = "";
+  
+    // Limpa textos de fornecedor e produto
+    document.getElementById('filtroFornecedor').value = "";
+    document.getElementById('filtroProduto').value = "";
+  
+    // Reseta ordenação para padrão
+    document.getElementById('ordenacaoRegistros').value = "cadastro_desc";
+  
+    // Reaplica filtros
+    aplicarFiltrosEOrdenacao();
+    paginaAtual = 1;
+    exibirPagina(paginaAtual);
+
+  });
+  
 
   async function salvarFinanceiro(dadosFinanceiro) {
     await addDoc(collection(db, 'bdFinanceiro'), dadosFinanceiro);
@@ -549,5 +615,142 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  
+  //FILTRO: Função para capturar os filtros
+  function capturarFiltros() {
+    const statusSelecionados = Array.from(document.querySelectorAll('.filtro-status:checked')).map(cb => cb.value);
+    const vencimentoInicio = document.getElementById('filtroVencimentoInicio').value;
+    const vencimentoFim = document.getElementById('filtroVencimentoFim').value;
+    const fornecedorFiltro = document.getElementById('filtroFornecedor').value.trim().toLowerCase();
+    const produtoFiltro = document.getElementById('filtroProduto').value.trim().toLowerCase();
+    const ordenacao = document.getElementById('ordenacaoRegistros').value;
+  
+    return {
+      statusSelecionados,
+      vencimentoInicio,
+      vencimentoFim,
+      fornecedorFiltro,
+      produtoFiltro,
+      ordenacao
+    };
+  }
+  
+  //FILTRO: Função para aplicar filtros e ordenação
+  function aplicarFiltrosEOrdenacao() {
+    const {
+      statusSelecionados,
+      vencimentoInicio,
+      vencimentoFim,
+      fornecedorFiltro,
+      produtoFiltro,
+      ordenacao
+    } = capturarFiltros();
+  
+    registrosFiltrados = registros.filter(r => {
+      let passaStatus = true;
+      let passaVencimento = true;
+      let passaFornecedor = true;
+      let passaProduto = true;
+  
+      // Filtro por status
+      if (statusSelecionados.length > 0) {
+        passaStatus = r.pagamentos.some(p => statusSelecionados.includes(p.status));
+      }
+  
+      // Filtro por vencimento
+      if (vencimentoInicio || vencimentoFim) {
+        passaVencimento = r.pagamentos.some(p => {
+          const dataVenc = converterDataBRparaISO(p.vencimento);
+          const dataInicio = vencimentoInicio ? new Date(vencimentoInicio) : null;
+          const dataFim = vencimentoFim ? new Date(vencimentoFim) : null;
+          return (!dataInicio || dataVenc >= dataInicio) && (!dataFim || dataVenc <= dataFim);
+        });
+      }
+  
+      // Filtro por fornecedor
+      if (fornecedorFiltro) {
+        passaFornecedor = r.fornecedor.toLowerCase().includes(fornecedorFiltro);
+      }
+  
+      // Filtro por produto
+      if (produtoFiltro) {
+        passaProduto = r.produtos.some(p => p.produto.toLowerCase().includes(produtoFiltro));
+      }
+  
+      return passaStatus && passaVencimento && passaFornecedor && passaProduto;
+    });
+  
+    // Ordenação
+    registrosFiltrados.sort((a, b) => {
+      if (ordenacao === 'cadastro_desc') {
+        return new Date(b.timestamp.seconds * 1000) - new Date(a.timestamp.seconds * 1000);
+      } else if (ordenacao === 'cadastro_asc') {
+        return new Date(a.timestamp.seconds * 1000) - new Date(b.timestamp.seconds * 1000);
+      } else if (ordenacao === 'vencimento_desc') {
+        const vencA = pegarMenorVencimento(a.pagamentos);
+        const vencB = pegarMenorVencimento(b.pagamentos);
+        return vencB - vencA;
+      } else if (ordenacao === 'vencimento_asc') {
+        const vencA = pegarMenorVencimento(a.pagamentos);
+        const vencB = pegarMenorVencimento(b.pagamentos);
+        return vencA - vencB;
+      }
+      return 0;
+    });
+  
+    paginaAtual = 1; // Sempre volta para a primeira página após aplicar
+    exibirPagina(paginaAtual);
+
+  }
+
+  //FILTRO: Função auxiliar para pegar menor vencimento de um registro
+  function pegarMenorVencimento(pagamentos) {
+    if (!pagamentos || pagamentos.length === 0) return new Date(0);
+    const datas = pagamentos.map(p => converterDataBRparaISO(p.vencimento));
+    return datas.sort((a, b) => a - b)[0];
+  }
+  
+  //FILTRO: Atualiza a contagem de registros filtrados
+  function atualizarContagemRegistros() {
+    let contador = document.getElementById('contadorRegistros');
+  
+    if (!contador) {
+      // Se ainda não existir o contador, criamos dinamicamente
+      const tabelaDiv = document.getElementById('tabelaFinanceiros');
+      contador = document.createElement('div');
+      contador.id = 'contadorRegistros';
+      contador.className = 'text-sm text-gray-500 text-center mb-2 mt-2';
+      tabelaDiv.insertBefore(contador, tabelaDiv.children[1]); // Insere o contador logo depois do cabeçalho
+    }
+  
+    const total = registrosFiltrados.length || 0;
+  
+    if (total > 0) {
+      contador.innerHTML = `Mostrando <strong>${total}</strong> registros encontrados.`;
+    } else {
+      contador.innerHTML = `<span class="text-red-400">Nenhum registro encontrado.</span>`;
+    }
+  }
+
+  //PÁGINAÇÃO: Atualiza os controles
+  function atualizarControlesPaginacao() {
+    const registrosPorPagina = parseInt(document.getElementById('registrosPorPagina').value) || 10;
+    const totalPaginas = Math.ceil(registrosFiltrados.length / registrosPorPagina);
+  
+    document.getElementById('btnAnterior').disabled = paginaAtual <= 1;
+    document.getElementById('btnProximo').disabled = paginaAtual >= totalPaginas;
+  
+    const contador = document.getElementById('contadorPagina');
+    if (contador) {
+      if (totalPaginas > 0) {
+        contador.textContent = `${paginaAtual} de ${totalPaginas}`;
+      } else {
+        contador.textContent = "";
+      }
+    }
+  }
+  
+  
+  
 
 });
