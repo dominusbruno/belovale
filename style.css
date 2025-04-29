@@ -1,0 +1,114 @@
+/* ============================ */
+/* VARIÁVEIS DE CORES            */
+/* ============================ */
+
+:root {
+  --color-alerta-bg: #ee5959;
+  --color-alerta-text: #ffffff;
+  --color-informacao-bg: #f5c168;
+  --color-informacao-text: #ffffff;
+  --color-feedback-bg: #2abd60;
+  --color-feedback-text: #ffffff;
+  --color-navbar-bg-desktop: #f97316;
+  --color-navbar-bg-mobile: #fb923c;
+  --color-submenu-hover-desktop: #fca157;
+  --color-submenu-bg-desktop: #fb923c;
+  --color-submenu-bg-mobile: #fef3c7;
+  --color-text-navbar-desktop: #ffffff;
+  --color-text-navbar-mobile: #ffffff;
+  --color-text-submenu-desktop: #f9fafb;
+  --color-text-submenu-mobile: #f9fafb;
+}
+
+/* ============================ */
+/* BACKGROUND E CORES DE TEXTO   */
+/* ============================ */
+
+.bg-navbar {
+  background-color: var(--color-navbar-bg-desktop);
+}
+
+.bg-submenu {
+  background-color: var(--color-submenu-bg-desktop);
+  color: var(--color-text-submenu-desktop);
+}
+
+.bg-submenu-hover:hover {
+  background-color: var(--color-submenu-hover-desktop);
+}
+
+.text-navbar {
+  color: var(--color-text-navbar-desktop);
+}
+
+.bg-mobile-menu {
+  background-color: var(--color-navbar-bg-mobile);
+  color: var(--color-text-navbar-mobile);
+}
+
+/* ============================ */
+/* TRANSIÇÕES E ANIMAÇÕES        */
+/* ============================ */
+
+.transition-base {
+  transition: all 0.3s ease-in-out;
+}
+
+.group-hover\:block {
+  transition: all 0.3s ease;
+}
+
+details[open]>summary {
+  transition: background-color 0.3s ease;
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 1.0s ease-out;
+}
+
+@keyframes fade-in-down {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ============================ */
+/* AJUSTES GLOBAIS DE ESTILO     */
+/* ============================ */
+
+body {
+  line-height: 1.0; /* Espaçamento global reduzido entre linhas */
+}
+
+p, span, td, th, li, label, input, textarea, select, button {
+  line-height: 1.0; /* Aplica também a elementos de texto e formulários */
+}
+
+
+/* ============================ */
+/* FORMATAÇÃO CONDICIONAL DE STATUS DAS PARCELAS */
+/* ============================ */
+
+/* Parcelas pagas */
+.status-pago {
+  background-color: #d1fae5; /* Verde bem claro */
+  color: #065f46; /* Verde escuro para texto */
+  font-weight: bold;
+}
+
+/* Parcelas pendentes */
+.status-pendente {
+  background-color: #fef9c3; /* Amarelo bem claro */
+  color: #92400e; /* Marrom/amarelo escuro para texto */
+  font-weight: bold;
+}
+
+/* Parcelas agendadas */
+.status-agendado {
+  background-color: #dbeafe; /* Azul bem claro */
+  color: #1e3a8a; /* Azul forte para texto */
+  font-weight: bold;
+}

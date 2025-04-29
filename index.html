@@ -7,74 +7,7 @@
   <title>POSTURAVES - Controle de Granja</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Cores customizadas centralizadas para fácil manutenção */
-    :root {
-      --color-alerta-bg: #ee5959;
-      --color-alerta-text: #ffffff;
-      --color-informacao-bg: #f5c168;
-      --color-informacao-text: #ffffff;
-      --color-feedback-bg: #2abd60;
-      --color-feedback-text: #ffffff;
-      --color-navbar-bg-desktop: #f97316;
-      --color-navbar-bg-mobile: #fb923c;
-      --color-submenu-hover-desktop: #fca157;
-      --color-submenu-bg-desktop: #fb923c;
-      --color-submenu-bg-mobile: #fef3c7;
-      --color-text-navbar-desktop: #ffffff;
-      --color-text-navbar-mobile: #ffffff;
-      --color-text-submenu-desktop: #f9fafb;
-      --color-text-submenu-mobile: #f9fafb;
-    }
-
-    .bg-navbar {
-      background-color: var(--color-navbar-bg-desktop);
-    }
-
-    .bg-submenu {
-      background-color: var(--color-submenu-bg-desktop);
-      color: var(--color-text-submenu-desktop);
-    }
-
-    .bg-submenu-hover:hover {
-      background-color: var(--color-submenu-hover-desktop);
-    }
-
-    .text-navbar {
-      color: var(--color-text-navbar-desktop);
-    }
-
-    .bg-mobile-menu {
-      background-color: var(--color-navbar-bg-mobile);
-      color: var(--color-text-navbar-mobile);
-    }
-
-    .transition-base {
-      transition: all 0.3s ease-in-out;
-    }
-
-    .group-hover\:block {
-      transition: all 0.3s ease;
-    }
-
-    details[open]>summary {
-      transition: background-color 0.3s ease;
-    }
-
-    .animate-fade-in-down {
-      animation: fade-in-down 1.0s ease-out;
-    }
-
-    @keyframes fade-in-down {
-      0% {
-        opacity: 0;
-      }
-
-      100% {
-        opacity: 1;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="bg-gray-100 text-gray-800">
@@ -297,7 +230,7 @@
           </div>
           <div class="col-span-full flex justify-end">
             <button type="submit"
-              class="w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Salvar</button>
+              class="w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Salvar</button>
           </div>
         </div>
       </form>
@@ -394,8 +327,8 @@
         <!-- 2ª Parte: Sobre produtos/serviços -->
         <div class="p-6">
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-lg font-bold">Produtos/Serviços</h3>
-            <div class="font-semibold text-green-700">
+            <h3 class="text-lg font-bold">PRODUTOS/ SERVIÇOS</h3>
+            <div class="font-semibold text-blue-700">
               TOTAL: <span id="totalGeralProdutos">R$ 0,00</span>
             </div>
           </div>
@@ -403,11 +336,13 @@
           <table class="w-full text-sm border">
             <thead class="bg-gray-200">
               <tr>
-                <th class="p-2 border">Produto</th>
-                <th class="p-2 border">Quantidade</th>
-                <th class="p-2 border">Preço</th>
-                <th class="p-2 border">Total</th>
+                <th class="p-2 border">PRODUTO</th>
+                <th class="p-2 border">QUANTIDADE</th>
+                <th class="p-2 border">PREÇO</th>
+                <th class="p-2 border">TOTAL</th>
+                <th class="p-2 border"></th>
               </tr>
+
             </thead>
             <tbody id="produtosFinanceiro">
               <!-- Linhas adicionadas via JS -->
@@ -417,19 +352,22 @@
           <datalist id="listaProdutos"></datalist>
 
           <button type="button" id="addProduto"
-            class="mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Adicionar Produto</button>
+            class="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">+PRODUTOS</button>
         </div>
 
 
         <!-- 3ª Parte: Sobre pagamento -->
         <div class="p-6">
-          <h3 class="text-lg font-bold mb-2">Pagamentos</h3>
+          <h3 class="text-lg font-bold mb-2">PAGAMENTOS</h3>
           <table class="w-full text-sm border">
             <thead class="bg-gray-200">
               <tr>
-                <th class="p-2 border">Parcela</th>
-                <th class="p-2 border">Vencimento</th>
-                <th class="p-2 border">Setor/Lote</th>
+                <th class="p-2 border">PARCELA</th>
+                <th class="p-2 border">VENCIMENTO</th>
+                <th class="p-2 border">SETOR/LOTE</th>
+                <th class="p-2 border">VALOR</th>
+                <th class="p-2 border">STATUS</th>
+                <th class="p-2 border"></th>
               </tr>
             </thead>
             <tbody id="pagamentosFinanceiro">
@@ -437,23 +375,43 @@
             </tbody>
           </table>
           <button type="button" id="addPagamento"
-            class="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Adicionar Parcela</button>
+            class="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">+PARCELAS</button>
         </div>
 
         <div class="p-6 flex justify-end">
-          <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded">Salvar
-            Cadastro</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded">SALVAR</button>
         </div>
       </form>
       <!-- TABELA DE REGISTROS FINANCEIROS -->
+
       <div id="tabelaFinanceiros" class="mt-8 hidden max-w-4xl mx-auto bg-white shadow-md rounded overflow-hidden">
-        <div class="bg-gray-800 text-white text-center py-2">
-          <h2 class="text-xl font-bold">Cadastros Financeiros</h2>
+        <div class="bg-gray-800 text-white flex items-center justify-between px-4 py-2">
+          <h2 class="text-xl font-bold">REGISTROS</h2>
+          <div class="flex items-center">
+            <select id="registrosPorPagina" class="border rounded px-2 py-1 text-black">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
         </div>
+
         <div id="listaFinanceiros" class="p-6 grid grid-cols-1 gap-4">
           <!-- Os cartões de cadastro serão inseridos aqui via JavaScript -->
         </div>
       </div>
+      <!-- Botões de paginação -->
+      <div class="flex justify-center items-center gap-4 py-4" id="paginacaoFinanceiros">
+        <button id="btnAnterior"
+          class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+          disabled>Anterior</button>
+        <button id="btnProximo"
+          class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+          disabled>Próximo</button>
+      </div>
+
 
 
     </section>
@@ -473,6 +431,8 @@
   <script type="module" src="./js/alerta.js"></script>
   <script type="module" src="./js/formfinanceiro.js"></script>
   <script type="module" src="./js/formlotes.js"></script>
+  <script type="module" src="./js/teste.js"></script>
+
 
 </body>
 
