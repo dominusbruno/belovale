@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 
-<body class="bg-blue-100 flex items-center justify-center min-h-screen">
+<body style="background-color: var(--color-bglogin);" class="flex items-center justify-center min-h-screen">
 
   <form id="formLogin" class="space-y-6 w-full max-w-xs sm:max-w-sm md:max-w-md px-4 sm:px-6">
 
@@ -55,37 +55,41 @@
           </g>
         </svg>
       </div>
-      <h1 class="text-3xl font-bold text-blue-500">Postur<span class="text-orange-500">Aves</span></h1>
+      <h1 class="text-3xl font-bold text-blue-400">Postur<span class="text-orange-400">Aves</span></h1>
 
-      <p class="text-sm text-gray-700">Acesso ao sistema</p>
+      <p class="text-sm text-gray-400">Acesso ao sistema</p>
     </div>
 
     <!-- Campo Usuário -->
-    <div>
-      <label for="email" class="block text-sm font-medium text-gray-700">Usuário</label>
+    <div class="w-3/4 mx-auto">
+      <label for="email" class="block text-sm font-medium text-gray-200">Usuário:</label>
       <input type="text" id="login"
         class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
         placeholder="ex: joaosilva" required />
     </div>
 
 
+
     <!-- Campo Senha -->
-    <div>
-      <label for="senha" class="block text-sm font-medium text-gray-700">Senha</label>
-      <input type="password" id="senha"
-        class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-        placeholder="********" required />
+    <div class="w-full flex flex-col items-center">
+      <div class="w-3/4 mx-auto">
+        <label for="senha" class="block text-sm font-medium text-gray-200">Senha:</label>
+        <input type="password" id="senha"
+          class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+          placeholder="********" required />
+      </div>
     </div>
+
 
     <!-- Botão -->
     <div class="text-center">
-      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-5 py-2 rounded shadow">
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-8 py-2 rounded shadow">
         Entrar
       </button>
     </div>
 
     <!-- Rodapé -->
-    <p class="text-center text-xs text-gray-500 mt-6">&copy; 2025 Avícola Belo Vale</p>
+    <p class="text-center text-xs text-gray-400 mt-4">&copy; 2025 Avícola Belo Vale</p>
   </form>
 
   <!-- Alerta -->

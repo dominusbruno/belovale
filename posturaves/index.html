@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <title>PosturAves - Painel</title>
@@ -12,8 +13,9 @@
 <body>
 
   <!-- NAVBAR -->
-  <header class="bg-orange-100 shadow-sm px-4 h-14 flex items-center justify-between">
-    <div class="flex items-center gap-2 text-2xl font-bold border-b border-orange-400 sm:border-0 w-full justify-center sm:justify-start py-1 sm:py-0">
+  <header class="bg-orange-300 shadow-sm px-4 h-14 flex items-center justify-between">
+    <div
+      class="flex items-center gap-2 text-2xl font-bold border-b border-orange-400 sm:border-0 w-full justify-center sm:justify-start py-1 sm:py-0">
 
       <!-- SVG da logo usada na tela de login -->
       <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" class="w-10 h-10" version="1.1"
@@ -21,10 +23,21 @@
         viewBox="0 0 512 512" xmlns:xlink="http://www.w3.org/1999/xlink">
         <defs>
           <style type="text/css">
-            .fil0 { fill: black }
-            .fil3 { fill: #E2BE06 }
-            .fil1 { fill: #ffffff }
-            .fil2 { fill: #FBD307 }
+            .fil0 {
+              fill: black
+            }
+
+            .fil3 {
+              fill: #E2BE06
+            }
+
+            .fil1 {
+              fill: #ffffff
+            }
+
+            .fil2 {
+              fill: #FBD307
+            }
           </style>
         </defs>
         <g id="Layer_x0020_1">
@@ -40,25 +53,26 @@
           </path>
         </g>
       </svg>
-    
+
       <!-- Texto PosturAves com cores -->
       <span><span class="text-blue-500">Postur</span><span class="text-orange-400">Aves</span></span>
     </div>
-    
+
 
     <!-- Botão hamburguer mobile -->
     <button id="menuToggle" class="md:hidden text-gray-600">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
-           viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="M4 6h16M4 12h16M4 18h16" />
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>
 
     <!-- Menu Desktop -->
     <nav id="navMenu" class="hidden md:flex gap-4 items-center text-sm">
       <span id="nomeUsuario" class="text-gray-500 flex items-center gap-1">
-        <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-3.31 0-6 2.69-6 6v1h12v-1c0-3.31-2.69-6-6-6z"/></svg>
+        <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-3.31 0-6 2.69-6 6v1h12v-1c0-3.31-2.69-6-6-6z" />
+        </svg>
         <span>Olá, Usuário</span>
       </span>
       <a href="cadastros.html" class="hover:text-blue-500">Cadastros</a>
@@ -116,4 +130,5 @@
     });
   </script>
 </body>
+
 </html>

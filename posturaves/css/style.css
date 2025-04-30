@@ -1,10 +1,22 @@
+
+/* Color Theme Swatches in Hex */
+.Simplicidade-e-elegancia-1-hex { color: #B2E0B2; }
+.Simplicidade-e-elegancia-2-hex { color: #003F5C; }
+.Simplicidade-e-elegancia-3-hex { color: #FFFFFF; }
+.Simplicidade-e-elegancia-4-hex { color: #C0C0C0; }
+.Simplicidade-e-elegancia-5-hex { color: #D1634A; }
+
+
+
+
 /* Estilo base e refinado */
 :root {
-  --color-primary: #2563eb;
-  --color-success: #059669;
-  --color-danger: #dc2626;
-  --bg-page: #f9fafb;       /* cinza claro do Tailwind */
-  --text-color: #374151;    /* slate-700 */
+  --color-bglogin: #003F5C;
+  --color-primary: #003F5C;
+  --color-success: #2eb62e;
+  --color-danger: #d45555;
+  --bg-page: #ffffff;       /* cinza claro do Tailwind */
+  --text-color: #003F5C;    /* slate-700 */
 }
 
 body {
@@ -27,11 +39,11 @@ SISTEMA DE ALERTAS
 ************************/
 /* Cores do alerta */
 #alertaCustom.success {
-  background-color: #73be8f; /* verde pastel */
+  background-color: #2eb62e; /* verde pastel */
 }
 
 #alertaCustom.error {
-  background-color: #ff7272; /* vermelho pastel */
+  background-color: #d45555; /* vermelho pastel */
 }
 
 /* Estado inicial (escondido) */
