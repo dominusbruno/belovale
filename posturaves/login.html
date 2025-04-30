@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - PosturAves</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+  <div class="bg-white shadow-md rounded-lg p-8 w-full max-w-sm space-y-6">
+
+    <!-- Logo + Título -->
+    <div class="text-center mb-6">
+      <div class="flex justify-center mb-2">
+        <!-- SVG da Logo -->
+        <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" class="w-10 h-10" version="1.1"
+          style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+          viewBox="0 0 512 512" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs>
+            <style type="text/css">
+              .fil0 {
+                fill: black
+              }
+
+              .fil3 {
+                fill: #E2BE06
+              }
+
+              .fil1 {
+                fill: #F6F4F7
+              }
+
+              .fil2 {
+                fill: #FBD307
+              }
+            </style>
+          </defs>
+          <g id="Layer_x0020_1">
+            <polygon class="fil0" points="95,84 95,84"></polygon>
+            <path class="fil1"
+              d="M212 488c-1,0 -1,0 -2,0 -46,-1 -107,-21 -135,-110 -15,-49 -36,-80 -52,-102 -16,-22 -27,-38 -22,-58 4,-19 23,-39 66,-71 13,-10 13,-16 13,-27 -1,-10 -1,-22 9,-40 20,-33 63,-31 105,-29 28,1 57,3 75,-7 20,-11 52,-23 89,-19 43,4 83,30 118,77 17,24 29,54 34,85 5,31 1,61 -9,85 -15,32 -42,51 -77,53 -55,4 -78,41 -102,81 -24,40 -50,82 -110,82z">
+            </path>
+            <path class="fil2"
+              d="M202 382c-62,0 -112,-50 -112,-112 0,-30 12,-59 33,-80 21,-21 49,-33 79,-33 62,0 113,51 113,113 0,62 -51,112 -113,112z">
+            </path>
+            <path class="fil3"
+              d="M259 263c-4,0 -7,-3 -7,-7 0,-24 -19,-43 -42,-43 -7,0 -15,2 -21,6 -4,2 -8,1 -10,-2 -2,-4 -1,-8 3,-10 8,-5 19,-8 28,-8 15,0 29,6 40,17 10,10 16,25 16,40 0,4 -3,7 -7,7z">
+            </path>
+          </g>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-blue-500">PosturAves</h1>
+      <p class="text-sm text-gray-700">Acesso ao sistema</p>
+    </div>
+
+    <!-- Formulário -->
+    <form id="formLogin" class="space-y-4">
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">E-mail ou usuário</label>
+        <input type="text" id="email"
+          class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+          placeholder="usuario@exemplo.com" required />
+      </div>
+      <div>
+        <label for="senha" class="block text-sm font-medium text-gray-700">Senha</label>
+        <input type="password" id="senha"
+          class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+          placeholder="********" required />
+      </div>
+      <button type="submit"
+        class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-2 rounded shadow">Entrar</button>
+    </form>
+
+    <p class="text-center text-xs text-gray-400">&copy; 2025 Avícola Belo Vale</p>
+  </div>
+
+</body>
+
+</html>

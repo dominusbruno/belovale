@@ -1,16 +1,17 @@
 // js/financeiro.js
 import { db } from './firebaseConfig.js';
-import { mostrarAlerta } from './alerta.js';
-import { collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { mostrarAlerta, mostrarConfirmacao } from './alerta.js';
+import { collection, addDoc, getDocs, query, orderBy, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-//Função para converter para a data brasileira
-function formatarDataBR(dataInput) {
-  const data = new Date(dataInput);
-  const dia = String(data.getDate()).padStart(2, '0');
-  const mes = String(data.getMonth() + 1).padStart(2, '0');
-  const ano = String(data.getFullYear());
-  return `${dia}/${mes}/${ano}`;
-}
+  //Função para converter para a data brasileira
+  function formatarDataBR(dataInput) {
+    const data = new Date(dataInput);
+    const dia = String(data.getDate()).padStart(2, '0');
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const ano = String(data.getFullYear());
+    return `${dia}/${mes}/${ano}`;
+  }
+
   //Função para converter data brasileira para ISO
   function converterDataBRparaISO(dataBR) {
     if (!dataBR) return new Date(0);
@@ -18,6 +19,13 @@ function formatarDataBR(dataInput) {
     return new Date(`${ano}-${mes}-${dia}`);
   }
 
+  //Função de converte a data para edição no formulário
+  function converterDataParaInput(dataBR) {
+    if (!dataBR) return '';
+    const [dia, mes, ano] = dataBR.split('/');
+    return `${ano}-${mes}-${dia}`;
+  }
+  
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -38,12 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Variáveis de controle de paginação
   let registros = [];
+  let ids = [];
   let paginaAtual = 1;
   let registrosPorPagina = 10;
   let registrosFiltrados = []; // Resultado do filtro
 
-
-  // Função que busca na lista de lotes os que stiverem ativos no momento.
+  // Função que busca na lista de lotes os que estiverem ativos no momento.
   async function buscarLotesAtivos() {
     const snapshot = await getDocs(collection(db, 'bdlotes'));
     return snapshot.docs
@@ -78,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return null;
     }
   }
-  
 
   // Salva novo valor e atualiza cache local
   async function salvarValorUnico(colecao, nome) {
@@ -151,26 +158,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const lista = document.getElementById('listaFinanceiros');
     const tabelaDiv = document.getElementById('tabelaFinanceiros');
     lista.innerHTML = "";
-  
-    const q = query(collection(db, 'bdFinanceiro'), orderBy('timestamp', 'desc')); // Ordenado pela data de cadastro decrescente
+
+    const q = query(collection(db, 'bdFinanceiro'), orderBy('timestamp', 'desc'));
     const snapshot = await getDocs(q);
-  
-    registros = []; // Zera registros para não acumular
+
+    registros = [];
+    ids = [];
+
     if (!snapshot.empty) {
       snapshot.forEach(doc => {
         registros.push(doc.data());
+        ids.push(doc.id); // <<< Armazena o ID aqui
       });
-  
-      registrosFiltrados = registros.slice(); // Começamos com todos
-      paginaAtual = 1; // Começamos sempre da primeira página
-  
-      exibirPagina(paginaAtual); // Exibe a primeira página carregada
+
+      registrosFiltrados = registros.slice();
+      paginaAtual = 1;
+      exibirPagina(paginaAtual);
     } else {
       tabelaDiv.classList.add('hidden');
     }
   }
-  
 
+  
   // Função para exibir os registros da página atual
   function exibirPagina(pagina) {
     listaFinanceiros.innerHTML = ""; // Limpa lista antes de mostrar
@@ -180,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const inicio = (pagina - 1) * registrosPorPagina;
     const fim = inicio + registrosPorPagina;
   
-    const registrosPagina = registrosFiltrados.slice(inicio, fim); // Agora fatiamos registros filtrados
+    const registrosPagina = registrosFiltrados.slice(inicio, fim);
   
     if (registrosPagina.length === 0) {
       tabelaDiv.classList.remove('hidden');
@@ -189,13 +198,24 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
   
+    const hoje = new Date(); // Pega a data atual UMA vez fora do forEach
+  
     registrosPagina.forEach(data => {
-      // Filtro dos pagamentos visíveis, conforme filtro STATUS
+      // Verifica se existe pagamento vencido e não pago PARA ESSE REGISTRO
+      const atrasoExistente = data.pagamentos.some(p => {
+        const vencimento = converterDataBRparaISO(p.vencimento);
+        return vencimento < hoje && p.status !== 'PAGO';
+      });
+  
+      // Captura filtros ativos
       const { statusSelecionados } = capturarFiltros();
+  
+      // Filtra pagamentos conforme STATUS selecionado
       const pagamentosFiltrados = statusSelecionados.length > 0
         ? data.pagamentos.filter(p => statusSelecionados.includes(p.status))
         : data.pagamentos;
   
+      // Monta Produtos
       const produtosHtml = data.produtos.map(p => `
         <tr class="text-center">
           <td class="border p-1">${p.produto}</td>
@@ -205,14 +225,18 @@ document.addEventListener('DOMContentLoaded', () => {
         </tr>
       `).join('');
   
+      // Monta Pagamentos
       const pagamentosHtml = pagamentosFiltrados.map(p => {
+        const vencimento = converterDataBRparaISO(p.vencimento);
+        const linhaAtrasada = vencimento < hoje && p.status !== 'PAGO' ? 'linha-atrasada' : '';
+  
         let classeStatus = '';
         if (p.status === 'PAGO') classeStatus = 'status-pago';
         else if (p.status === 'PENDENTE') classeStatus = 'status-pendente';
         else if (p.status === 'AGENDADO') classeStatus = 'status-agendado';
   
         return `
-          <tr class="text-center">
+          <tr class="text-center ${linhaAtrasada}">
             <td class="border p-1">${p.parcela}</td>
             <td class="border p-1">${p.vencimento}</td>
             <td class="border p-1">${p.setorLote}</td>
@@ -222,17 +246,22 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
       }).join('');
   
+      // Monta Card completo
       const card = `
-        <div class="border rounded shadow p-5">
+        <div class="border rounded shadow p-5 ${atrasoExistente ? 'card-atrasado' : ''}">
           <div class="flex justify-between font-bold mb-2">
-            <span>${data.dataFormatada}</span>
+            <span>
+            ${atrasoExistente ? '<span title="Pagamentos em atraso" class="text-red-600 ml-1">⚠️</span>' : ''}
+            ${data.dataFormatada}
+            </span>
             <span>${data.fornecedor} | ${data.nota || 'Sem Nota'}</span>
-            <span class="text-blue-700">${data.produtos.reduce((acc, p) => acc + (p.total || 0), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+            <span class="text-black-700">${data.produtos.reduce((acc, p) => acc + (p.total || 0), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
           </div>
+
   
           <h3 class="text-gray-700 font-semibold mt-4 mb-1">PRODUTOS</h3>
           <table class="w-full text-sm border mb-1">
-            <thead class="bg-gray-200">
+            <thead class="${atrasoExistente ? 'bg-black text-white' : 'bg-gray-200'}">
               <tr>
                 <th class="border p-1">PRODUTO</th>
                 <th class="border p-1">QUANT.</th>
@@ -245,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
           <h3 class="text-gray-700 font-semibold mt-4 mb-1">PAGAMENTOS</h3>
           <table class="w-full text-sm border">
-            <thead class="bg-gray-200">
+            <thead class="${atrasoExistente ? 'bg-black text-white' : 'bg-gray-200'}">
               <tr>
                 <th class="border p-1">PARCELA</th>
                 <th class="border p-1">VENCIMENTO</th>
@@ -267,7 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
     atualizarControlesPaginacao();
   }
   
-
   // Atualiza botões e texto de paginação
   function atualizarControlesPaginacao() {
     const totalPaginas = Math.ceil(registros.length / registrosPorPagina);
@@ -536,7 +564,18 @@ document.addEventListener('DOMContentLoaded', () => {
       
   
       // PRIMEIRO: salva o novo cadastro no banco
-      await addDoc(collection(db, 'bdFinanceiro'), dadosFinanceiro);
+      if (formFinanceiro.dataset.editandoId) {
+        // Atualiza registro existente
+        const docRef = doc(db, 'bdFinanceiro', formFinanceiro.dataset.editandoId);
+        await updateDoc(docRef, dadosFinanceiro);
+        delete formFinanceiro.dataset.editandoId; // Limpa o modo edição
+        mostrarAlerta('Registro atualizado com sucesso!', 'feedback');
+      } else {
+        // Cria novo registro
+        await addDoc(collection(db, 'bdFinanceiro'), dadosFinanceiro);
+        mostrarAlerta('Cadastro financeiro salvo com sucesso!', 'feedback');
+      }
+      
   
       // DEPOIS: atualiza a lista de cadastros com o novo incluso
       paginaAtual = 1; // Opcional: volta para a página 1 após novo cadastro
@@ -544,13 +583,24 @@ document.addEventListener('DOMContentLoaded', () => {
   
       // Exibe mensagem de sucesso
       mostrarAlerta('Cadastro financeiro salvo com sucesso!', 'feedback');
-  
-      // Limpa o formulário e reseta tudo
+      
+      // Limpa o formulário
       formFinanceiro.reset();
       produtosTabela.innerHTML = "";
       pagamentosTabela.innerHTML = "";
       totalGeralProdutos.textContent = "R$ 0,00";
+
+      // Atualiza listas dinâmicas
       carregarListasDinamicas();
+
+      // Atualiza lista de registros
+      await listarCadastrosFinanceiros();
+
+      // Volta para primeira página
+      paginaAtual = 1;
+      exibirPagina(paginaAtual);
+
+
   
     } catch (error) {
       console.error('Erro ao salvar financeiro:', error);
@@ -584,6 +634,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+
+  // Detectar clique em qualquer card de registro
+  listaFinanceiros.addEventListener('click', async (e) => {
+    const card = e.target.closest('.border.rounded.shadow');
+  
+    if (card) {
+      const index = Array.from(listaFinanceiros.children).indexOf(card);
+      const registrosPorPagina = parseInt(document.getElementById('registrosPorPagina').value) || 10;
+      const posicaoGlobal = (paginaAtual - 1) * registrosPorPagina + index;
+  
+      const registroSelecionado = registrosFiltrados[posicaoGlobal];
+      const idSelecionado = ids[posicaoGlobal]; // <<< Agora temos o ID correto!
+  
+      const resposta = await mostrarConfirmacao(`Editar nota ${registroSelecionado.nota || "(sem nota)"} - ${registroSelecionado.fornecedor}?`);
+  
+      if (resposta) {
+        carregarRegistroNoFormulario(registroSelecionado, idSelecionado);
+      }
+    }
+  });
+  
 
   // Adiciona uma linha inicial no formulário de produtos
   btnAddProduto.click();
@@ -750,7 +821,82 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
+  //EDIÇÃO: Carrega os dados do CARD no formulário 
+  async function carregarRegistroNoFormulario(data, id) {
+    const formFinanceiro = document.getElementById('formFinanceiro');
+    
+    // Guardar o ID do registro sendo editado
+    formFinanceiro.dataset.editandoId = id;
+
+    // Preencher os campos do formulário
+    document.getElementById('tipo').value = data.tipo || "Despesa";
+    document.getElementById('fornecedor').value = data.fornecedor || "";
+    document.getElementById('nota').value = data.nota || "";
+    document.getElementById('categoria').value = data.categoria || "";
+    document.getElementById('subcategoria').value = data.subcategoria || "";
+    document.getElementById('observacao').value = data.observacao || "";
+
+    // Limpar produtos e pagamentos atuais
+    produtosTabela.innerHTML = "";
+    pagamentosTabela.innerHTML = "";
+
+    // Carregar produtos
+    if (Array.isArray(data.produtos)) {
+      data.produtos.forEach(p => {
+        const novaLinha = document.createElement('tr');
+        novaLinha.innerHTML = `
+          <td class="border p-2"><input type="text" value="${p.produto}" list="listaProdutos" class="w-full border rounded px-2 py-1" required></td>
+          <td class="border p-2"><input type="number" value="${p.quantidade}" class="w-full border rounded px-2 py-1" required></td>
+          <td class="border p-2"><input type="number" value="${p.preco}" class="w-full border rounded px-2 py-1" required></td>
+          <td class="border p-2"><input type="text" value="${(p.quantidade * p.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}" class="w-full border rounded px-2 py-1 bg-gray-100" readonly></td>
+          <td class="border p-2 text-center"><button type="button" class="text-red-600 removeProduto">🗑️</button></td>
+        `;
+        produtosTabela.appendChild(novaLinha);
+      });
+    }
+
+    // Carregar pagamentos
+    if (Array.isArray(data.pagamentos)) {
+      const lotes = await buscarLotesAtivos();
+      const selectOptions = lotes.map(l => `<option value="${l}">${l}</option>`).join('');
+
+      data.pagamentos.forEach(p => {
+        const novaLinha = document.createElement('tr');
+        novaLinha.innerHTML = `
+          <td class="border p-2"><input type="text" value="${p.parcela}" class="w-full border rounded px-2 py-1"></td>
+          <td class="border p-2"><input type="date" value="${converterDataParaInput(p.vencimento)}" class="w-full border rounded px-2 py-1"></td>
+          <td class="border p-2">
+            <select class="w-full border rounded px-2 py-1">
+              ${selectOptions}
+            </select>
+          </td>
+          <td class="border p-2"><input type="number" value="${p.valor}" class="w-full border rounded px-2 py-1"></td>
+          <td class="border p-2">
+            <select class="w-full border rounded px-2 py-1">
+              <option value="PENDENTE" ${p.status === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
+              <option value="AGENDADO" ${p.status === 'AGENDADO' ? 'selected' : ''}>AGENDADO</option>
+              <option value="PAGO" ${p.status === 'PAGO' ? 'selected' : ''}>PAGO</option>
+            </select>
+          </td>
+          <td class="border p-2 text-center"><button type="button" class="text-red-600 removePagamento">🗑️</button></td>
+        `;
+        pagamentosTabela.appendChild(novaLinha);
+
+        // Seleciona o valor correto no lote
+        const selectLote = novaLinha.querySelector('select');
+        if (selectLote && p.setorLote) {
+          selectLote.value = p.setorLote;
+        }
+      });
+    }
+
+    // Atualiza total geral produtos
+    atualizarTotalGeral();
+
+    // Alternar para a aba de formulário
+    document.getElementById('form-financeiro').classList.remove('hidden');
   
-  
+  }
+
 
 });

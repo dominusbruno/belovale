@@ -112,3 +112,14 @@ p, span, td, th, li, label, input, textarea, select, button {
   color: #1e3a8a; /* Azul forte para texto */
   font-weight: bold;
 }
+
+/* Estilo para CARD com pagamento atrasado */
+.card-atrasado {
+  background-color: #fee2e2; /* Vermelho claro */
+}
+
+/* Estilo para LINHA de parcela atrasada */
+.linha-atrasada {
+  background-color: #7f1d1d; /* Vermelho bem escuro */
+  color: #fecaca; /* Vermelho claro no texto */
+}
