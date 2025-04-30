@@ -12,6 +12,8 @@
 /* Estilo base e refinado */
 :root {
   --color-bglogin: #003F5C;
+  --color-bgnavbar: #003F5C;
+  --color-bgnavbarenumobile: #017fb9;
   --color-primary: #003F5C;
   --color-success: #2eb62e;
   --color-danger: #d45555;
@@ -31,7 +33,7 @@ body {
 input, select, textarea, button {
   font-size: 0.875rem;
   border-radius: 1.375rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid #ffffff;
 }
 
 /***********************

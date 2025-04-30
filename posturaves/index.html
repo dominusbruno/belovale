@@ -13,7 +13,8 @@
 <body>
 
   <!-- NAVBAR -->
-  <header class="bg-orange-300 shadow-sm px-4 h-14 flex items-center justify-between">
+  <header style="background-color: var(--color-bgnavbar);"
+    class="shadow-sm px-4 h-14 flex items-center justify-between">
     <div
       class="flex items-center gap-2 text-2xl font-bold border-b border-orange-400 sm:border-0 w-full justify-center sm:justify-start py-1 sm:py-0">
 
@@ -55,12 +56,12 @@
       </svg>
 
       <!-- Texto PosturAves com cores -->
-      <span><span class="text-blue-500">Postur</span><span class="text-orange-400">Aves</span></span>
+      <span><span class="text-blue-400">Postur</span><span class="text-orange-400">Aves</span></span>
     </div>
 
 
     <!-- Botão hamburguer mobile -->
-    <button id="menuToggle" class="md:hidden text-gray-600">
+    <button id="menuToggle" class="md:hidden text-white">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
@@ -68,27 +69,28 @@
 
     <!-- Menu Desktop -->
     <nav id="navMenu" class="hidden md:flex gap-4 items-center text-sm">
-      <span id="nomeUsuario" class="text-gray-500 flex items-center gap-1">
-        <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+      <span id="nomeUsuario" class="text-white flex items-center gap-2">
+        <svg class="w-12 h-12 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
           <path
             d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-3.31 0-6 2.69-6 6v1h12v-1c0-3.31-2.69-6-6-6z" />
         </svg>
         <span>Olá, Usuário</span>
       </span>
-      <a href="cadastros.html" class="hover:text-blue-500">Cadastros</a>
-      <a href="relatorios.html" class="hover:text-blue-500">Relatórios</a>
-      <a href="#" class="hover:text-blue-500">Gráficos</a>
-      <a href="login.html" class="text-red-500 hover:underline">Sair</a>
+      <a href="cadastros.html" class="text-white hover:text-orange-300">Cadastros</a>
+      <a href="relatorios.html" class="text-white hover:text-orange-300">Relatórios</a>
+      <a href="#" class="text-white hover:text-orange-300">Gráficos</a>
+      <a href="login.html" class="text-red-400 hover:text-red-600">Sair</a>
     </nav>
   </header>
 
   <!-- Menu Mobile -->
-  <div id="menuMobile" class="md:hidden hidden bg-orange-100 shadow px-4 py-2 space-y-2 text-sm">
-    <span id="nomeUsuarioMobile" class="block text-gray-600 font-medium"></span>
-    <a href="cadastros.html" class="block text-gray-700 hover:text-blue-500">Cadastros</a>
-    <a href="relatorios.html" class="block text-gray-700 hover:text-blue-500">Relatórios</a>
-    <a href="#" class="block text-gray-700 hover:text-blue-500">Gráficos</a>
-    <a href="login.html" class="block text-red-500 hover:underline">Sair</a>
+  <div id="menuMobile" style="background-color: var(--color-bgnavbarenumobile);"
+    class="md:hidden hidden bg-orange-100 shadow px-4 py-2 space-y-2 text-sm">
+    <span id="nomeUsuarioMobile" class="block text-white font-medium"></span>
+    <a href="cadastros.html" class="block text-white">Cadastros</a>
+    <a href="relatorios.html" class="block text-white">Relatórios</a>
+    <a href="#" class="block text-white">Gráficos</a>
+    <a href="login.html" class="block text-red-400">Sair</a>
   </div>
 
   <!-- CONTEÚDO PRINCIPAL -->
