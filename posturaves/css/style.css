@@ -3,11 +3,17 @@
   --color-primary: #2563eb;
   --color-success: #059669;
   --color-danger: #dc2626;
+  --bg-page: #f9fafb;       /* cinza claro do Tailwind */
+  --text-color: #374151;    /* slate-700 */
 }
 
 body {
+  background-color: var(--bg-page);
   font-family: 'Roboto', sans-serif;
+  color: var(--text-color);
+  min-height: 100vh;
 }
+
 
 
 input, select, textarea, button {
