@@ -1,12 +1,7 @@
 import { db } from './firebaseConfig.js';
 import { mostrarAlerta } from './alerta.js';
 
-import {
-  collection,
-  query,
-  where,
-  getDocs
-} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+import { collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 
 const formLogin = document.getElementById('formLogin');
 
@@ -17,14 +12,14 @@ formLogin.addEventListener('submit', async (e) => {
   const senhaInput = document.getElementById('senha').value.trim();
 
   if (!loginInput || !senhaInput) {
-    mostrarAlerta('Por favor, preencha todos os campos.', 'error');
+    mostrarAlerta('Preencha todos os campos.', 'error');
     return;
   }
 
   try {
     const colabQuery = query(
-      collection(db, 'dbcolaborador'),
-      where('login', '==', loginInput)
+      collection(db, 'bdcolaboradores'),
+      where('colabLogin', '==', loginInput)
     );
 
     const snapshot = await getDocs(colabQuery);
@@ -36,17 +31,17 @@ formLogin.addEventListener('submit', async (e) => {
 
     const colaborador = snapshot.docs[0].data();
 
-    if (colaborador.senha !== senhaInput) {
+    if (colaborador.colabSenha !== senhaInput) {
       mostrarAlerta('Senha incorreta.', 'error');
       return;
     }
 
-    mostrarAlerta('Login realizado com sucesso!', 'success');
+    mostrarAlerta(`Bem-vindo, ${colaborador.colabNome}!`, 'success');
 
-    // Redireciona após leve delay para permitir exibir o alerta
+    // Redireciona após leve delay
     setTimeout(() => {
       window.location.href = 'index.html';
-    }, 1200);
+    }, 1500);
 
   } catch (error) {
     console.error('Erro ao verificar login:', error);
