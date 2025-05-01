@@ -1,0 +1,69 @@
+<form id="formLotes" class="space-y-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <!-- STATUS -->
+    <div>
+      <label for="status" class="block text-sm font-medium mb-1">Status</label>
+      <select id="status" name="status" class="w-full border rounded px-3 py-2">
+        <option value="ATIVO">ATIVO</option>
+        <option value="INATIVO">INATIVO</option>
+      </select>
+    </div>
+
+    <!-- GALPÃO -->
+    <div>
+      <label for="galpao" class="block text-sm font-medium mb-1">Galpão</label>
+      <select id="galpao" name="galpao" class="w-full border rounded px-3 py-2">
+        <option>01</option>
+        <option>02</option>
+        <option>03</option>
+        <option>04</option>
+        <option>05</option>
+        <option>PINTEIRO</option>
+        <option>RECRIA</option>
+      </select>
+    </div>
+
+    <!-- PROPRIETÁRIO -->
+    <div>
+      <label for="proprietario" class="block text-sm font-medium mb-1">Proprietário</label>
+      <input type="text" id="proprietario" name="proprietario" class="w-full border rounded px-3 py-2" />
+    </div>
+
+    <!-- LINHAGEM -->
+    <div>
+      <label for="linhagem" class="block text-sm font-medium mb-1">Linhagem</label>
+      <input type="text" id="linhagem" name="linhagem" class="w-full border rounded px-3 py-2" />
+    </div>
+
+    <!-- NASCIMENTO -->
+    <div>
+      <label for="nascimento" class="block text-sm font-medium mb-1">Nascimento</label>
+      <input type="date" id="nascimento" name="nascimento" class="w-full border rounded px-3 py-2" />
+    </div>
+
+    <!-- CHEGADA -->
+    <div>
+      <label for="chegada" class="block text-sm font-medium mb-1">Chegada</label>
+      <input type="date" id="chegada" name="chegada" class="w-full border rounded px-3 py-2" />
+    </div>
+
+    <!-- QUANTIDADE -->
+    <div>
+      <label for="quantidade" class="block text-sm font-medium mb-1">Quantidade</label>
+      <input type="number" id="quantidade" name="quantidade" min="4000" max="5500" class="w-full border rounded px-3 py-2" />
+    </div>
+
+    <!-- IDLOTE -->
+    <div>
+      <label for="idlote" class="block text-sm font-medium mb-1">ID do Lote</label>
+      <input type="text" id="idlote" name="idlote" class="w-full border rounded px-3 py-2" />
+    </div>
+  </div>
+
+  <!-- Botão de envio -->
+  <div class="pt-4">
+    <button type="submit" class="bg-orange-400 hover:bg-orange-500 text-white px-6 py-2 rounded shadow">
+      Salvar Lote
+    </button>
+  </div>
+</form>

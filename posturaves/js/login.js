@@ -37,6 +37,12 @@ formLogin.addEventListener('submit', async (e) => {
     }
 
     mostrarAlerta(`Bem-vindo, ${colaborador.colabNome}!`, 'success');
+    
+    // Salva dados no localStorage
+    localStorage.setItem('colabNome', colaborador.colabNome);
+    localStorage.setItem('colabLogin', colaborador.colabLogin);
+    localStorage.setItem('colabTipo', colaborador.colabTipo);
+
 
     // Redireciona após leve delay
     setTimeout(() => {
