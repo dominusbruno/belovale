@@ -97,7 +97,7 @@
   
   <!-- USUÁRIO + MENU -->
   <div id="usuarioContainer" class="relative hidden md:flex items-center gap-2 text-white cursor-pointer">
-    <span id="nomeUsuario">Olá, Usuário</span>
+    <span id="nomeUsuario" class="inline-block min-w-[140px] truncate">Olá, Usuário</span>
     <svg class="w-10 h-10 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
       <path
         d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-3.31 0-6 2.69-6 6v1h12v-1c0-3.31-2.69-6-6-6z" />
@@ -112,11 +112,26 @@
 
   <!-- Conteúdo dinâmico -->
 <!-- Botão + Novo Registro -->
-<div class="flex justify-end px-6 pt-6">
+<div class="flex items-center justify-between px-6 pt-6">
+  <h2 id="tituloPagina" class="text-lg font-semibold text-slate-700 uppercase">Cadastro</h2>
   <button id="btnNovoRegistro" class="bg-orange-500 text-white text-sm px-4 py-2 rounded shadow hover:bg-orange-600">
     + Novo Registro
   </button>
 </div>
+<!-- Filtros com botão colapsável -->
+<div class="px-6 mt-4">
+  <button id="btnToggleFiltros"
+    class="text-sm bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
+    FILTROS ▼
+  </button>
+
+  <div id="areaFiltros"
+    class="mt-2 hidden bg-gray-100 bg-opacity-90 text-sm text-slate-800 rounded p-4 transition-all duration-300">
+    <!-- Filtros serão inseridos via JS -->
+  </div>
+</div>
+
+
 
 <!-- Tabela de registros -->
 <main class="p-6">
@@ -130,21 +145,22 @@
       </tbody>
     </table>
   </div>
+  <div id="paginacao" class="mt-4"></div>
 </main>
 
-<!-- Modal de Formulário -->
-<div id="formContainer" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-  <div class="bg-white rounded shadow-lg w-full max-w-md mx-4 p-6 relative">
-    <button id="btnFecharSlide" class="absolute top-2 right-2 text-slate-400 hover:text-red-500">
-      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-    <div id="formConteudo">
-      <!-- Formulário será carregado aqui -->
+  <!-- Modal de Formulário -->
+  <div id="formContainer" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+    <div class="bg-white rounded shadow-lg w-full max-w-md mx-4 p-6 relative">
+      <button id="btnFecharSlide" class="absolute top-2 right-2 text-slate-400 hover:text-red-500">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div id="formConteudo">
+        <!-- Formulário será carregado aqui -->
+      </div>
     </div>
   </div>
-</div>
 </main>
 
   
