@@ -1,6 +1,5 @@
 import { db } from './firebaseConfig.js';
 import { mostrarAlerta } from './alerta.js';
-
 import { collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 
 const formLogin = document.getElementById('formLogin');
@@ -42,6 +41,10 @@ formLogin.addEventListener('submit', async (e) => {
     localStorage.setItem('colabNome', colaborador.colabNome);
     localStorage.setItem('colabLogin', colaborador.colabLogin);
     localStorage.setItem('colabTipo', colaborador.colabTipo);
+
+    //Set de tempo da seção válida.
+    const validade = Date.now() + 1 * 60 * 60 * 1000; // 8h depois da seção ele precisa se logar.
+    localStorage.setItem('authValidade', validade);
 
 
     // Redireciona após leve delay

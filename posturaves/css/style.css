@@ -29,13 +29,6 @@ body {
 }
 
 
-
-input, select, textarea, button {
-  font-size: 0.875rem;
-  border-radius: 1.375rem;
-  border: 1px solid #ffffff;
-}
-
 /***********************
 SISTEMA DE ALERTAS
 ************************/

@@ -2,7 +2,7 @@
 
 import { db } from './firebaseConfig.js';
 import { mostrarAlerta } from './alerta.js';
-import { collection, getDocs, addDoc, updateDoc, doc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const btnNovo = document.getElementById('btnNovoRegistro');
@@ -12,27 +12,47 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tabelaCorpo = document.getElementById('tabelaCorpo');
   const btnToggleFiltros = document.getElementById('btnToggleFiltros');
   const areaFiltros = document.getElementById('areaFiltros');
+  const btnLimparFiltros = document.getElementById('btnLimparFiltros');
 
+
+    
+  //***************************************************************************************
+  // Define campos calculados por Formulário
+  const camposCalculadosPersonalizados = {
+    lotes: {
+      _idadeSemanas: (item) => {
+        const nascimento = item.loteDataNascimento;
+        if (!nascimento) return '-';
+        const nasc = new Date(nascimento);
+        const hoje = new Date();
+        const dias = Math.floor((hoje - nasc) / (1000 * 60 * 60 * 24));
+        return dias < 7 ? '1 Sem' : `${Math.ceil(dias / 7)} Sem`;
+      }
+    },
+    // outros
+  };
   
+  
+
   //***************************************************************************************
   // Define os campos dinâmicos usados na tabela e formulário
   const configuracoesFormularios = {
     lotes: [
-      { campo: 'loteStatus', label: 'Status' },
-      { campo: 'loteIdentificador', label: 'Identificador' },
-      { campo: 'loteLinhagem', label: 'Linhagem' },
-      { campo: 'loteGalpao', label: 'Galpão', tipo: 'select', opcoes: ['Pinteiro', 'Recria', '01', '02', '03', '04', '05'] },
-      { campo: 'loteProprietario', label: 'Proprietário' },
-      { campo: 'loteDataNascimento', label: 'Nascimento', tipo: 'date' },
-      { campo: '_idadeSemanas', label: 'Idade (sem)', calculado: true },
-      { campo: 'loteDataChegada', label: 'Chegada', tipo: 'date' },
-      { campo: 'loteQuantAves', label: 'Qtd Aves' }
+      { campo: 'loteStatus', label: 'Status', filtrar: true, eColuna: false },
+      { campo: 'loteIdentificador', label: 'Identificador', filtrar: false, eColuna: true },
+      { campo: 'loteLinhagem', label: 'Linhagem', filtrar: true, eColuna: true },
+      { campo: 'loteGalpao', label: 'Galpão', tipo: 'select', opcoes: ['Pinteiro', 'Recria', '01', '02', '03', '04', '05'], filtrar: true, eColuna: true },
+      { campo: 'loteProprietario', label: 'Proprietário', filtrar: true, eColuna: true },
+      { campo: 'loteDataNascimento', label: 'Nascimento', tipo: 'date', filtrar: false, eColuna: true },
+      { campo: '_idadeSemanas', label: 'Idade (sem)', calculado: true, eColuna: true },
+      { campo: 'loteDataChegada', label: 'Chegada', tipo: 'date', filtrar: false, eColuna: true },
+      { campo: 'loteQuantAves', label: 'Qtd Aves', filtrar: false, eColuna: true }
     ],
     colaboradores: [
-      { campo: 'colabNome', label: 'Nome' },
-      { campo: 'colabLogin', label: 'Login' },
-      { campo: 'colabSenha', label: 'Senha' },
-      { campo: 'colabTipo', label: 'Tipo' }
+      { campo: 'colabNome', label: 'Nome', filtrar: false, eColuna: true },
+      { campo: 'colabLogin', label: 'Login', filtrar: false, eColuna: true },
+      { campo: 'colabSenha', label: 'Senha', filtrar: false, eColuna: true },
+      { campo: 'colabTipo', label: 'Tipo', filtrar: true, eColuna: true }
     ],
     // insumos, vacinas, etc...
   };
@@ -65,19 +85,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   //***************************************************************************************
   // Gera dinamicamente o cabeçalho da tabela com base na estrutura
   const renderizarCabecalho = () => {
-    const tabelaCabecalho = document.getElementById('tabelaCabecalho');
     tabelaCabecalho.innerHTML = '';
     const tr = document.createElement('tr');
-    estrutura.forEach(col => {
-      const th = document.createElement('th');
-      th.className = 'px-4 py-2 text-center uppercase text-xs text-slate-600';
-      th.textContent = col.label;
-      tr.appendChild(th);
-    });
+  
+    estrutura
+      .filter(col => col.eColuna)
+      .forEach(col => {
+        const th = document.createElement('th');
+        th.className = 'px-4 py-2 text-center uppercase';
+        th.textContent = col.label;
+        tr.appendChild(th);
+      });
+  
     const thAcoes = document.createElement('th');
-    thAcoes.className = 'px-4 py-2';
+    thAcoes.className = 'px-4 py-2 text-center uppercase';
     thAcoes.textContent = 'Ações';
     tr.appendChild(thAcoes);
+  
     tabelaCabecalho.appendChild(tr);
   };
   
@@ -96,55 +120,49 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   
-
   //***************************************************************************************
   // Gera as linhas da tabela com os registros carregados
   const renderizarTabela = (dados = registros) => {
 
     tabelaCorpo.innerHTML = '';
     const inicio = (paginaAtual - 1) * registrosPorPagina;
-const fim = inicio + registrosPorPagina;
-const registrosPaginados = dados.slice(inicio, fim);
-
-registrosPaginados.forEach((item, index) => {
+    const fim = inicio + registrosPorPagina;
+    const registrosPaginados = dados.slice(inicio, fim);
+    registrosPaginados.forEach((item, index) => {
       const tr = document.createElement('tr');
-      estrutura.forEach(col => {
-        const td = document.createElement('td');
-        td.className = 'px-2 py-1 border-t text-center align-middle';     
-        let valor = '';
-        if (col.calculado && col.campo === '_idadeSemanas') {
-          const nascimento = item.loteDataNascimento;
-          if (nascimento) {
-            const nasc = new Date(nascimento);
-            const hoje = new Date();
-            const dias = Math.floor((hoje - nasc) / (1000 * 60 * 60 * 24));
-            valor = dias < 7 ? '1 Sem' : `${Math.ceil(dias / 7)} Sem`;
-          } else {
-            valor = '-';
-          }
-        } else {
-          valor = item[col.campo] || '';
-          if (col.tipo === 'date' && valor) {
-            const [ano, mes, dia] = valor.split('-');
-            valor = `${dia}/${mes}/${ano.slice(2)}`;
-          }
-        }
+      estrutura
+  .filter(col => col.eColuna)
+  .forEach(col => {
+    const td = document.createElement('td');
+    td.className = 'px-2 py-1 border-t text-center align-middle';
+
+    let valor = '';
+
+    if (col.calculado && camposCalculadosPersonalizados[tipo]?.[col.campo]) {
+      valor = camposCalculadosPersonalizados[tipo][col.campo](item);
+    } else {
+      valor = item[col.campo] || '';
+      if (col.tipo === 'date' && valor) {
+        const [ano, mes, dia] = valor.split('-');
+        valor = `${dia}/${mes}/${ano.slice(2)}`;
+      }
+    }
+
+    td.textContent = valor;
+    tr.appendChild(td);
+  });
+
       
-        td.textContent = valor;
-        tr.appendChild(td);
-      });
-      
-      const tdAcoes = document.createElement('td');
-      tdAcoes.className = 'px-4 py-2 border-t';
-      const btnEditar = document.createElement('button');
-      btnEditar.textContent = 'Editar';
-      btnEditar.className = 'text-blue-500 hover:underline text-sm';
-      btnEditar.addEventListener('click', () => abrirFormulario(index));
-      tdAcoes.appendChild(btnEditar);
-      tr.appendChild(tdAcoes);
-      tabelaCorpo.appendChild(tr);
-      //atualizarPaginacao();
-      atualizarPaginacao(dados);
+        const tdAcoes = document.createElement('td');
+        tdAcoes.className = 'px-4 py-2 border-t text-center align-middle';
+        const btnEditar = document.createElement('button');
+        btnEditar.textContent = 'Editar';
+        btnEditar.className = 'text-blue-500 hover:underline text-sm';
+        btnEditar.addEventListener('click', () => abrirFormulario(item.id));
+        tdAcoes.appendChild(btnEditar);
+        tr.appendChild(tdAcoes);
+        tabelaCorpo.appendChild(tr);
+        atualizarPaginacao(dados);
 
 
     });
@@ -187,55 +205,61 @@ registrosPaginados.forEach((item, index) => {
 
   //***************************************************************************************
   // Cria e exibe o formulário para novo registro ou edição
-  const abrirFormulario = (index = null) => {
+  const abrirFormulario = (id = null) => {
     formContainer.classList.remove('hidden');
     formConteudo.innerHTML = '';
-    idEditando = index !== null ? registros[index].id : null;
-
+    idEditando = id;
+  
+    const registro = registros.find(r => r.id === id);
+  
     estrutura
       .filter(col => !col.calculado)
       .forEach(col => {
-      const div = document.createElement('div');
-      div.className = 'mb-4';
-
-      const label = document.createElement('label');
-      label.className = 'block text-sm font-medium text-gray-700 mb-1';
-      label.setAttribute('for', col.campo);
-      label.textContent = col.label;
-
-            let input;
-      if (col.tipo === 'select') {
-        input = document.createElement('select');
-        input.className = 'w-full border border-gray-300 rounded px-3 py-2 text-sm';
-        col.opcoes.forEach(opcao => {
-          const opt = document.createElement('option');
-          opt.value = opcao;
-          opt.textContent = opcao;
-          input.appendChild(opt);
-        });
-      } else {
-        input = document.createElement('input');
-        input.type = col.tipo === 'date' ? 'date' : 'text';
-        input.className = 'w-full border border-gray-300 rounded px-3 py-2 text-sm';
-      }
-      input.id = col.campo;
-      input.name = col.campo;
-      input.value = index !== null ? registros[index][col.campo] : '';
-      div.appendChild(label);
-      div.appendChild(input);
-      formConteudo.appendChild(div);
-    });
-
+        const div = document.createElement('div');
+        div.className = 'mb-4';
+  
+        const label = document.createElement('label');
+        label.className = 'block text-sm font-medium text-gray-700 mb-1';
+        label.setAttribute('for', col.campo);
+        label.textContent = col.label;
+  
+        let input;
+        if (col.tipo === 'select') {
+          input = document.createElement('select');
+          input.className = 'w-full border border-gray-300 rounded px-3 py-2 text-sm';
+          col.opcoes.forEach(opcao => {
+            const opt = document.createElement('option');
+            opt.value = opcao;
+            opt.textContent = opcao;
+            input.appendChild(opt);
+          });
+        } else {
+          input = document.createElement('input');
+          input.type = col.tipo === 'date' ? 'date' : 'text';
+          input.className = 'w-full border border-gray-300 rounded px-3 py-2 text-sm';
+        }
+  
+        input.id = col.campo;
+        input.name = col.campo;
+        input.value = registro ? registro[col.campo] : '';
+        div.appendChild(label);
+        div.appendChild(input);
+        formConteudo.appendChild(div);
+      });
+  
+    // Botão salvar
     const btnSalvar = document.createElement('button');
     btnSalvar.textContent = idEditando ? 'Atualizar' : 'Salvar';
     btnSalvar.className = 'bg-blue-500 text-white px-3 py-1.5 text-sm rounded hover:bg-blue-600';
     btnSalvar.addEventListener('click', salvarRegistro);
     formConteudo.appendChild(btnSalvar);
-
-    const btnExcluir = document.createElement('button');
+  
+    // Botão excluir (se edição)
     if (idEditando) {
+      const btnExcluir = document.createElement('button');
       btnExcluir.textContent = 'Excluir';
       btnExcluir.className = 'ml-4 bg-red-500 text-white px-3 py-1.5 text-sm rounded hover:bg-red-600';
+  
       btnExcluir.addEventListener('click', async () => {
         const confirmacao = confirm('Tem certeza que deseja excluir este registro?');
         if (confirmacao) {
@@ -250,32 +274,39 @@ registrosPaginados.forEach((item, index) => {
           }
         }
       });
+  
       formConteudo.appendChild(btnExcluir);
     }
   };
+  
 
 
   //***************************************************************************************
   // Salva novo registro ou atualiza existente no Firebase
   const salvarRegistro = async () => {
     const novoRegistro = {};
-    estrutura.forEach(col => {
-      const valor = document.getElementById(col.campo).value;
-      novoRegistro[col.campo] = valor;
-    });
+    estrutura
+      .filter(col => !col.calculado)
+      .forEach(col => {
+        const input = document.getElementById(col.campo);
+        if (input) {
+          novoRegistro[col.campo] = input.value;
+        }
+      });
+
 
     const now = new Date().toISOString();
 
-if (idEditando) {
-  novoRegistro.atualizadoEm = now;
-  await updateDoc(doc(db, colecao, idEditando), novoRegistro);
-  mostrarAlerta('Registro atualizado com sucesso.', 'success');
-} else {
-  novoRegistro.criadoEm = now;
-  novoRegistro.atualizadoEm = now;
-  await addDoc(collection(db, colecao), novoRegistro);
-  mostrarAlerta('Registro criado com sucesso.', 'success');
-}
+    if (idEditando) {
+      novoRegistro.atualizadoEm = now;
+      await updateDoc(doc(db, colecao, idEditando), novoRegistro);
+      mostrarAlerta('Registro atualizado com sucesso.', 'success');
+    } else {
+      novoRegistro.criadoEm = now;
+      novoRegistro.atualizadoEm = now;
+      await addDoc(collection(db, colecao), novoRegistro);
+      mostrarAlerta('Registro criado com sucesso.', 'success');
+    }
 
 
     formContainer.classList.add('hidden');
@@ -295,7 +326,8 @@ if (idEditando) {
 
   //***************************************************************************************
   // Controle do collapse do filtro
-  btnToggleFiltros?.addEventListener('click', () => {
+  btnToggleFiltros?.addEventListener('click', (e) => {
+    e.preventDefault();
     areaFiltros.classList.toggle('hidden');
     btnToggleFiltros.textContent = areaFiltros.classList.contains('hidden')
       ? 'FILTROS ▼'
@@ -312,52 +344,127 @@ if (idEditando) {
   // Atualiza dinamicamente a tabela com os dados correspondentes
   const aplicarFiltros = () => {
     let dadosFiltrados = [...registros];
-  
-    Object.entries(filtrosAtivos).forEach(([campo, valor]) => {
-      if (valor !== '') {
-        dadosFiltrados = dadosFiltrados.filter(reg => reg[campo] === valor);
+
+    Object.entries(filtrosAtivos).forEach(([campo, valores]) => {
+      if (valores.length > 0) {
+        dadosFiltrados = dadosFiltrados.filter(reg => valores.includes(reg[campo]));
       }
     });
+    
   
     renderizarTabela(dadosFiltrados);
+    gerarFiltros(dadosFiltrados);
   };
   
 
-//***************************************************************************************
-// Gera dinamicamente os filtros com base nos campos tipo 'select'
-// Insere cada filtro na área colapsável e define escutadores de mudança
-  const gerarFiltros = () => {
+  //***************************************************************************************
+  // Gera dinamicamente os filtros com base nos campos tipo 'select'
+  // Insere cada filtro na área colapsável e define escutadores de mudança
+  const gerarFiltros = (dados = registros) => {
     areaFiltros.innerHTML = '';
-  
-    estrutura.filter(f => f.tipo === 'select').forEach(filtro => {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'mb-3';
-  
-      const label = document.createElement('label');
-      label.className = 'block text-sm font-medium mb-1 text-slate-700';
-      label.textContent = filtro.label;
-  
-      const select = document.createElement('select');
-      select.className = 'w-full px-2 py-1 rounded border border-gray-300 text-sm';
-      select.innerHTML = `<option value="">Todos</option>`;
-      filtro.opcoes.forEach(op => {
-        const opt = document.createElement('option');
-        opt.value = op;
-        opt.textContent = op;
-        select.appendChild(opt);
+
+    const container = document.createElement('div');
+    container.className = 'flex flex-wrap gap-4';
+
+    estrutura
+      .filter(f => !f.calculado && f.filtrar)
+      .forEach(filtro => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex flex-col w-auto min-w-[160px]';
+
+        const label = document.createElement('label');
+        label.className = 'block text-sm font-medium mb-1 text-white uppercase';
+        label.textContent = filtro.label;
+
+        const select = document.createElement('select');
+        select.className = 'px-2 py-1 h-16 text-sm rounded border border-gray-300 text-slate-700 bg-white w-full';
+        select.multiple = true;
+
+        // Pega valores únicos dos dados filtrados
+        let valoresUnicos = [...new Set(registros.map(r => r[filtro.campo]).filter(Boolean))];
+
+        // Garante que as opções selecionadas permaneçam no dropdown
+        const valoresSelecionados = filtrosAtivos[filtro.campo] || [];
+        valoresSelecionados.forEach(selecionado => {
+          if (!valoresUnicos.includes(selecionado)) {
+            valoresUnicos.push(selecionado);
+          }
+        });
+
+        valoresUnicos.sort(); // ordena alfabeticamente
+
+        valoresUnicos.forEach(valor => {
+          const option = document.createElement('option');
+          option.value = valor;
+          option.textContent = valor;
+
+          // Mantém a seleção ativa
+          if (valoresSelecionados.includes(valor)) {
+            option.selected = true;
+          }
+
+          option.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            option.selected = !option.selected;
+
+            const selecionados = [...select.options]
+              .filter(o => o.selected)
+              .map(o => o.value);
+
+            filtrosAtivos[filtro.campo] = selecionados;
+            aplicarFiltros();
+          });
+
+          select.appendChild(option);
+        });
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(select);
+        container.appendChild(wrapper);
       });
-  
-      select.addEventListener('change', () => {
-        filtrosAtivos[filtro.campo] = select.value;
-        aplicarFiltros();
+
+    areaFiltros.appendChild(container);
+
+    btnLimparFiltros.classList.remove('hidden');
+    btnLimparFiltros.addEventListener('click', () => {
+      Object.keys(filtrosAtivos).forEach(campo => filtrosAtivos[campo] = []);
+
+      // desmarca visualmente os selects
+      areaFiltros.querySelectorAll('select').forEach(sel => {
+        [...sel.options].forEach(opt => (opt.selected = false));
       });
-  
-      filtrosAtivos[filtro.campo] = '';
-      wrapper.appendChild(label);
-      wrapper.appendChild(select);
-      areaFiltros.appendChild(wrapper);
+
+      aplicarFiltros();
     });
   };
+
+
+  //***************************************************************************************
+  // Fechar o filtro ao clicar fora dele
+  const filtroContainer = document.getElementById('filtroContainer');
+  document.addEventListener('click', (e) => {
+    const clicouDentroDoFiltro = filtroContainer.contains(e.target);
+  
+    if (!areaFiltros.classList.contains('hidden')) {
+      if (!clicouDentroDoFiltro) {
+        areaFiltros.classList.add('hidden');
+        btnToggleFiltros.textContent = 'FILTROS ▼';
+      }
+    }
+  });
+  
+  
+
+  //***************************************************************************************
+  // Fechar o formulário ao clicar fora dele
+  formContainer?.addEventListener('click', (e) => {
+    // Garante que o clique não foi dentro do formulário em si
+    if (e.target === formContainer) {
+      formContainer.classList.add('hidden');
+      formConteudo.innerHTML = '';
+    }
+  });
+  
 
 
   //***************************************************************************************
