@@ -1,0 +1,60 @@
+
+/* Color Theme Swatches in Hex */
+.Simplicidade-e-elegancia-1-hex { color: #B2E0B2; }
+.Simplicidade-e-elegancia-2-hex { color: #003F5C; }
+.Simplicidade-e-elegancia-3-hex { color: #FFFFFF; }
+.Simplicidade-e-elegancia-4-hex { color: #C0C0C0; }
+.Simplicidade-e-elegancia-5-hex { color: #D1634A; }
+
+
+
+
+/* Estilo base e refinado */
+:root {
+  --color-bglogin: #003F5C;
+  --color-bgnavbar: #003F5C;
+  --color-bgnavbarenumobile: #017fb9;
+  --color-primary: #003F5C;
+  --color-success: #2eb62e;
+  --color-danger: #d45555;
+  --bg-page: #ffffff;       /* cinza claro do Tailwind */
+  --text-color: #003F5C;    /* slate-700 */
+}
+
+body {
+  background-color: var(--bg-page);
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-color);
+  min-height: 100vh;
+}
+
+
+/***********************
+SISTEMA DE ALERTAS
+************************/
+/* Cores do alerta */
+#alertaCustom.success {
+  background-color: #2eb62e; /* verde pastel */
+}
+
+#alertaCustom.error {
+  background-color: #d45555; /* vermelho pastel */
+}
+
+/* Estado inicial (escondido) */
+#alertaCustom {
+  opacity: 0;
+  transform: translate(-50%, 100%);
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+#alertaCustom.mostrar {
+  opacity: 1;
+  transform: translate(-50%, -1rem); /* sobe */
+}
+
+#alertaCustom.ocultar {
+  opacity: 0;
+  transform: translate(-50%, 100%); /* desce */
+}
+
