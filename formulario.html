@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,145 +13,156 @@
 
 <body class="bg-gray-50 font-['Roboto'] text-slate-700 min-h-screen">
 
-<!-- NAVBAR -->
-<header style="background-color: var(--color-bgnavbar);" class="shadow-sm px-4 h-14 flex items-center relative">
+  <!-- NAVBAR -->
+  <header style="background-color: var(--color-bgnavbar);" class="shadow-sm px-4 h-14 flex items-center relative">
 
-  <!-- Botão hamburguer mobile à esquerda -->
-  <button id="menuToggle" class="md:hidden absolute left-4 text-white z-50">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-  </button>
+    <!-- Botão hamburguer mobile à esquerda -->
+    <button id="menuToggle" class="md:hidden absolute left-4 text-white z-50">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
 
-  <!-- Conteúdo principal do header dividido em 3 colunas -->
-  <div class="w-full flex items-center justify-between">
+    <!-- Conteúdo principal do header dividido em 3 colunas -->
+    <div class="w-full flex items-center justify-between">
 
-    <!-- 1. Logo + Nome (esquerda no desktop, centro no mobile) -->
-    <div class="flex-1 flex justify-center md:justify-start items-center gap-2 text-xl md:text-2xl font-bold">
-      <img src="icons/icon-logo.svg" alt="PosturAves" class="w-10 h-10 md:w-16 md:h-16 md:translate-y-3" />
-      <span>
-        <span class="text-blue-400">Postur</span><span class="text-orange-400">Aves</span>
-      </span>
-    </div>
+      <!-- 1. Logo + Nome (esquerda no desktop, centro no mobile) -->
+      <div class="flex-1 flex justify-center md:justify-start items-center gap-2 text-xl md:text-2xl font-bold">
+        <img src="icons/icon-logo.svg" alt="PosturAves" class="w-10 h-10 md:w-16 md:h-16 md:translate-y-3" />
+        <span>
+          <span class="text-blue-400">Postur</span><span class="text-orange-400">Aves</span>
+        </span>
+      </div>
 
-    <!-- 2. Menus centrais (apenas no desktop) -->
-    <nav class="hidden md:flex flex-1 justify-center items-center gap-6 text-sm text-white">
-      <a href="index.html" class="hover:text-orange-300">Início</a>
+      <!-- 2. Menus centrais (apenas no desktop) -->
+      <nav class="hidden md:flex flex-1 justify-center items-center gap-6 text-sm text-white">
+        <a href="index.html" class="hover:text-orange-300">Início</a>
 
-      <!-- Submenu CADASTROS -->
-      <div class="relative group">
-        <button class="hover:text-orange-300">Cadastros</button>
-        <div class="absolute hidden group-hover:block bg-white shadow text-gray-800 z-50 min-w-[200px]">
-          <a href="formulario.html?tipo=lotes" class="block px-4 py-2 hover:bg-gray-200">Lotes</a>
-          <a href="formulario.html?tipo=colaboradores" class="block px-4 py-2 hover:bg-gray-200">Colaboradores</a>
-          <a href="formulario.html?tipo=financeiro" class="block px-4 py-2 hover:bg-gray-200">Financeiro</a>
+        <!-- Submenu CADASTROS -->
+        <div class="relative group">
+          <button class="hover:text-orange-300">Cadastros</button>
+          <div class="absolute hidden group-hover:block bg-white shadow text-gray-800 z-50 min-w-[200px]">
+            <a href="formulario.html?tipo=lotes" class="block px-4 py-2 hover:bg-gray-200">Lotes</a>
+            <a href="formulario.html?tipo=colaboradores" class="block px-4 py-2 hover:bg-gray-200">Colaboradores</a>
+            <a href="formulario.html?tipo=financeiro" class="block px-4 py-2 hover:bg-gray-200">Financeiro</a>
+          </div>
+        </div>
+
+        <!-- Submenu RELATÓRIOS -->
+        <div class="relative group">
+          <button class="hover:text-orange-300">Relatórios</button>
+          <div class="absolute hidden group-hover:block bg-white shadow text-gray-800 z-50 min-w-[200px]">
+            <a href="relatorio.html?tipo=financeiro" class="block px-4 py-2 hover:bg-gray-200">Financeiro</a>
+            <a href="relatorio.html?tipo=producao" class="block px-4 py-2 hover:bg-gray-200">Produção</a>
+            <a href="relatorio.html?tipo=consumo" class="block px-4 py-2 hover:bg-gray-200">Consumo</a>
+            <a href="relatorio.html?tipo=viabilidade" class="block px-4 py-2 hover:bg-gray-200">Viabilidade</a>
+          </div>
+        </div>
+
+        <!-- Submenu GRÁFICOS -->
+        <div class="relative group">
+          <button class="hover:text-orange-300">Gráficos</button>
+          <div class="absolute hidden group-hover:block bg-white shadow text-gray-800 z-50 min-w-[200px]">
+            <a href="grafico.html?tipo=producao" class="block px-4 py-2 hover:bg-gray-200">Produção</a>
+            <a href="grafico.html?tipo=consumo" class="block px-4 py-2 hover:bg-gray-200">Consumo</a>
+            <a href="grafico.html?tipo=financeiro" class="block px-4 py-2 hover:bg-gray-200">Financeiro</a>
+            <a href="grafico.html?tipo=estoque" class="block px-4 py-2 hover:bg-gray-200">Estoque</a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- 3. Usuário (direita no desktop) -->
+      <div id="usuarioContainer"
+        class="hidden md:flex flex-1 justify-end items-center gap-2 text-white cursor-pointer relative">
+        <img src="icons/icon-user.svg" alt="Usuário" class="w-10 h-10" />
+        <span id="nomeUsuario" class="text-sm min-w-[120px]">Olá, Usuário</span>
+        <div id="menuUsuario" class="absolute right-0 top-full bg-white text-sm text-gray-800 shadow hidden z-50">
+          <a href="#" id="btnLogout" class="block px-8 py-2 hover:bg-gray-300 text-red-500">Sair</a>
         </div>
       </div>
 
-      <!-- Submenu RELATÓRIOS -->
-      <div class="relative group">
-        <button class="hover:text-orange-300">Relatórios</button>
-        <div class="absolute hidden group-hover:block bg-white shadow text-gray-800 z-50 min-w-[200px]">
-          <a href="relatorio.html?tipo=financeiro" class="block px-4 py-2 hover:bg-gray-200">Financeiro</a>
-          <a href="relatorio.html?tipo=producao" class="block px-4 py-2 hover:bg-gray-200">Produção</a>
-          <a href="relatorio.html?tipo=consumo" class="block px-4 py-2 hover:bg-gray-200">Consumo</a>
-          <a href="relatorio.html?tipo=viabilidade" class="block px-4 py-2 hover:bg-gray-200">Viabilidade</a>
-        </div>
-      </div>
+    </div>
+  </header>
 
-      <!-- Submenu GRÁFICOS -->
-      <div class="relative group">
-        <button class="hover:text-orange-300">Gráficos</button>
-        <div class="absolute hidden group-hover:block bg-white shadow text-gray-800 z-50 min-w-[200px]">
-          <a href="grafico.html?tipo=producao" class="block px-4 py-2 hover:bg-gray-200">Produção</a>
-          <a href="grafico.html?tipo=consumo" class="block px-4 py-2 hover:bg-gray-200">Consumo</a>
-          <a href="grafico.html?tipo=financeiro" class="block px-4 py-2 hover:bg-gray-200">Financeiro</a>
-          <a href="grafico.html?tipo=estoque" class="block px-4 py-2 hover:bg-gray-200">Estoque</a>
-        </div>
-      </div>
-    </nav>
 
-    <!-- 3. Usuário (direita no desktop) -->
-    <div id="usuarioContainer" class="hidden md:flex flex-1 justify-end items-center gap-2 text-white cursor-pointer relative">
-      <img src="icons/icon-user.svg" alt="Usuário" class="w-10 h-10" />
-      <span id="nomeUsuario" class="text-sm min-w-[120px]">Olá, Usuário</span>
-      <div id="menuUsuario" class="absolute right-0 top-full bg-white text-sm text-gray-800 shadow hidden z-50">
-        <a href="#" id="btnLogout" class="block px-8 py-2 hover:bg-gray-300 text-red-500">Sair</a>
+
+  <!-- Menu Mobile com seções colapsáveis -->
+  <div id="menuMobile" style="background-color: var(--color-bgnavbar);"
+    class="md:hidden hidden px-4 py-2 pt-4 text-sm space-y-2">
+
+    <!-- Seção: Cadastros -->
+    <div class="pb-1">
+      <button class="w-full flex justify-between items-center text-left text-white uppercase"
+        onclick="toggleMenu('cadastrosMenu')" aria-expanded="false">
+        Cadastros
+        <svg id="icon-cadastrosMenu" class="w-4 h-4 ml-2 transition-transform duration-200 transform"
+          fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"
+            clip-rule="evenodd" />
+        </svg>
+      </button>
+      <div id="cadastrosMenu" style="background-color: var(--color-bgnavbarenumobile);"
+        class="w-full mb-4 space-y-1 hidden px-4 py-2 rounded transition-all duration-200 ease-in-out">
+        <a href="formulario.html?tipo=lotes" class="block text-white pl-4">Lotes</a>
+        <a href="formulario.html?tipo=colaboradores" class="block text-white pl-4">Colaboradores</a>
+        <a href="formulario.html?tipo=financeiro" class="block text-white pl-4">Financeiro</a>
       </div>
     </div>
 
-  </div>
-</header>
-
-
-
-<!-- Menu Mobile com seções colapsáveis -->
-<div id="menuMobile" style="background-color: var(--color-bgnavbar);" class="md:hidden hidden px-4 py-2 pt-4 text-sm space-y-2">
-
-  <!-- Seção: Cadastros -->
-  <div class="pb-1">
-    <button class="w-full flex justify-between items-center text-left text-white uppercase"
-            onclick="toggleMenu('cadastrosMenu')" aria-expanded="false">
-      Cadastros
-      <svg id="icon-cadastrosMenu" class="w-4 h-4 ml-2 transition-transform duration-200 transform" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-      </svg>
-    </button>
-    <div id="cadastrosMenu" style="background-color: var(--color-bgnavbarenumobile);" 
-         class="w-full mb-4 space-y-1 hidden px-4 py-2 rounded transition-all duration-200 ease-in-out">
-      <a href="formulario.html?tipo=lotes" class="block text-white pl-4">Lotes</a>
-      <a href="formulario.html?tipo=colaboradores" class="block text-white pl-4">Colaboradores</a>
-      <a href="formulario.html?tipo=financeiro" class="block text-white pl-4">Financeiro</a>
+    <!-- Seção: Relatórios -->
+    <div class="pb-1">
+      <button class="w-full flex justify-between items-center text-left text-white uppercase"
+        onclick="toggleMenu('relatoriosMenu')" aria-expanded="false">
+        Relatórios
+        <svg id="icon-relatoriosMenu" class="w-4 h-4 ml-2 transition-transform duration-200 transform"
+          fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"
+            clip-rule="evenodd" />
+        </svg>
+      </button>
+      <div id="relatoriosMenu" style="background-color: var(--color-bgnavbarenumobile);"
+        class="w-full mb-4 space-y-1 hidden px-4 py-2 rounded transition-all duration-200 ease-in-out">
+        <a href="relatorio.html?tipo=financeiro" class="block text-white pl-4">Financeiro</a>
+        <a href="relatorio.html?tipo=producao" class="block text-white pl-4">Produção</a>
+      </div>
     </div>
-  </div>
 
-  <!-- Seção: Relatórios -->
-  <div class="pb-1">
-    <button class="w-full flex justify-between items-center text-left text-white uppercase"
-            onclick="toggleMenu('relatoriosMenu')" aria-expanded="false">
-      Relatórios
-      <svg id="icon-relatoriosMenu" class="w-4 h-4 ml-2 transition-transform duration-200 transform" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-      </svg>
-    </button>
-    <div id="relatoriosMenu" style="background-color: var(--color-bgnavbarenumobile);" 
-         class="w-full mb-4 space-y-1 hidden px-4 py-2 rounded transition-all duration-200 ease-in-out">
-      <a href="relatorio.html?tipo=financeiro" class="block text-white pl-4">Financeiro</a>
-      <a href="relatorio.html?tipo=producao" class="block text-white pl-4">Produção</a>
-    </div>
-  </div>
-
-  <!-- Seção: Gráficos -->
-  <div class="pb-6">
-    <button class="w-full flex justify-between items-center text-left text-white uppercase"
-            onclick="toggleMenu('graficosMenu')" aria-expanded="false">
-      Gráficos
-      <svg id="icon-graficosMenu" class="w-4 h-4 ml-2 transition-transform duration-200 transform" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-      </svg>
-    </button>
-      <div id="graficosMenu" style="background-color: var(--color-bgnavbarenumobile);" 
-          class="w-full space-y-1 hidden px-4 py-2 rounded transition-all duration-200 ease-in-out">
+    <!-- Seção: Gráficos -->
+    <div class="pb-6">
+      <button class="w-full flex justify-between items-center text-left text-white uppercase"
+        onclick="toggleMenu('graficosMenu')" aria-expanded="false">
+        Gráficos
+        <svg id="icon-graficosMenu" class="w-4 h-4 ml-2 transition-transform duration-200 transform" fill="currentColor"
+          viewBox="0 0 20 20">
+          <path fill-rule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"
+            clip-rule="evenodd" />
+        </svg>
+      </button>
+      <div id="graficosMenu" style="background-color: var(--color-bgnavbarenumobile);"
+        class="w-full space-y-1 hidden px-4 py-2 rounded transition-all duration-200 ease-in-out">
         <a href="grafico.html?tipo=financeiro" class="block text-white pl-4">Financeiro</a>
         <a href="grafico.html?tipo=consumo" class="block text-white pl-4">Consumo</a>
       </div>
-  </div>
-
-  
-
-  <!-- Sair + Nome -->
-  <div class="flex justify-between items-center mt-4 pr-4 pt-4 py-2 border-t border-white/20">
-    <!-- Ícone + nome -->
-    <div class="flex items-center gap-2">
-      <img src="icons/icon-user.svg" alt="Usuário" class="w-10 h-10 self-center" />
-      <span id="nomeUsuarioMobile" class="text-blue-400 font-medium">Bruno Eduardo</span>
     </div>
 
-    <!-- Sair -->
-    <a href="#" id="btnLogoutMobile" class="text-red-300 font-medium pr-1 uppercase">Sair</a>
-  </div>
 
-</div>
+
+    <!-- Sair + Nome -->
+    <div class="flex justify-between items-center mt-4 pr-4 pt-4 py-2 border-t border-white/20">
+      <!-- Ícone + nome -->
+      <div class="flex items-center gap-2">
+        <img src="icons/icon-user.svg" alt="Usuário" class="w-10 h-10 self-center" />
+        <span id="nomeUsuarioMobile" class="text-blue-400 font-medium">Bruno Eduardo</span>
+      </div>
+
+      <!-- Sair -->
+      <a href="#" id="btnLogoutMobile" class="text-red-300 font-medium pr-1 uppercase">Sair</a>
+    </div>
+
+  </div>
 
 
 
@@ -160,50 +172,50 @@
 
 
   <!-- Conteúdo dinâmico -->
-<!-- Botão + Novo Registro -->
-<div class="flex items-center justify-between px-6 pt-6">
-  <h2 id="tituloPagina" class="text-lg font-semibold text-slate-700 uppercase">Cadastro</h2>
-  <button id="btnNovoRegistro" class="bg-orange-500 text-white text-sm px-4 py-2 rounded shadow hover:bg-orange-600">
-    +Novo
-  </button>
-</div>
-
-<!-- Filtros -->
-<div class="px-6 mt-4">
-  <div id="filtroContainer" class="bg-gray-800 rounded-t text-white">
-    <!-- Cabeçalho dos filtros -->
-    <div class="flex justify-between items-center px-4 py-2 border-b border-gray-700">
-      <a id="btnToggleFiltros" href="#" class="text-sm hover:underline">
-        FILTROS ▼
-      </a>
-      <button id="btnLimparFiltros" class="text-sm text-orange-200 hover:underline hidden">
-        Limpa
-      </button>
-    </div>
-
-    <!-- Área dos filtros -->
-    <div id="areaFiltros" class="hidden px-4 py-4 flex justify-center flex-wrap gap-4">
-      <!-- filtros via JS -->
-    </div>
-    
+  <!-- Botão + Novo Registro -->
+  <div class="flex items-center justify-between px-6 pt-6">
+    <h2 id="tituloPagina" class="text-lg font-semibold text-slate-700 uppercase">Cadastro</h2>
+    <button id="btnNovoRegistro" class="bg-orange-500 text-white text-sm px-4 py-2 rounded shadow hover:bg-orange-600">
+      +Novo
+    </button>
   </div>
-</div>
 
-<!-- Tabela de registros -->
-<main class="pt-0 px-6 pb-6">
+  <!-- Filtros -->
+  <div class="px-6 mt-4">
+    <div id="filtroContainer" class="bg-gray-800 rounded-t text-white">
+      <!-- Cabeçalho dos filtros -->
+      <div class="flex justify-between items-center px-4 py-2 border-b border-gray-700">
+        <a id="btnToggleFiltros" href="#" class="text-sm hover:underline">
+          FILTROS ▼
+        </a>
+        <button id="btnLimparFiltros" class="text-sm text-orange-200 hover:underline hidden">
+          Limpa
+        </button>
+      </div>
 
-  <div class="overflow-x-auto">
-    <table class="min-w-full bg-white text-sm border rounded-b shadow">
-      <thead class="bg-gray-200 text-slate-600 text-left" id="tabelaCabecalho">
-        <!-- Cabeçalho será inserido via JS -->
-      </thead>
-      <tbody id="tabelaCorpo">
-        <!-- Linhas serão inseridas dinamicamente aqui -->
-      </tbody>
-    </table>
+      <!-- Área dos filtros -->
+      <div id="areaFiltros" class="hidden px-4 py-4 flex justify-center flex-wrap gap-4">
+        <!-- filtros via JS -->
+      </div>
+
+    </div>
   </div>
-  <div id="paginacao" class="mt-4"></div>
-</main>
+
+  <!-- Tabela de registros -->
+  <main class="pt-0 px-6 pb-6">
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white text-sm border rounded-b shadow">
+        <thead class="bg-gray-200 text-slate-600 text-left" id="tabelaCabecalho">
+          <!-- Cabeçalho será inserido via JS -->
+        </thead>
+        <tbody id="tabelaCorpo">
+          <!-- Linhas serão inseridas dinamicamente aqui -->
+        </tbody>
+      </table>
+    </div>
+    <div id="paginacao" class="mt-4"></div>
+  </main>
 
   <!-- Modal de Formulário -->
   <div id="formContainer" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
@@ -218,9 +230,9 @@
       </div>
     </div>
   </div>
-</main>
+  </main>
 
-  
+
   <!-- Scripts -->
   <script type="module" src="./js/menu.js"></script>
   <script type="module" src="./js/formulario.js"></script>
@@ -230,14 +242,15 @@
       const menu = document.getElementById(id);
       menu.classList.toggle('hidden');
     }
-    </script>
+  </script>
 
 
 
   <!-- Alerta visual inferior -->
   <div id="alertaCustom"
-      class="fixed bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full transition-all duration-300 z-50 px-6 py-3 rounded text-white text-sm shadow-lg hidden">
+    class="fixed bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full transition-all duration-300 z-50 px-6 py-3 rounded text-white text-sm shadow-lg hidden">
     <span id="textoAlerta">Mensagem</span>
   </div>
 </body>
+
 </html>
