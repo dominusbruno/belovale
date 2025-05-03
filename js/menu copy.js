@@ -1,4 +1,8 @@
 // menu.js
+console.log('menu.js iniciado');
+console.log('menuMobile:', document.getElementById('menuMobile'));
+
+
 document.addEventListener('DOMContentLoaded', () => {
   // ✅ Obtém o nome do usuário armazenado
   const nome = localStorage.getItem('colabNome') || 'Usuário';
@@ -7,13 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const spanUsuario = document.getElementById('nomeUsuario');
   if (spanUsuario) {
     spanUsuario.classList.add('hover:text-red-400');
-    spanUsuario.textContent = `${nome}`;
+    spanUsuario.textContent = `Olá, ${nome}`;
   }
 
   // ✅ Atualiza nome no menu mobile
   const spanMobile = document.getElementById('nomeUsuarioMobile');
   if (spanMobile) {
-    spanMobile.textContent = `${nome}`;
+    spanMobile.textContent = `Olá, ${nome}`;
   }
 
   // ✅ Dropdown do usuário no desktop
@@ -59,48 +63,4 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = 'login.html';
     });
   }
-
-  // ✅ Fecha todos os submenus se clicar fora do menu mobile
-  document.addEventListener('click', function (event) {
-    const menuMobile = document.getElementById('menuMobile');
-    const menuToggle = document.getElementById('menuToggle');
-  
-    if (
-      menuMobile &&
-      !menuMobile.classList.contains('hidden') &&
-      !menuMobile.contains(event.target) &&
-      !menuToggle.contains(event.target)
-    ) {
-  
-      ['cadastrosMenu', 'relatoriosMenu', 'graficosMenu'].forEach(id => {
-        const menu = document.getElementById(id);
-        if (menu) menu.classList.add('hidden');
-      });
-  
-      menuMobile.classList.add('hidden');
-    }
-  });
-  
 });
-
-/**
- * ✅ Função global chamada pelos botões para abrir o submenu correspondente
- * Fecha todos os outros submenus antes de abrir o clicado
- */
-function toggleMenu(id) {
-  const submenus = ['cadastrosMenu', 'relatoriosMenu', 'graficosMenu'];
-  submenus.forEach(menuId => {
-    const el = document.getElementById(menuId);
-    if (el && menuId !== id) {
-      el.classList.add('hidden');
-    }
-  });
-
-  const target = document.getElementById(id);
-  if (target) {
-    target.classList.toggle('hidden');
-  }
-}
-
-// Torna a função acessível no escopo global para uso no HTML (ex: onclick="toggleMenu('cadastrosMenu')")
-window.toggleMenu = toggleMenu;

@@ -92,7 +92,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       .filter(col => col.eColuna)
       .forEach(col => {
         const th = document.createElement('th');
-        th.className = 'px-4 py-2 text-center uppercase';
+        th.className = 'px-2 py-1 text-sm text-center uppercase whitespace-nowrap overflow-hidden text-ellipsis';
+
         th.textContent = col.label;
         tr.appendChild(th);
       });
@@ -108,7 +109,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   //***************************************************************************************
   // Busca os registros do Firebase e atualiza a tabela
-  
   const carregarRegistros = async () => {
     registros = [];
     const snapshot = await getDocs(collection(db, colecao));
@@ -131,38 +131,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     registrosPaginados.forEach((item, index) => {
       const tr = document.createElement('tr');
       estrutura
-  .filter(col => col.eColuna)
-  .forEach(col => {
-    const td = document.createElement('td');
-    td.className = 'px-2 py-1 border-t text-center align-middle';
+      .filter(col => col.eColuna)
+      .forEach(col => {
+        const td = document.createElement('td');
+        td.className = 'px-2 py-0.5 text-sm border-t text-center align-middle leading-tight whitespace-nowrap overflow-hidden text-ellipsis';
+        //td.className = 'px-2 py-1 border-t text-center align-middle';
 
-    let valor = '';
+        let valor = '';
 
-    if (col.calculado && camposCalculadosPersonalizados[tipo]?.[col.campo]) {
-      valor = camposCalculadosPersonalizados[tipo][col.campo](item);
-    } else {
-      valor = item[col.campo] || '';
-      if (col.tipo === 'date' && valor) {
-        const [ano, mes, dia] = valor.split('-');
-        valor = `${dia}/${mes}/${ano.slice(2)}`;
-      }
-    }
+        if (col.calculado && camposCalculadosPersonalizados[tipo]?.[col.campo]) {
+          valor = camposCalculadosPersonalizados[tipo][col.campo](item);
+        } else {
+          valor = item[col.campo] || '';
+          if (col.tipo === 'date' && valor) {
+            const [ano, mes, dia] = valor.split('-');
+            valor = `${dia}/${mes}/${ano.slice(2)}`;
+          }
+        }
 
-    td.textContent = valor;
-    tr.appendChild(td);
-  });
+        td.textContent = valor;
+        tr.appendChild(td);
+      });
 
+    
+      const tdAcoes = document.createElement('td');
+      //tdAcoes.className = 'px-4 py-2 border-t text-center align-middle';
+      tdAcoes.className = 'px-2 py-0.5 text-sm border-t text-center align-middle leading-tight';
+
+      const btnEditar = document.createElement('button');
+      btnEditar.innerHTML = `<img src="icons/icon-edit.svg" alt="Editar" class="w-5 h-5 inline-block">`;
+      btnEditar.className = 'hover:scale-125 transition-transform';
+      btnEditar.title = 'Editar';
       
-        const tdAcoes = document.createElement('td');
-        tdAcoes.className = 'px-4 py-2 border-t text-center align-middle';
-        const btnEditar = document.createElement('button');
-        btnEditar.textContent = 'Editar';
-        btnEditar.className = 'text-blue-500 hover:underline text-sm';
-        btnEditar.addEventListener('click', () => abrirFormulario(item.id));
-        tdAcoes.appendChild(btnEditar);
-        tr.appendChild(tdAcoes);
-        tabelaCorpo.appendChild(tr);
-        atualizarPaginacao(dados);
+      btnEditar.addEventListener('click', () => abrirFormulario(item.id));
+      tdAcoes.appendChild(btnEditar);
+      tr.appendChild(tdAcoes);
+      tabelaCorpo.appendChild(tr);
+      atualizarPaginacao(dados);
 
 
     });
@@ -364,7 +369,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     areaFiltros.innerHTML = '';
 
     const container = document.createElement('div');
-    container.className = 'flex flex-wrap gap-4';
+    container.className = 'flex flex-wrap justify-center gap-4';
 
     estrutura
       .filter(f => !f.calculado && f.filtrar)
