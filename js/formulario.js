@@ -1,8 +1,8 @@
 // formulario.js
 
-import { db } from './firebaseConfig.js';
+import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 import { mostrarAlerta } from './alerta.js';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+import { db } from './firebaseConfig.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const btnNovo = document.getElementById('btnNovoRegistro');
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const areaFiltros = document.getElementById('areaFiltros');
   const btnLimparFiltros = document.getElementById('btnLimparFiltros');
 
-
+ 
     
   //***************************************************************************************
   // Define campos calculados por Formulário
@@ -64,14 +64,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (h2Titulo) h2Titulo.textContent = tituloPagina;
   document.title = `PosturAves - ${tituloPagina}`;
 
+
   
   const estrutura = configuracoesFormularios[tipo];
   const colecao = tipo === 'colaboradores' ? 'bdcolaboradores' : 'bd' + tipo;
   
-  if (!estrutura) {
+  if (!estrutura && tipo !== 'financeiro') {
     mostrarAlerta('Tipo de formulário inválido ou não configurado.', 'error');
     return;
   }
+  
   
 
   let registros = [];
@@ -80,8 +82,72 @@ document.addEventListener('DOMContentLoaded', async () => {
   const registrosPorPagina = 20;
 
 
+  //***************************************************************************************
+  // Inicia o formulário financeiro (layout básico inicial)
+  const iniciarFormularioFinanceiro = (id = null) => {
+    formContainer.classList.remove('hidden');
+    formConteudo.innerHTML = '';
 
-  
+    // Cabeçalho
+    const titulo = document.createElement('h3');
+    titulo.textContent = id ? 'Editar Registro Financeiro' : 'Novo Registro Financeiro';
+    titulo.className = 'text-lg font-semibold mb-4';
+    formConteudo.appendChild(titulo);
+
+    // Exemplo de campos iniciais
+    const camposBasicos = [
+      { id: 'finTipo', label: 'Tipo', tipo: 'select', opcoes: ['Compra', 'Venda'] },
+      { id: 'finData', label: 'Data', tipo: 'date' },
+      { id: 'finDescricao', label: 'Descrição', tipo: 'text' }
+    ];
+
+    camposBasicos.forEach(campo => {
+      const div = document.createElement('div');
+      div.className = 'mb-4';
+
+      const label = document.createElement('label');
+      label.textContent = campo.label;
+      label.className = 'block text-sm font-medium text-gray-700 mb-1';
+
+      let input;
+      if (campo.tipo === 'select') {
+        input = document.createElement('select');
+        input.className = 'w-full border rounded px-3 py-2 text-sm';
+        campo.opcoes.forEach(op => {
+          const option = document.createElement('option');
+          option.value = op;
+          option.textContent = op;
+          input.appendChild(option);
+        });
+      } else {
+        input = document.createElement('input');
+        input.type = campo.tipo;
+        input.className = 'w-full border rounded px-3 py-2 text-sm';
+      }
+
+      input.id = campo.id;
+      div.appendChild(label);
+      div.appendChild(input);
+      formConteudo.appendChild(div);
+    });
+
+    // Botão salvar (placeholder por enquanto)
+    const btnSalvar = document.createElement('button');
+    btnSalvar.textContent = 'Salvar';
+    btnSalvar.className = 'bg-blue-500 text-white px-3 py-1.5 rounded hover:bg-blue-600';
+    formConteudo.appendChild(btnSalvar);
+  };
+
+
+
+  //***************************************************************************************
+  // Identifica quando se tratar do formulário financeiro(Tem uma estrutura diferenciada)
+  if (tipo === 'financeiro') {
+    iniciarFormularioFinanceiro(); // nova função isolada
+    return;
+  }
+
+
   //***************************************************************************************
   // Gera dinamicamente o cabeçalho da tabela com base na estrutura
   const renderizarCabecalho = () => {
@@ -163,7 +229,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       btnEditar.className = 'hover:scale-125 transition-transform';
       btnEditar.title = 'Editar';
       
-      btnEditar.addEventListener('click', () => abrirFormulario(item.id));
+      btnEditar.addEventListener('click', () => {
+        if (tipo === 'financeiro') {
+          iniciarFormularioFinanceiro(item.id);
+        } else {
+          abrirFormulario(item.id);
+        }
+      });
+      
       tdAcoes.appendChild(btnEditar);
       tr.appendChild(tdAcoes);
       tabelaCorpo.appendChild(tr);
@@ -172,6 +245,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     });
   };
+
+
 
 
   //***************************************************************************************
@@ -322,7 +397,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   //***************************************************************************************
   // Captura o click do botão +Novo Registro
-  btnNovo?.addEventListener('click', () => abrirFormulario());
+  //btnNovo?.addEventListener('click', () => {
+  //  if (tipo === 'financeiro') {
+  //    iniciarFormularioFinanceiro();
+  //  } else {
+  //    abrirFormulario();
+  //  }
+  //});
+  
+  // Fecha o formulário
   btnFechar?.addEventListener('click', () => {
     formContainer.classList.add('hidden');
     formConteudo.innerHTML = '';
@@ -471,10 +554,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   
 
-
   //***************************************************************************************
   // Carrega a tabela de registros atualizada
   await carregarRegistros();
   gerarFiltros();  
   
+
+  //***************************************************************************************
+  // Captura o click do botão +Novo Registro
+  btnNovo?.addEventListener('click', () => {
+    if (tipo === 'financeiro') {
+      iniciarFormularioFinanceiro();
+    } else {
+      abrirFormulario();
+    }
+  });
 });
