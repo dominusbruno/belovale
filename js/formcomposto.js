@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // Função para abrir formulário composto (ainda será definida por tipo)
-  const abrirFormulario = (id = null) => {
+  const abrirFormulario = async (id = null) => {
     formContainer.classList.remove('hidden');
     // Limpa o conteúdo anterior do formulário e cria a 1ª parte do formulário financeiro:
     // Contém os campos de dados gerais da transação: data (gerada automaticamente),
@@ -102,23 +102,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ---------------- 1ª PARTE - INFORMAÇÕES GERAIS ---------------- //
 
-    // Cria o contêiner do grupo 1 com layout em grid de 2 colunas em telas médias
+    // Cria o contêiner principal do grupo1
     const grupo1 = document.createElement('div');
-    grupo1.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4';
+    grupo1.className = 'w-full space-y-4'; // separa visualmente as linhas
 
-    // Campo de data com valor automático
-    const data = new Date().toISOString().split('T')[0];
+    // LINHA 1 — já existente: Data + Tipo (metade do modal)
+    const linha1 = document.createElement('div');
+    linha1.className = 'w-full sm:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-4';
+
+    // Campo de Data
+    const hoje = new Date();
+    const data = hoje.toLocaleDateString('fr-CA');
     const campoData = document.createElement('input');
-    campoData.type = 'text';
+    campoData.type = 'date';
     campoData.id = 'finData';
     campoData.value = data;
-    campoData.disabled = true;
-    campoData.className = 'w-full border rounded px-3 py-2 text-sm bg-gray-100';
-    grupo1.appendChild(criarCampoComLabel('Data', campoData));
+    campoData.className = 'w-full border rounded px-3 py-2 text-sm';
+    linha1.appendChild(criarCampoComLabel('Data', campoData));
 
-    // Campo de tipo (Receita ou Despesa) com radios lado a lado
+    // Campo de Tipo
     const divTipo = document.createElement('div');
-    divTipo.className = 'flex gap-4 items-center';
+    divTipo.className = 'flex gap-4 items-center mt-4';
     ['Receita', 'Despesa'].forEach(tipo => {
       const label = document.createElement('label');
       label.className = 'flex items-center gap-2 text-sm';
@@ -130,35 +134,79 @@ document.addEventListener('DOMContentLoaded', async () => {
       label.appendChild(document.createTextNode(tipo));
       divTipo.appendChild(label);
     });
-    grupo1.appendChild(criarCampoComLabel('Tipo', divTipo));
+    linha1.appendChild(criarCampoComLabel('Tipo', divTipo));
+    grupo1.appendChild(linha1);
 
-    // Campos da 2ª e 3ª linhas
-    [
-      { id: 'finNota', label: 'Nota' },
-      { id: 'finFornecedor', label: 'Fornecedor' },
-      { id: 'finCategoria', label: 'Categoria' },
-      { id: 'finSubcategoria', label: 'Subcategoria' }
-    ].forEach(({ id, label }) => {
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.id = id;
-      input.className = 'w-full border rounded px-3 py-2 text-sm';
-      grupo1.appendChild(criarCampoComLabel(label, input));
-    });
+    // LINHA 2 — Nota (1/4) + Fornecedor (3/4)
+    const linha2 = document.createElement('div');
+    linha2.className = 'grid grid-cols-1 sm:grid-cols-4 gap-4';
 
-    // Campo de observação ocupa as 2 colunas
+    const inputNota = document.createElement('input');
+    inputNota.type = 'text';
+    inputNota.id = 'finNota';
+    inputNota.className = 'w-full border rounded px-3 py-2 text-sm';
+    linha2.appendChild(criarCampoComLabel('Nota', inputNota)); // col-span-1 (1/4)
+
+    const wrapperFornecedor = document.createElement('div');
+    wrapperFornecedor.className = 'sm:col-span-3'; // 3/4 da linha
+    const inputFornecedor = document.createElement('input');
+    inputFornecedor.type = 'text';
+    inputFornecedor.id = 'finFornecedor';
+    inputFornecedor.className = 'w-full border rounded px-3 py-2 text-sm';
+    wrapperFornecedor.appendChild(criarCampoComLabel('Fornecedor', inputFornecedor));
+    linha2.appendChild(wrapperFornecedor);
+
+    grupo1.appendChild(linha2);
+
+    // LINHA 3 — Categoria (1/4), Subcategoria (1/4), Observação (2/4)
+    const linha3 = document.createElement('div');
+    linha3.className = 'grid grid-cols-1 sm:grid-cols-4 gap-4';
+
+    // --- Categoria ---
+    const inputCategoria = document.createElement('input');
+    inputCategoria.type = 'text';
+    inputCategoria.id = 'finCategoria';
+    inputCategoria.setAttribute('list', 'listaCategorias'); // usa datalist
+    inputCategoria.className = 'w-full border rounded px-3 py-2 text-sm';
+    linha3.appendChild(criarCampoComLabel('Categoria', inputCategoria));
+
+    // datalist da categoria
+    const datalistCategoria = document.createElement('datalist');
+    datalistCategoria.id = 'listaCategorias';
+    document.body.appendChild(datalistCategoria); // precisa estar no body
+
+    // --- Subcategoria ---
+    const inputSubcategoria = document.createElement('input');
+    inputSubcategoria.type = 'text';
+    inputSubcategoria.id = 'finSubcategoria';
+    inputSubcategoria.setAttribute('list', 'listaSubcategorias');
+    inputSubcategoria.className = 'w-full border rounded px-3 py-2 text-sm';
+    linha3.appendChild(criarCampoComLabel('Subcategoria', inputSubcategoria));
+
+    // datalist da subcategoria
+    const datalistSubcategoria = document.createElement('datalist');
+    datalistSubcategoria.id = 'listaSubcategorias';
+    document.body.appendChild(datalistSubcategoria);
+
+
+    // Observação (ocupa metade da linha)
+    const wrapperObs = document.createElement('div');
+    wrapperObs.className = 'sm:col-span-2';
     const inputObs = document.createElement('input');
     inputObs.type = 'text';
     inputObs.id = 'finObs';
     inputObs.className = 'w-full border rounded px-3 py-2 text-sm';
-
-    const wrapperObs = document.createElement('div');
-    wrapperObs.className = 'sm:col-span-2';
     wrapperObs.appendChild(criarCampoComLabel('Observação', inputObs));
-    grupo1.appendChild(wrapperObs);
+    linha3.appendChild(wrapperObs);
 
-    // Adiciona o grupo1 ao formulário
+    grupo1.appendChild(linha3);
+
+    // Adiciona tudo ao formulário
     formConteudo.appendChild(grupo1);
+    await carregarCategorias();
+await carregarSubcategorias();
+
+
 
 
 
@@ -315,18 +363,52 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Adiciona ao conteúdo principal do formulário
     formConteudo.appendChild(grupo3);
 
-    // Adiciona Botão salvar
-    const linhaSalvar = document.createElement('div');
-    linhaSalvar.className = 'mt-6 flex justify-center';
-    const btnSalvar = document.createElement('button');
-    btnSalvar.textContent = 'Salvar';
-    btnSalvar.className = 'bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700';
-    btnSalvar.addEventListener('click', () => {
-      // Aqui futuramente chamaremos salvarFinanceiro()
-      mostrarAlerta('Função de salvamento ainda não implementada.', 'info');
-    });
-    linhaSalvar.appendChild(btnSalvar);
-    formConteudo.appendChild(linhaSalvar);
+    // Substitui o trecho atual de criação do botão "Salvar"
+const linhaSalvar = document.createElement('div');
+linhaSalvar.className = 'mt-6 flex justify-center';
+
+const btnSalvar = document.createElement('button');
+btnSalvar.textContent = 'Salvar';
+btnSalvar.className = 'bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700';
+
+btnSalvar.addEventListener('click', async () => {
+  const categoria = document.getElementById('finCategoria').value.trim();
+  const subcategoria = document.getElementById('finSubcategoria').value.trim();
+
+  const categoriasValidas = Array.from(document.getElementById('finCategoria').list.options).map(opt => opt.value.toLowerCase());
+  const subcategoriasValidas = Array.from(document.getElementById('finSubcategoria').list.options).map(opt => opt.value.toLowerCase());
+
+  // Verifica categoria
+  if (categoria && !categoriasValidas.includes(categoria.toLowerCase())) {
+    const inserir = confirm(`A categoria "${categoria}" não existe. Deseja cadastrá-la?`);
+    if (inserir) {
+      await addDoc(collection(db, 'bdcategorias'), { catNome: categoria });
+      mostrarAlerta('Categoria adicionada com sucesso!', 'success');
+    } else {
+      mostrarAlerta('Selecione uma categoria válida para continuar.', 'error');
+      return;
+    }
+  }
+
+  // Verifica subcategoria
+  if (subcategoria && !subcategoriasValidas.includes(subcategoria.toLowerCase())) {
+    const inserir = confirm(`A subcategoria "${subcategoria}" não existe. Deseja cadastrá-la?`);
+    if (inserir) {
+      await addDoc(collection(db, 'bdsubcategorias'), { subCatNome: subcategoria });
+      mostrarAlerta('Subcategoria adicionada com sucesso!', 'success');
+    } else {
+      mostrarAlerta('Selecione uma subcategoria válida para continuar.', 'error');
+      return;
+    }
+  }
+
+  // Aqui entra o salvamento final
+  mostrarAlerta('Salvamento implementado aqui...', 'info');
+});
+
+linhaSalvar.appendChild(btnSalvar);
+formConteudo.appendChild(linhaSalvar);
+
 
 
     // Função auxiliar: adiciona uma linha à tabela de parcelas
@@ -352,32 +434,72 @@ document.addEventListener('DOMContentLoaded', async () => {
       tbody.appendChild(tr);
 
       // Carrega os lotes ativos no dropdown
-      carregarLotesAtivos(tr.querySelector('select'), lote);
+      //carregarLotesAtivos(tr.querySelector('select'), lote);
     }
 
     // Carrega os lotes ativos (formato Galpão(Lote), salva apenas o ID)
-    async function carregarLotesAtivos(selectElement, valorSelecionado) {
-      const snapshot = await getDocs(collection(db, 'bdlotes'));
-      const lotes = [];
-      snapshot.forEach(doc => {
-        const lote = doc.data();
-        if (lote.loteStatus !== 'INATIVO') {
-          lotes.push({ id: doc.id, nome: `${lote.loteGalpao} (${doc.id})` });
-        }
-      });
+    // Função que carrega os lotes ativos no dropdown
+    async function carregarLotesAtivos(selectElement, valorSelecionado = '') {
+      try {
+        const snapshot = await getDocs(collection(db, 'bdlotes'));
+        const lotes = [];
 
-      selectElement.innerHTML = '<option value="">Selecione</option>';
-      lotes.forEach(l => {
-        const opt = document.createElement('option');
-        opt.value = l.id;
-        opt.textContent = l.nome;
-        if (l.id === valorSelecionado) opt.selected = true;
-        selectElement.appendChild(opt);
-      });
+        snapshot.forEach(doc => {
+          const lote = doc.data();
+          if (lote.loteStatus === 'ATIVO') {
+            // Usa loteGalpao e loteIdentificador no formato solicitado
+            lotes.push({
+              id: doc.id,
+              nome: `${lote.loteGalpao} (${lote.loteIdentificador})`
+            });
+          }
+        });
+
+        // Limpa o select e insere as opções
+        selectElement.innerHTML = '<option value="">Selecione</option>';
+        lotes.forEach(l => {
+          const opt = document.createElement('option');
+          opt.value = l.id;
+          opt.textContent = l.nome;
+          if (l.id === valorSelecionado) opt.selected = true;
+          selectElement.appendChild(opt);
+        });
+      } catch (erro) {
+        console.error('Erro ao carregar lotes ativos:', erro);
+        mostrarAlerta('Erro ao carregar os lotes ativos.', 'error');
+      }
     }
 
+    async function carregarCategorias() {
+  const lista = document.getElementById('listaCategorias');
+  lista.innerHTML = '';
+  const snapshot = await getDocs(collection(db, 'bdcategorias'));
+  snapshot.forEach(doc => {
+    const option = document.createElement('option');
+    option.value = doc.data().catNome;
+    lista.appendChild(option);
+  });
+}
+
+async function carregarSubcategorias() {
+  const lista = document.getElementById('listaSubcategorias');
+  lista.innerHTML = '';
+  const snapshot = await getDocs(collection(db, 'bdsubcategorias'));
+  snapshot.forEach(doc => {
+    const option = document.createElement('option');
+    option.value = doc.data().subCatNome;
+    lista.appendChild(option);
+  });
+}
+
+
+
+
+
     // Adiciona 1 parcela padrão na abertura do formulário
-    adicionarLinhaParcela(1, new Date().toISOString().split('T')[0]);
+    const dataHoje = new Date().toLocaleDateString('fr-CA');
+    adicionarLinhaParcela(1, dataHoje);
+
 
   }
 
