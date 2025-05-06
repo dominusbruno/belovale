@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // LINHA 2 — Produtos (tabela horizontal)
         const linha2 = document.createElement('div');
         linha2.innerHTML = `
-          <div class="mt-1 mb-1 font-semibold uppercase text-xs">Item</div>
+          <div class="mt-1 mb-1 font-semibold uppercase text-xs">Items</div>
           <div class="grid grid-cols-5 gap-y-0 gap-x-2 text-[11px] ml-3">
             <div class="font-semibold uppercase">Produto</div>
             <div class="font-semibold uppercase text-center">Quant</div>
