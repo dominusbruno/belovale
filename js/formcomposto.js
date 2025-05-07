@@ -234,6 +234,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Função para abrir formulário composto (ainda será definida por tipo)
   const abrirFormulario = async (dados = null) => {
+    // Limpa ID anterior, por segurança
+    formConteudo.dataset.idRegistro = '';
+
+    // Se estiver editando, define o ID do registro atual
+    if (dados?.id) {
+      formConteudo.dataset.idRegistro = dados.id;
+    }
+
+
     formContainer.classList.remove('hidden');
     // Limpa o conteúdo anterior do formulário e cria a 1ª parte do formulário financeiro:
     // Contém os campos de dados gerais da transação: data (gerada automaticamente),
@@ -425,7 +434,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <input type="text" list="listaProdutos" placeholder="Produto" class="w-full border rounded px-2 py-1 text-sm" />
         </td>
         <td class="col-span-1"><input type="number" min="0" step="0.01" placeholder="Qtd" class="w-full border rounded px-2 py-1 text-sm text-right" /></td>
-        <td class="col-span-1"><input type="number" min="0" step="0.01" placeholder="Preço" class="w-full border rounded px-2 py-1 text-sm text-right" /></td>
+        <td class="col-span-1"><input type="text" placeholder="Preço" class="w-full border rounded px-2 py-1 text-sm text-right" /></td>
         <td class="col-span-2 border rounded text-right text-sm pt-1">0,00</td>
         <td class="col-span-2">
           <select class="w-full border rounded px-2 py-1 text-sm">
@@ -439,16 +448,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
       const inputProduto = tr.querySelectorAll('input')[0];          // Produto (texto)
-      const inputQtd = tr.querySelectorAll('input')[1];              // Quantidade (número)
-      const inputPreco = tr.querySelectorAll('input')[2];            // Preço (número)
-      const totalCelula = tr.children[3];                            // Total (célula de texto)
-      const selectLote = tr.querySelector('select');                 // Lote (select)
-      const btnRemover = tr.querySelector('img');                    // Botão de remover
+      const inputQtd     = tr.querySelectorAll('input')[1];          // Quantidade (número)
+      const inputPreco   = tr.querySelectorAll('input')[2];          // Preço (texto com máscara)
+      const totalCelula  = tr.children[3];                           // Total (texto)
+      const selectLote   = tr.querySelector('select');               // Dropdown de lote
+      const btnRemover   = tr.querySelector('img');                  // Botão de remover linha
+
+      // 🎯 Agora sim aplique a máscara ao campo de preço
+      inputPreco.addEventListener('input', (e) => {
+        let valor = e.target.value.replace(/\D/g, '');
+
+        // Se for número muito grande por erro, limita
+        if (valor.length > 10) valor = valor.slice(0, 10);
+
+        // Aplica formatação somente se digitando manualmente
+        if (document.activeElement === e.target) {
+          valor = (parseInt(valor || '0', 10) / 100).toFixed(2);
+          e.target.value = formatarReal(valor);
+          atualizarTotal(); // sempre atualiza total após digitação
+        }
+      });
+
+
 
 
 
       const atualizarTotal = () => {
-        const total = parseFloat(inputQtd.value || 0) * parseFloat(inputPreco.value || 0);
+        const precoNumerico = parseFloat((inputPreco.value || '0').replace(/\D/g, '')) / 100;
+        const total = parseFloat(inputQtd.value || 0) * precoNumerico;
         totalCelula.textContent = formatarReal(total);
         atualizarTotalGeral();
       };
@@ -549,41 +576,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const categoriasValidas = Array.from(document.getElementById('finCategoria').list.options).map(opt => opt.value.toLowerCase());
       const subcategoriasValidas = Array.from(document.getElementById('finSubcategoria').list.options).map(opt => opt.value.toLowerCase());
 
-      // Verifica categoria
-      if (categoria && !categoriasValidas.includes(categoria.toLowerCase())) {
-        const inserir = confirm(`A categoria "${categoria}" não existe. Deseja cadastrá-la?`);
-        if (inserir) {
-          await addDoc(collection(db, 'bdcategorias'), { catNome: categoria });
-          mostrarAlerta('Categoria adicionada com sucesso!', 'success');
-        } else {
-          mostrarAlerta('Selecione uma categoria válida para continuar.', 'error');
-          return;
-        }
-      }
+      // Verifica e cadastra categoria, subcategoria e fornecedor se necessário
+      await verificarCadastroSimples(categoria, 'bdcategorias', 'catNome', 'Categoria', categoriasValidas);
+      await verificarCadastroSimples(subcategoria, 'bdsubcategorias', 'subCatNome', 'Subcategoria', subcategoriasValidas);
+      await verificarCadastroSimples(fornecedor, 'bdfornecedores', 'forNome', 'Fornecedor', fornecedoresValidos);
 
-      // Verifica subcategoria
-      if (subcategoria && !subcategoriasValidas.includes(subcategoria.toLowerCase())) {
-        const inserir = confirm(`A subcategoria "${subcategoria}" não existe. Deseja cadastrá-la?`);
-        if (inserir) {
-          await addDoc(collection(db, 'bdsubcategorias'), { subCatNome: subcategoria });
-          mostrarAlerta('Subcategoria adicionada com sucesso!', 'success');
-        } else {
-          mostrarAlerta('Selecione uma subcategoria válida para continuar.', 'error');
-          return;
-        }
-      }
-
-      // Verifica Fornecedores
-      if (fornecedor && !fornecedoresValidos.includes(fornecedor.toLowerCase())) {
-        const inserir = confirm(`O fornecedor "${fornecedor}" não existe. Deseja cadastrá-lo?`);
-        if (inserir) {
-          await addDoc(collection(db, 'bdfornecedores'), { forNome: fornecedor });
-          mostrarAlerta('Fornecedor adicionado com sucesso!', 'success');
-        } else {
-          mostrarAlerta('Selecione um fornecedor válido para continuar.', 'error');
-          return;
-        }
-      }
 
       // Verifica se algum tipo foi selecionado
       const tipoSelecionado = document.querySelector('input[name="finTipo"]:checked');
@@ -608,32 +605,66 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Captura os produtos da tabela
         const produtos = [];
         const linhasProdutos = document.querySelectorAll('#tabelaItensCorpo tr');
-        linhasProdutos.forEach(tr => {
+
+        // Lista local com produtos válidos já existentes
+        const produtosValidos = Array.from(document.getElementById('listaProdutos').options)
+          .map(opt => opt.value.toLowerCase());
+
+        for (const tr of linhasProdutos) {
           const inputs = tr.querySelectorAll('input, select');
           const nome = inputs[0]?.value || '';
           const quantidade = parseFloat(inputs[1]?.value || 0);
-          const preco = parseFloat(inputs[2]?.value || 0);
+
+          // Extrai o valor do campo de preço com máscara R$
+          const precoTexto = inputs[2]?.value || '0';
+          const precoNumerico = parseFloat(precoTexto.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+          const preco = Number(precoNumerico.toFixed(2));
+
           const selectLote = tr.querySelector('select');
           const optionSelecionada = selectLote?.options[selectLote.selectedIndex];
           const loteTexto = optionSelecionada?.textContent || '';
           const loteIdentificador = loteTexto.split('(')[1]?.replace(')', '') || '';
 
           if (nome) {
+            // Verifica e cadastra o produto se ainda não existir na lista local
+            if (!produtosValidos.includes(nome.toLowerCase())) {
+              const confirmar = confirm(`O produto "${nome}" não existe. Deseja cadastrá-lo?`);
+              if (confirmar) {
+                await addDoc(collection(db, 'bdprodutos'), { prodNome: nome });
+                mostrarAlerta('Produto adicionado com sucesso!', 'success');
+                produtosValidos.push(nome.toLowerCase());
+              } else {
+                mostrarAlerta('Selecione um produto válido para continuar.', 'error');
+                return;
+              }
+            }
+
             produtos.push({ nome, quantidade, preco, lote: loteIdentificador });
           }
-
-        });
-
+        }
         dados.finProduto = produtos;
+
 
         // Captura as parcelas existentes
         const parcelas = [];
         const linhasParcelas = document.querySelectorAll('#corpoParcelas > div.grid');
 
+        // Verifica se todas as parcelas estão vazias (ou zeradas)
         const todasParcelasVazias = [...linhasParcelas].every(div => {
-          const valorInput = div.querySelector('input[type="number"]');
-          return !valorInput || !valorInput.value || parseFloat(valorInput.value) <= 0;
-        });
+  const inputs = div.querySelectorAll('input');
+  if (inputs.length < 3) return true;
+
+  const parcela = inputs[0].value?.trim();
+  const vencimento = inputs[1].value?.trim();
+  const valorTexto = inputs[2].value?.trim();
+
+  const valor = parseFloat(valorTexto.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+
+  return !(parcela && vencimento && valor > 0);
+});
+
+
+
 
         if (todasParcelasVazias) {
           const hoje = new Date().toISOString().split('T')[0];
@@ -646,23 +677,26 @@ document.addEventListener('DOMContentLoaded', async () => {
           });
         } else {
           linhasParcelas.forEach(div => {
-            const inputs = div.querySelectorAll('input');
-            const select = div.querySelector('select');
-            if (inputs.length < 3 || !select) return;
+          const inputs = div.querySelectorAll('input');
+          const select = div.querySelector('select');
+          if (inputs.length < 3 || !select) return;
 
-            const parcela = inputs[0]?.value?.trim();
-            const vencimento = inputs[1]?.value;
-            const valor = parseFloat(inputs[2]?.value || 0);
-            const status = select?.value || 'pendente';
+          const parcela = inputs[0].value.trim();
+          const vencimento = inputs[1].value;
+          const valorTexto = inputs[2].value || '0';
+          const valor = Number(parseFloat(valorTexto.replace(/[^\d,]/g, '').replace(',', '.')).toFixed(2));
+          const status = select.value;
 
-            if (parcela && vencimento && valor > 0) {
-              parcelas.push({ parcela, vencimento, valor, status });
-            }
-          });
+          if (parcela && vencimento && valor > 0) {
+            parcelas.push({ parcela, vencimento, valor, status });
+          }
+        });
+
+
         }
-
-        
         dados.finParcelas = parcelas;
+
+
         const idRegistro = formConteudo.dataset.idRegistro;
         if (idRegistro) {
           const ref = doc(db, 'bdfinanceiro', idRegistro);
@@ -691,40 +725,53 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // Função auxiliar: adiciona uma linha à tabela de parcelas
-    function adicionarLinhaParcela(parcela = 1, vencimento = '') {
-      const tbody = document.getElementById('corpoParcelas');
+function adicionarLinhaParcela(parcela = 1, vencimento = '', valor = '') {
+  const tbody = document.getElementById('corpoParcelas');
 
-      const linha = document.createElement('div');
-      linha.className = 'grid grid-cols-6 gap-1 items-center m-1';
+  const linha = document.createElement('div');
+  linha.className = 'grid grid-cols-6 gap-1 items-center m-1';
 
-      linha.innerHTML = `
-        <div class="col-span-1">
-          <input type="text" class="w-full text-sm text-center border px-2 py-1 rounded" value="${parcela}">
-        </div>
-        <div class="col-span-2">
-          <input type="date" class="w-full text-sm text-center border px-2 py-1 rounded" value="${vencimento}">
-        </div>
-        <div class="col-span-1">
-          <input type="number" class="w-full text-sm text-right border px-2 py-1 rounded" min="0" step="0.01" value="">
-        </div>
-        <div class="col-span-1">
-          <select class="w-full text-sm border px-2 py-1 rounded">
-            <option value="pendente" selected>PENDENTE</option>
-            <option value="pago">PAGO</option>
-          </select>
-        </div>
-        <div class="col-span-1 text-center">
-          <img src="./icons/icon-cancel.svg" alt="Remover" class="w-5 h-5 mx-auto cursor-pointer hover:scale-110 transition" />
-        </div>
-        <div class="col-span-4"></div>
-      `;
+  linha.innerHTML = `
+    <div class="col-span-1">
+      <input type="text" class="w-full text-sm text-center border px-2 py-1 rounded" value="${parcela}">
+    </div>
+    <div class="col-span-2">
+      <input type="date" class="w-full text-sm text-center border px-2 py-1 rounded" value="${vencimento}">
+    </div>
+    <div class="col-span-1">
+      <input type="text" class="w-full text-sm text-right border px-2 py-1 rounded" value="${valor ? formatarReal(valor) : ''}">
+    </div>
+    <div class="col-span-1">
+      <select class="w-full text-sm border px-2 py-1 rounded">
+        <option value="pendente" selected>PENDENTE</option>
+        <option value="pago">PAGO</option>
+      </select>
+    </div>
+    <div class="col-span-1 text-center">
+      <img src="./icons/icon-cancel.svg" alt="Remover" class="w-5 h-5 mx-auto cursor-pointer hover:scale-110 transition" />
+    </div>
+    <div class="col-span-4"></div>
+  `;
 
-      // Adiciona funcionalidade ao botão de remover
-      const btnRemover = linha.querySelector('img');
-      btnRemover.addEventListener('click', () => linha.remove());
+  // Agora sim: seleciona o input de valor corretamente (terceiro input da linha)
+  const inputValorParcela = linha.querySelectorAll('input')[2];
 
-      tbody.appendChild(linha);
-    }
+  // Aplica a máscara apenas quando o usuário digita (evita mascarar ao preencher via JS)
+  inputValorParcela.addEventListener('input', (e) => {
+    if (document.activeElement !== e.target) return;
+
+    let valor = e.target.value.replace(/\D/g, '');
+    valor = (parseInt(valor || '0', 10) / 100).toFixed(2);
+    e.target.value = formatarReal(valor);
+  });
+
+  // Botão de remover linha
+  const btnRemover = linha.querySelector('img');
+  btnRemover.addEventListener('click', () => linha.remove());
+
+  tbody.appendChild(linha);
+}
+
 
 
 
@@ -802,6 +849,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
+    async function carregarProdutos() {
+      const lista = document.getElementById('listaProdutos');
+      if (!lista) return;
+
+      lista.innerHTML = '';
+      const snapshot = await getDocs(collection(db, 'bdprodutos'));
+      snapshot.forEach(doc => {
+        const option = document.createElement('option');
+        option.value = doc.data().prodNome;
+        lista.appendChild(option);
+      });
+    }
+    
+
     if (dados) {
       // Preenche campos principais
       formConteudo.dataset.idRegistro = dados.id || '';
@@ -830,7 +891,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (inputs.length >= 3) {
           inputs[0].value = p.nome || '';
           inputs[1].value = p.quantidade || '';
-          inputs[2].value = p.preco || '';
+          inputs[2].value = formatarReal(p.preco);
           const totalCelula = linha.children[3]; // célula do total
           const total = (p.quantidade || 0) * (p.preco || 0);
           totalCelula.textContent = formatarReal(total);
@@ -853,25 +914,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (inputs.length >= 3) {
           inputs[0].value = parcelaObj.parcela;
           inputs[1].value = parcelaObj.vencimento;
-          inputs[2].value = parcelaObj.valor;
+          inputs[2].value = formatarReal(parcelaObj.valor);
           select.value = parcelaObj.status || 'pendente';
         }
       });
     }
 
 
-    async function carregarProdutos() {
-      const lista = document.getElementById('listaProdutos');
-      if (!lista) return;
 
-      lista.innerHTML = '';
-      const snapshot = await getDocs(collection(db, 'bdprodutos'));
-      snapshot.forEach(doc => {
-        const option = document.createElement('option');
-        option.value = doc.data().prodNome;
-        lista.appendChild(option);
-      });
-    }
 
 
 
@@ -889,11 +939,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Função Converter o visual em R$
   function formatarReal(valor) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(valor);
-}
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2
+    }).format(valor);
+  }
+
 
   // Função para capturar clique no botão +Novo
   btnNovo?.addEventListener('click', () => abrirFormulario());
@@ -915,6 +967,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   
+/**
+ * Verifica se o valor já existe em uma lista local e cadastra se o usuário confirmar.
+ * @param {string} valor - O texto digitado pelo usuário
+ * @param {string} nomeColecao - Nome da coleção no Firebase (ex: 'bdcategorias')
+ * @param {string} campo - Nome do campo a ser salvo (ex: 'catNome')
+ * @param {string} label - Nome amigável para exibição no alerta (ex: 'Categoria')
+ * @param {Array} listaValidos - Lista de valores válidos existentes (ex: ['ração', 'vacina'])
+ */
+async function verificarCadastroSimples(valor, nomeColecao, campo, label, listaValidos = []) {
+  if (!valor.trim()) return;
+
+  const valorLower = valor.toLowerCase();
+  const listaLower = listaValidos.map(v => v.toLowerCase());
+
+  if (!listaLower.includes(valorLower)) {
+    const confirmar = confirm(`${label} "${valor}" não existe. Deseja cadastrá-lo?`);
+    if (confirmar) {
+      await addDoc(collection(db, nomeColecao), { [campo]: valor });
+      mostrarAlerta(`${label} adicionado com sucesso!`, 'success');
+    } else {
+      mostrarAlerta(`Selecione uma ${label.toLowerCase()} válida para continuar.`, 'error');
+      throw new Error(`${label} não confirmado`);
+    }
+  }
+}
 
 
   // Carregamento inicial
