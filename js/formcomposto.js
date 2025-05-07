@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Setup inicial da página baseado no parâmetro ?tipo
   const capitalizar = texto => texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
   const tipo = new URLSearchParams(window.location.search).get('tipo');
-  const tituloPagina = tipo ? `Cadastro de ${capitalizar(tipo)}` : 'Cadastro';
+  const tituloPagina = tipo ? `Cadastro ${capitalizar(tipo)}` : 'Cadastro';
   document.title = `PosturAves - ${tituloPagina}`;
   const h2Titulo = document.getElementById('tituloPagina');
   if (h2Titulo) h2Titulo.textContent = tituloPagina;
@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Estado local
   let registros = [];
   let idEditando = null;
+  let registrosOriginais = [];
   let paginaAtual = 1;
   const registrosPorPagina = 20;
 
@@ -65,9 +66,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     snapshot.forEach(doc => {
       registros.push({ id: doc.id, ...doc.data() });
     });
+    registrosOriginais = [...registros]; // salva cópia original
     renderizarCabecalho();
     renderizarTabela();
   };
+
 
   // Função que soma o total da nota com base nos produtos
   function calcularTotal(item) {
@@ -101,6 +104,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (tipo === 'financeiro') {
       // Oculta a tabela
       document.querySelector('table').classList.add('hidden');
+      
+      //Carrega os filtros na barra
+      criarFiltroPorStatus();
+      criarFiltroPorDataVencimento();
+
+
 
       // Cria ou seleciona a div dos cards
       let lista = document.getElementById('listaFinanceiros');
@@ -118,6 +127,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const registrosPaginados = registros.slice(inicio, fim);
 
       registrosPaginados.forEach(item => {
+        if ((item.finParcelas || []).length === 0) return; // pula se não tem parcelas visíveis
+
         const card = document.createElement('div');
         card.className = 'card-financeiro bg-white border rounded-md shadow-sm text-sm text-gray-800 py-2 px-2  space-y-2 max-h-80 overflow-y-auto';
 
@@ -146,7 +157,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // LINHA 1 — Cabeçalho (dados principais da nota)
         const linha1 = document.createElement('div');
         linha1.className = 'flex justify-between items-center font-semibold border-b border-gray-300 bg-gray-200 text-[13px] px-3 py-1 rounded-t leading-tight';
-
         linha1.innerHTML = `
           <span class="whitespace-nowrap overflow-hidden text-ellipsis block mr-3">${item.finFornecedor || '—'} (${item.finNota || '—'})</span>
           <span class="whitespace-nowrap overflow-hidden text-ellipsis block ml-auto max-w-[120px] text-green-600 text-right mr-6">R$ ${calcularTotal(item).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
@@ -157,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // LINHA 2 — Produtos (tabela horizontal com visual limpo)
         const linha2 = document.createElement('div');
         linha2.innerHTML = `
-          <div class="grid grid-cols-5 gap-y-[4px] gap-x-2 text-[11px] ml-3 my-3 p-2 bg-white border border-gray-200 rounded text-gray-700 leading-tight">
+          <div class="grid grid-cols-5 gap-y-[4px] gap-x-2 text-[11px] px-3 my-3 py-2 bg-white border border-gray-200 rounded text-gray-700 leading-tight">
             <div class="font-semibold uppercase">Produto</div>
             <div class="font-semibold uppercase text-center">Quant</div>
             <div class="font-semibold uppercase text-center">Preço</div>
@@ -176,26 +186,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // LINHA 3 — Parcelas (linhas destacadas por status)
         const linha3 = document.createElement('div');
-linha3.innerHTML = `
-  <div class="grid grid-cols-4 gap-x-2 text-[11px] ml-3 my-3 p-2 leading-tight">
-    <div class="font-semibold uppercase text-center">Parcela</div>
-    <div class="font-semibold uppercase text-center">Data</div>
-    <div class="font-semibold uppercase text-center">Valor</div>
-    <div class="font-semibold uppercase text-center">Status</div>
+        linha3.innerHTML = `
+          <div class="grid grid-cols-4 gap-x-2 text-[11px] px-3 my-3 py-2 border border-gray-200 rounded leading-tight">
+            <div class="font-semibold uppercase text-center">Parcela</div>
+            <div class="font-semibold uppercase text-center">Data</div>
+            <div class="font-semibold uppercase text-center">Valor</div>
+            <div class="font-semibold uppercase text-center">Status</div>
 
-    ${(item.finParcelas || []).map(p => {
-      const corLinha = p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900';
-      return `
-        <div class="col-span-4 grid grid-cols-4 gap-x-2 ${corLinha}">
-          <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis py-1">${p.parcela}ª</div>
-          <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis py-1">${formatarDataBR(p.vencimento).slice(0, 5)}</div>
-          <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis py-1">R$ ${parseFloat(p.valor).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits:2})}</div>
-          <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis font-bold py-1">${p.status.toUpperCase()}</div>
-        </div>
-      `;
-    }).join('')}
-  </div>
-`;
+            ${(item.finParcelas || []).map(p => {
+              const corLinha = p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900';
+              return `
+                <div class="col-span-4 grid grid-cols-4 gap-x-2 py-0.5 ${corLinha}">
+                  <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis">${p.parcela}ª</div>
+                  <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis">${formatarDataBR(p.vencimento).slice(0, 5)}</div>
+                  <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis">R$ ${parseFloat(p.valor).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits:2})}</div>
+                  <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis font-bold">${p.status.toUpperCase()}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
 
 
 
@@ -1042,7 +1052,7 @@ linha3.innerHTML = `
     const listaParcelas = dados.finParcelas?.map(p => `
       <tr>
         <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${p.parcela}</td>
-        <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${formatarDataBR(p.vencimento)}</td>
+        <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${formatarDataBR(p.vencimento).slice(0,5)}</td>
         <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${formatarReal(p.valor)}</td>
         <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${p.status.toUpperCase()}</td>
       </tr>
@@ -1087,6 +1097,14 @@ linha3.innerHTML = `
   });
 
   //***************************************************************************************
+  // Limpa o filtro
+  btnLimparFiltros?.addEventListener('click', () => {
+    document.getElementById('filtroStatus').value = 'todos';
+    btnLimparFiltros.classList.add('hidden');
+    aplicarFiltros();
+  });
+
+  //***************************************************************************************
   // Fechar o formulário ao clicar fora dele
   formContainer?.addEventListener('click', (e) => {
     // Garante que o clique não foi dentro do formulário em si
@@ -1095,7 +1113,21 @@ linha3.innerHTML = `
       formConteudo.innerHTML = '';
     }
   });
-  
+
+  //***************************************************************************************
+  // Abre e fecha a barra de filtro
+  btnToggleFiltros?.addEventListener('click', (e) => {
+    e.preventDefault();
+    areaFiltros.classList.toggle('hidden');
+
+    // Alterna o ícone de setinha
+    if (areaFiltros.classList.contains('hidden')) {
+      btnToggleFiltros.textContent = 'FILTROS ▼';
+    } else {
+      btnToggleFiltros.textContent = 'FILTROS ▲';
+    }
+  });
+
   //***************************************************************************************
   /**Função reutilizazel de inserção de campos
    * Verifica se o valor já existe em uma lista local e cadastra se o usuário confirmar.
@@ -1155,6 +1187,128 @@ linha3.innerHTML = `
       inputValor.value = formatarReal(valorParcela);
     });
   }
+
+  //FILTROS
+  //***************************************************************************************
+  //POR STATUS
+  function criarFiltroPorStatus() {
+    const container = document.getElementById('areaFiltros');
+    if (!container) return;
+
+    // Impede que o filtro seja adicionado mais de uma vez
+    if (document.getElementById('filtroStatus')) return;
+
+    const div = document.createElement('div');
+    div.className = 'flex flex-col text-sm';
+
+    const label = document.createElement('label');
+    label.textContent = 'STATUS';
+    label.className = 'font-semibold mb-1 text-white';
+
+    const select = document.createElement('select');
+    select.id = 'filtroStatus'; // <-- essa ID garante a verificação acima
+    select.className = 'border rounded px-2 py-1 text-black';
+
+    ['Todos', 'Pago', 'Pendente'].forEach(status => {
+      const option = document.createElement('option');
+      option.value = status.toLowerCase();
+      option.textContent = status;
+      select.appendChild(option);
+    });
+
+    select.addEventListener('change', () => {
+      document.getElementById('btnLimparFiltros')?.classList.remove('hidden');
+      aplicarFiltros();
+    });
+
+    div.appendChild(label);
+    div.appendChild(select);
+    container.appendChild(div);
+  }
+
+  //POR VENCIMENTO
+  function criarFiltroPorDataVencimento() {
+    const container = document.getElementById('areaFiltros');
+    if (!container) return;
+
+    // Evita duplicação
+    if (document.getElementById('filtroVencimentoInicial')) return;
+
+    const div = document.createElement('div');
+    div.className = 'flex flex-col text-sm text-white';
+
+    const label = document.createElement('label');
+    label.textContent = 'VENCIMENTO (De - Até)';
+    label.className = 'font-semibold mb-1';
+
+    const grupo = document.createElement('div');
+    grupo.className = 'flex gap-2';
+
+    const inputInicio = document.createElement('input');
+    inputInicio.type = 'date';
+    inputInicio.id = 'filtroVencimentoInicial';
+    inputInicio.className = 'border rounded px-2 py-1 text-black';
+    inputInicio.addEventListener('change', aplicarFiltros);
+
+    const inputFim = document.createElement('input');
+    inputFim.type = 'date';
+    inputFim.id = 'filtroVencimentoFinal';
+    inputFim.className = 'border rounded px-2 py-1 text-black';
+    inputFim.addEventListener('change', aplicarFiltros);
+
+    grupo.appendChild(inputInicio);
+    grupo.appendChild(inputFim);
+    div.appendChild(label);
+    div.appendChild(grupo);
+    container.appendChild(div);
+  }
+
+  
+  //Compara as datas para aplicar no filtro
+  function compararDatas(data1, data2) {
+    const d1 = new Date(data1);
+    const d2 = new Date(data2);
+
+    d1.setHours(0, 0, 0, 0);
+    d2.setHours(0, 0, 0, 0);
+
+    return d1.getTime() - d2.getTime();
+  }
+
+  //Aplica os filtros selecionados
+  function aplicarFiltros() {
+    const statusSelecionado = document.getElementById('filtroStatus')?.value || 'todos';
+    const inicio = document.getElementById('filtroVencimentoInicial')?.value;
+    const fim = document.getElementById('filtroVencimentoFinal')?.value;
+
+    registros = registrosOriginais.map(registro => {
+      let parcelas = registro.finParcelas || [];
+
+      // Filtro por status
+      if (statusSelecionado !== 'todos') {
+        parcelas = parcelas.filter(p => p.status.toLowerCase() === statusSelecionado);
+      }
+
+      // Filtro por intervalo de vencimento
+      if (inicio) {
+        parcelas = parcelas.filter(p => compararDatas(p.vencimento, inicio) >= 0);
+      }
+      if (fim) {
+        parcelas = parcelas.filter(p => compararDatas(p.vencimento, fim) <= 0);
+      }
+
+      return { ...registro, finParcelas: parcelas };
+    });
+
+    renderizarTabela();
+  }
+
+
+
+
+
+
+
 
   //***************************************************************************************
   // Fecha o modal se pressionar Esc
