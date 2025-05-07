@@ -10,6 +10,12 @@
   <link rel="stylesheet" href="css/style.css" />
   <script type="module" src="./js/auth.js"></script>
 
+  <style>
+    body {
+      display: none;
+    }
+  </style>
+
 </head>
 
 <body class="bg-gray-50 font-['Roboto'] text-slate-700 min-h-screen">
@@ -191,7 +197,16 @@
 
   <!-- SCRIPT -->
   <script type="module" src="./js/menu.js"></script>
-
+  <script>
+    const logado = localStorage.getItem('colabLogin');
+    if (!logado) {
+      window.location.href = 'login.html';
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.style.display = 'block';
+      });
+    }
+  </script>
 
 
 

@@ -93,6 +93,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tabelaCabecalho = document.getElementById('tabelaCabecalho');
     tabelaCabecalho.innerHTML = '';
 
+    // Ordena os registros do mais recente para o mais antigo com base em finData
+    registros.sort((a, b) => new Date(b.finData) - new Date(a.finData));
+
+
     // Se for tipo financeiro, renderiza cards
     if (tipo === 'financeiro') {
       // Oculta a tabela
@@ -115,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       registrosPaginados.forEach(item => {
         const card = document.createElement('div');
-        card.className = 'card-financeiro bg-white border rounded-md shadow-sm text-sm text-gray-800 p-3 space-y-2 max-h-64 overflow-y-auto';
+        card.className = 'card-financeiro bg-white border rounded-md shadow-sm text-sm text-gray-800 py-2 px-2  space-y-2 max-h-80 overflow-y-auto';
 
         // Botão editar no canto superior direito
         const btnEditar = document.createElement('button');
@@ -139,20 +143,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         card.appendChild(btnEditar);
 
 
-        // LINHA 1 — Cabeçalho
+        // LINHA 1 — Cabeçalho (dados principais da nota)
         const linha1 = document.createElement('div');
-        linha1.className = 'flex justify-between items-center font-semibold border-b pb-1';
+        linha1.className = 'flex justify-between items-center font-semibold border-b border-gray-300 bg-gray-200 text-[13px] px-3 py-1 rounded-t leading-tight';
+
         linha1.innerHTML = `
-          <span class="whitespace-nowrap overflow-hidden text-ellipsis block max-w-[120px]">${formatarDataBR(item.finData)}</span>
-          <span class="whitespace-nowrap overflow-hidden text-ellipsis block">${item.finFornecedor || '—'} (${item.finNota || '—'})</span>
-          <span class="whitespace-nowrap overflow-hidden text-ellipsis block mr-10 max-w-[120px] text-green-600">R$ ${calcularTotal(item).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+          <span class="whitespace-nowrap overflow-hidden text-ellipsis block mr-3">${item.finFornecedor || '—'} (${item.finNota || '—'})</span>
+          <span class="whitespace-nowrap overflow-hidden text-ellipsis block ml-auto max-w-[120px] text-green-600 text-right mr-6">R$ ${calcularTotal(item).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
         `;
 
-        // LINHA 2 — Produtos (tabela horizontal)
+
+
+        // LINHA 2 — Produtos (tabela horizontal com visual limpo)
         const linha2 = document.createElement('div');
         linha2.innerHTML = `
-          <div class="mt-1 mb-1 font-semibold uppercase text-xs">Items</div>
-          <div class="grid grid-cols-5 gap-y-0 gap-x-2 text-[11px] ml-3">
+          <div class="grid grid-cols-5 gap-y-[4px] gap-x-2 text-[11px] ml-3 my-3 p-2 bg-white border border-gray-200 rounded text-gray-700 leading-tight">
             <div class="font-semibold uppercase">Produto</div>
             <div class="font-semibold uppercase text-center">Quant</div>
             <div class="font-semibold uppercase text-center">Preço</div>
@@ -168,29 +173,43 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
         `;
 
-        // LINHA 3 — Parcelas
+
+        // LINHA 3 — Parcelas (linhas destacadas por status)
         const linha3 = document.createElement('div');
-        linha3.innerHTML = `
-          <div class="mt-5 mb-1 font-semibold uppercase text-xs">Vencimentos</div>
-          <div class="grid grid-cols-4 gap-y-0 gap-x-2 text-[11px] ml-3">
-            <div class="font-semibold uppercase text-center">Parcela</div>
-            <div class="font-semibold uppercase text-center">Data</div>
-            <div class="font-semibold uppercase text-center">Valor</div>
-            <div class="font-semibold uppercase text-center">Status</div>
-            ${(item.finParcelas || []).map(p => `
-              <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis">${p.parcela}ª</div>
-              <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis">${formatarDataBR(p.vencimento).slice(0, 5)}</div>
-              <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis">R$ ${parseFloat(p.valor).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits:2})}</div>
-              <div class="text-center whitespace-nowrap overflow-hidden font-bold text-ellipsisfont-semibold ${p.status === 'pago' ? 'text-green-600' : 'text-red-600'}">${p.status.toUpperCase()}</div>
-            `).join('')}
-          </div>
-        `;
+linha3.innerHTML = `
+  <div class="grid grid-cols-4 gap-x-2 text-[11px] ml-3 my-3 p-2 leading-tight">
+    <div class="font-semibold uppercase text-center">Parcela</div>
+    <div class="font-semibold uppercase text-center">Data</div>
+    <div class="font-semibold uppercase text-center">Valor</div>
+    <div class="font-semibold uppercase text-center">Status</div>
+
+    ${(item.finParcelas || []).map(p => {
+      const corLinha = p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900';
+      return `
+        <div class="col-span-4 grid grid-cols-4 gap-x-2 ${corLinha}">
+          <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis py-1">${p.parcela}ª</div>
+          <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis py-1">${formatarDataBR(p.vencimento).slice(0, 5)}</div>
+          <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis py-1">R$ ${parseFloat(p.valor).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits:2})}</div>
+          <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis font-bold py-1">${p.status.toUpperCase()}</div>
+        </div>
+      `;
+    }).join('')}
+  </div>
+`;
+
+
 
         // LINHA 4 — Observação (se houver)
         const linha4 = document.createElement('div');
+
         if (item.finObservacao) {
-          linha4.innerHTML = `<div class="mt-2 text-xs text-gray-600"><span class="font-semibold">Obs:</span> ${item.finObservacao}</div>`;
+          linha4.innerHTML = `
+            <div class="mt-2 px-3 pb-1 text-xs text-gray-600 italic leading-tight">
+              <span class="font-semibold not-italic">Obs:</span> ${item.finObservacao}
+            </div>
+          `;
         }
+
 
         // Adiciona tudo ao card
         card.appendChild(linha1);
@@ -991,8 +1010,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Exibição dos dados principais
     const infoGeral = `
-      <div class="grid grid-cols-2 gap-1 text-sm text-gray-700">
-        <div><strong>Data:</strong> ${formatarDataBR(dados.finData)}</div>
+      <div class="grid grid-cols-2 gap-1 text-sm text-gray-700 uppercase">
+        <div class="uppercase"><strong>Data:</strong> ${formatarDataBR(dados.finData)}</div>
         <div><strong>Fornecedor:</strong> ${dados.finFornecedor}</div>
         <div><strong>Categoria:</strong> ${dados.finCategoria}</div>
         <div><strong>Subcategoria:</strong> ${dados.finSubCategoria}</div>
@@ -1011,21 +1030,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       </tr>
     `).join('') || '';
     const tabelaProdutos = `
-      <h4 class="mt-3 mb-1 text-sm font-semibold uppercase text-gray-800">Itens</h4>
-      <table class="w-full text-sm border">
+      <h4 class="mt-3 mb-1 text-sm font-semibold uppercase text-gray-800 ">Itens</h4>
+      <table class="w-full text-sm border leading-tight">
         <thead class="bg-gray-100 text-center uppercase">
           <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Lote</th></tr>
         </thead>
-        <tbody class="text-center">${listaProdutos}</tbody>
+        <tbody class="text-center text-xs">${listaProdutos}</tbody>
       </table>
     `;
 
     const listaParcelas = dados.finParcelas?.map(p => `
       <tr>
-        <td class="text-center ${p.status === 'pago' ? 'bg-green-200' : 'bg-red-200'}">${p.parcela}</td>
-        <td class="text-center ${p.status === 'pago' ? 'bg-green-200' : 'bg-red-200'}">${formatarDataBR(p.vencimento)}</td>
-        <td class="text-center ${p.status === 'pago' ? 'bg-green-200' : 'bg-red-200'}">${formatarReal(p.valor)}</td>
-        <td class="text-center ${p.status === 'pago' ? 'bg-green-200' : 'bg-red-200'}">${p.status.toUpperCase()}</td>
+        <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${p.parcela}</td>
+        <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${formatarDataBR(p.vencimento)}</td>
+        <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${formatarReal(p.valor)}</td>
+        <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${p.status.toUpperCase()}</td>
       </tr>
     `).join('') || '';
 
@@ -1035,7 +1054,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <thead class="bg-gray-100 text-center uppercase">
           <tr><th>Parcela</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr>
         </thead>
-        <tbody>${listaParcelas}</tbody>
+        <tbody class="text-center text-xs leading-tight">${listaParcelas}</tbody>
       </table>
     `;
 
