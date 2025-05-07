@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!lista) {
         lista = document.createElement('div');
         lista.id = 'listaFinanceiros';
-        lista.className = 'p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4';
+        lista.className = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4';
         document.querySelector('main').appendChild(lista);
       } else {
         lista.innerHTML = ''; // limpa se já existe
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       registrosPaginados.forEach(item => {
         const card = document.createElement('div');
-        card.className = 'card-financeiro bg-white border rounded-md shadow-sm text-sm text-gray-800 p-3 space-y-2';
+        card.className = 'card-financeiro bg-white border rounded-md shadow-sm text-sm text-gray-800 p-3 space-y-2 max-h-64 overflow-y-auto';
 
         // Botão editar no canto superior direito
         const btnEditar = document.createElement('button');
@@ -520,11 +520,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     const titulo3 = document.createElement('h4');
     titulo3.textContent = 'Pagamentos';
     titulo3.className = 'text-sm font-semibold text-slate-700 uppercase';
-
+    
+    //BOTÃO adicionar parcela
     const btnAdicionarParcela = document.createElement('button');
     btnAdicionarParcela.textContent = '+Parcela';
     btnAdicionarParcela.className = 'bg-blue-500 text-white px-3 py-1.5 text-sm rounded shadow hover:bg-blue-600';
-    btnAdicionarParcela.addEventListener('click', () => adicionarLinhaParcela());
+    btnAdicionarParcela.addEventListener('click', () => {
+      const corpo = document.getElementById('corpoParcelas');
+      const totalParcelas = corpo.querySelectorAll('div.grid').length;
+
+      // Nova parcela será N + 1
+      const numeroParcela = totalParcelas + 1;
+
+      // Calcula a nova data (última + 30 dias, ou hoje se for a primeira)
+      let novaData = new Date();
+      if (totalParcelas > 0) {
+        const ultimaLinha = corpo.lastElementChild;
+        const dataUltima = ultimaLinha.querySelector('input[type="date"]')?.value;
+        if (dataUltima) {
+          novaData = new Date(dataUltima);
+          novaData.setDate(novaData.getDate() + 30);
+        }
+      }
+
+      const vencimento = novaData.toISOString().split('T')[0];
+
+      // Divide o valor total de produtos
+      const totalProdutos = calcularTotalProdutos(); // definiremos essa função abaixo
+      const valorParcela = totalParcelas >= 0 ? totalProdutos / (numeroParcela) : 0;
+
+      adicionarLinhaParcela(numeroParcela, vencimento, valorParcela);
+    });
+
 
     header3.appendChild(titulo3);
     header3.appendChild(btnAdicionarParcela);
@@ -725,52 +752,55 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // Função auxiliar: adiciona uma linha à tabela de parcelas
-function adicionarLinhaParcela(parcela = 1, vencimento = '', valor = '') {
-  const tbody = document.getElementById('corpoParcelas');
+    function adicionarLinhaParcela(parcela = 1, vencimento = '', valor = '') {
+      const tbody = document.getElementById('corpoParcelas');
 
-  const linha = document.createElement('div');
-  linha.className = 'grid grid-cols-6 gap-1 items-center m-1';
+      const linha = document.createElement('div');
+      linha.className = 'grid grid-cols-6 gap-1 items-center m-1';
 
-  linha.innerHTML = `
-    <div class="col-span-1">
-      <input type="text" class="w-full text-sm text-center border px-2 py-1 rounded" value="${parcela}">
-    </div>
-    <div class="col-span-2">
-      <input type="date" class="w-full text-sm text-center border px-2 py-1 rounded" value="${vencimento}">
-    </div>
-    <div class="col-span-1">
-      <input type="text" class="w-full text-sm text-right border px-2 py-1 rounded" value="${valor ? formatarReal(valor) : ''}">
-    </div>
-    <div class="col-span-1">
-      <select class="w-full text-sm border px-2 py-1 rounded">
-        <option value="pendente" selected>PENDENTE</option>
-        <option value="pago">PAGO</option>
-      </select>
-    </div>
-    <div class="col-span-1 text-center">
-      <img src="./icons/icon-cancel.svg" alt="Remover" class="w-5 h-5 mx-auto cursor-pointer hover:scale-110 transition" />
-    </div>
-    <div class="col-span-4"></div>
-  `;
+      linha.innerHTML = `
+        <div class="col-span-1">
+          <input type="text" class="w-full text-sm text-center border px-2 py-1 rounded" value="${parcela}">
+        </div>
+        <div class="col-span-2">
+          <input type="date" class="w-full text-sm text-center border px-2 py-1 rounded" value="${vencimento}">
+        </div>
+        <div class="col-span-1">
+          <input type="text" class="w-full text-sm text-right border px-2 py-1 rounded" value="${valor ? formatarReal(valor) : ''}">
+        </div>
+        <div class="col-span-1">
+          <select class="w-full text-sm border px-2 py-1 rounded">
+            <option value="pendente" selected>PENDENTE</option>
+            <option value="pago">PAGO</option>
+          </select>
+        </div>
+        <div class="col-span-1 text-center">
+          <img src="./icons/icon-cancel.svg" alt="Remover" class="w-5 h-5 mx-auto cursor-pointer hover:scale-110 transition" />
+        </div>
+        <div class="col-span-4"></div>
+      `;
 
-  // Agora sim: seleciona o input de valor corretamente (terceiro input da linha)
-  const inputValorParcela = linha.querySelectorAll('input')[2];
+      // Aplica máscara de moeda apenas durante a digitação
+      const inputValorParcela = linha.querySelectorAll('input')[2];
+      inputValorParcela.addEventListener('input', (e) => {
+        if (document.activeElement !== e.target) return;
+        let valor = e.target.value.replace(/\D/g, '');
+        valor = (parseInt(valor || '0', 10) / 100).toFixed(2);
+        e.target.value = formatarReal(valor);
+      });
 
-  // Aplica a máscara apenas quando o usuário digita (evita mascarar ao preencher via JS)
-  inputValorParcela.addEventListener('input', (e) => {
-    if (document.activeElement !== e.target) return;
+      // Botão para remover a linha
+      const btnRemover = linha.querySelector('img');
+      btnRemover.addEventListener('click', () => {
+        linha.remove();
+        redistribuirValoresParcelas(); // recalcula após remoção
+      });
 
-    let valor = e.target.value.replace(/\D/g, '');
-    valor = (parseInt(valor || '0', 10) / 100).toFixed(2);
-    e.target.value = formatarReal(valor);
-  });
+      tbody.appendChild(linha);
 
-  // Botão de remover linha
-  const btnRemover = linha.querySelector('img');
-  btnRemover.addEventListener('click', () => linha.remove());
+      redistribuirValoresParcelas(); // recalcula ao adicionar nova
+    }
 
-  tbody.appendChild(linha);
-}
 
 
 
@@ -967,31 +997,63 @@ function adicionarLinhaParcela(parcela = 1, vencimento = '', valor = '') {
     }
   });
   
-/**
- * Verifica se o valor já existe em uma lista local e cadastra se o usuário confirmar.
- * @param {string} valor - O texto digitado pelo usuário
- * @param {string} nomeColecao - Nome da coleção no Firebase (ex: 'bdcategorias')
- * @param {string} campo - Nome do campo a ser salvo (ex: 'catNome')
- * @param {string} label - Nome amigável para exibição no alerta (ex: 'Categoria')
- * @param {Array} listaValidos - Lista de valores válidos existentes (ex: ['ração', 'vacina'])
- */
-async function verificarCadastroSimples(valor, nomeColecao, campo, label, listaValidos = []) {
-  if (!valor.trim()) return;
 
-  const valorLower = valor.toLowerCase();
-  const listaLower = listaValidos.map(v => v.toLowerCase());
+  /**
+   * Verifica se o valor já existe em uma lista local e cadastra se o usuário confirmar.
+   * @param {string} valor - O texto digitado pelo usuário
+   * @param {string} nomeColecao - Nome da coleção no Firebase (ex: 'bdcategorias')
+   * @param {string} campo - Nome do campo a ser salvo (ex: 'catNome')
+   * @param {string} label - Nome amigável para exibição no alerta (ex: 'Categoria')
+   * @param {Array} listaValidos - Lista de valores válidos existentes (ex: ['ração', 'vacina'])
+   */
+  async function verificarCadastroSimples(valor, nomeColecao, campo, label, listaValidos = []) {
+    if (!valor.trim()) return;
 
-  if (!listaLower.includes(valorLower)) {
-    const confirmar = confirm(`${label} "${valor}" não existe. Deseja cadastrá-lo?`);
-    if (confirmar) {
-      await addDoc(collection(db, nomeColecao), { [campo]: valor });
-      mostrarAlerta(`${label} adicionado com sucesso!`, 'success');
-    } else {
-      mostrarAlerta(`Selecione uma ${label.toLowerCase()} válida para continuar.`, 'error');
-      throw new Error(`${label} não confirmado`);
+    const valorLower = valor.toLowerCase();
+    const listaLower = listaValidos.map(v => v.toLowerCase());
+
+    if (!listaLower.includes(valorLower)) {
+      const confirmar = confirm(`${label} "${valor}" não existe. Deseja cadastrá-lo?`);
+      if (confirmar) {
+        await addDoc(collection(db, nomeColecao), { [campo]: valor });
+        mostrarAlerta(`${label} adicionado com sucesso!`, 'success');
+      } else {
+        mostrarAlerta(`Selecione uma ${label.toLowerCase()} válida para continuar.`, 'error');
+        throw new Error(`${label} não confirmado`);
+      }
     }
   }
-}
+
+  //função auxiliar para calcular o total de produtos
+  function calcularTotalProdutos() {
+    const linhas = document.querySelectorAll('#tabelaItensCorpo tr');
+    let total = 0;
+
+    linhas.forEach(tr => {
+      const inputs = tr.querySelectorAll('input');
+      const qtd = parseFloat(inputs[1]?.value?.replace(',', '.') || 0);
+      const preco = parseFloat(inputs[2]?.value?.replace(/[^\d,]/g, '').replace(',', '.') || 0);
+      total += qtd * preco;
+    });
+
+    return Number(total.toFixed(2));
+  }
+
+  //Função que recalcula os valores existentes proporcionalmente ao clicar em "+Parcela"
+  function redistribuirValoresParcelas() {
+    const corpo = document.getElementById('corpoParcelas');
+    const linhas = corpo.querySelectorAll('div.grid');
+    const total = calcularTotalProdutos();
+
+    if (linhas.length === 0 || total === 0) return;
+
+    const valorParcela = total / linhas.length;
+
+    linhas.forEach(linha => {
+      const inputValor = linha.querySelectorAll('input')[2];
+      inputValor.value = formatarReal(valorParcela);
+    });
+  }
 
 
   // Carregamento inicial

@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       { campo: 'loteStatus', label: 'Status', filtrar: true, eColuna: false },
       { campo: 'loteIdentificador', label: 'Identificador', filtrar: false, eColuna: true },
       { campo: 'loteLinhagem', label: 'Linhagem', filtrar: true, eColuna: true },
-      { campo: 'loteGalpao', label: 'Galpão', tipo: 'select', opcoes: ['Pinteiro', 'Recria', '01', '02', '03', '04', '05'], filtrar: true, eColuna: true },
+      { campo: 'loteGalpao', label: 'Galpão', tipo: 'select', opcoes: ['Pinteiro', 'Recria', '01', '02', '03', '04', '05', 'GRANJA'], filtrar: true, eColuna: true },
       { campo: 'loteProprietario', label: 'Proprietário', filtrar: true, eColuna: true },
       { campo: 'loteDataNascimento', label: 'Nascimento', tipo: 'date', filtrar: false, eColuna: true },
       { campo: '_idadeSemanas', label: 'Idade (sem)', calculado: true, eColuna: true },
