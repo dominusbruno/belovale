@@ -58,3 +58,9 @@ SISTEMA DE ALERTAS
   transform: translate(-50%, 100%); /* desce */
 }
 
+
+/* ⚠️ Sobrescreve todos os elementos com espaços superiores e inferiores py-2 para usar py-1 nos formulários*/
+#formContainer [class*="py-2"] {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}

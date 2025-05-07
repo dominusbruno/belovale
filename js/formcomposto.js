@@ -231,13 +231,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Limpa ID anterior, por segurança
     formConteudo.dataset.idRegistro = '';
     document.getElementById('formWrapper').className = 'bg-white rounded shadow-lg w-full max-w-5xl mx-4 p-6 relative transition-all duration-300';
+
+
     // Se estiver editando, define o ID do registro atual
     if (dados?.id) {
       formConteudo.dataset.idRegistro = dados.id;
     }
 
 
-    formContainer.classList.remove('hidden');
+  // Oculta o modal enquanto carrega tudo
+  formContainer.classList.add('hidden');
+  formConteudo.innerHTML = ''; // limpa conteúdo anterior
+
     // Limpa o conteúdo anterior do formulário e cria a 1ª parte do formulário financeiro:
     // Contém os campos de dados gerais da transação: data (gerada automaticamente),
     // tipo (Receita ou Despesa), fornecedor, nota, categoria, subcategoria e observação.
@@ -293,11 +298,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const wrapperFornecedor = document.createElement('div');
     wrapperFornecedor.className = 'sm:col-span-3';
+    
+    // --- Fornecedor ---
     const inputFornecedor = document.createElement('input');
     inputFornecedor.type = 'text';
     inputFornecedor.id = 'finFornecedor';
     inputFornecedor.className = 'w-full border rounded px-3 py-2 text-sm';
     inputFornecedor.setAttribute('list', 'listaFornecedores'); // conecta o input ao datalist
+    
+    // datalist de fornecedor
     const datalistFornecedor = document.createElement('datalist');
     datalistFornecedor.id = 'listaFornecedores';
     document.body.appendChild(datalistFornecedor); // precisa estar fora do formulário para funcionar corretamente
@@ -351,8 +360,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Adiciona tudo ao formulário
     formConteudo.appendChild(grupo1);
+    
+    // ⏳ Aguarda o carregamento completo das listas antes de montar o DOM
     await carregarCategorias();
     await carregarSubcategorias();
+    await carregarProdutos();
+    await carregarFornecedores();
+
+    // Agora sim, exibe o formulário após tudo estar carregado
+    formContainer.classList.remove('hidden');
 
 
 
@@ -497,7 +513,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const datalistProdutos = document.createElement('datalist');
     datalistProdutos.id = 'listaProdutos';
     document.body.appendChild(datalistProdutos);
-    await carregarProdutos();
+    //await carregarProdutos();
 
 
 
@@ -671,17 +687,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Verifica se todas as parcelas estão vazias (ou zeradas)
         const todasParcelasVazias = [...linhasParcelas].every(div => {
-  const inputs = div.querySelectorAll('input');
-  if (inputs.length < 3) return true;
+        const inputs = div.querySelectorAll('input');
+        if (inputs.length < 3) return true;
 
-  const parcela = inputs[0].value?.trim();
-  const vencimento = inputs[1].value?.trim();
-  const valorTexto = inputs[2].value?.trim();
+        const parcela = inputs[0].value?.trim();
+        const vencimento = inputs[1].value?.trim();
+        const valorTexto = inputs[2].value?.trim();
 
-  const valor = parseFloat(valorTexto.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+        const valor = parseFloat(valorTexto.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
 
-  return !(parcela && vencimento && valor > 0);
-});
+        return !(parcela && vencimento && valor > 0);
+      });
 
 
 
@@ -759,7 +775,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <input type="date" class="w-full text-sm text-center border px-2 py-1 rounded" value="${vencimento}">
         </div>
         <div class="col-span-1">
-          <input type="text" class="w-full text-sm text-right border px-2 py-1 rounded" value="${valor ? formatarReal(valor) : ''}">
+          <input type="text" class="w-full text-sm text-right border px-2 py-1 rounded" placeholder="Valor" value="${valor ? formatarReal(valor) : ''}">
         </div>
         <div class="col-span-1">
           <select class="w-full text-sm border px-2 py-1 rounded">
@@ -955,7 +971,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     
-    await carregarFornecedores();
+    //await carregarFornecedores();
 
 
   }
