@@ -476,4 +476,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   await carregarRegistros();
   gerarFiltros();  
   
+  
+  //***************************************************************************************
+  // Fecha o modal se pressionar Esc
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('formContainer');
+      if (!modal.classList.contains('hidden')) {
+        modal.classList.add('hidden');
+        document.getElementById('formConteudo').innerHTML = ''; // limpa conteúdo
+      }
+    }
+  });
+
+
 });
