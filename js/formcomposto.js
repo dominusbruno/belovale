@@ -883,7 +883,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         option.value = doc.data().prodNome;
         lista.appendChild(option);
       });
-    }
+    } 
     
 
     if (dados) {
