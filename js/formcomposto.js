@@ -102,158 +102,72 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Se for tipo financeiro, renderiza cards
     if (tipo === 'financeiro') {
-      // Oculta a tabela
-      document.querySelector('table').classList.add('hidden');
-      
-      //Carrega os filtros na barra
-      criarFiltroPorStatus();
-      criarFiltroPorDataVencimento();
-
-
-
-      // Cria ou seleciona a div dos cards
-      let lista = document.getElementById('listaFinanceiros');
-      if (!lista) {
-        lista = document.createElement('div');
-        lista.id = 'listaFinanceiros';
-        lista.className = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4';
-        document.querySelector('main').appendChild(lista);
-      } else {
-        lista.innerHTML = ''; // limpa se já existe
-      }
-
-      const inicio = (paginaAtual - 1) * registrosPorPagina;
-      const fim = inicio + registrosPorPagina;
-      const registrosPaginados = registros.slice(inicio, fim);
-
-      registrosPaginados.forEach(item => {
-        if ((item.finParcelas || []).length === 0) return; // pula se não tem parcelas visíveis
-
-        const card = document.createElement('div');
-        card.className = 'card-financeiro bg-white border rounded-md shadow-sm text-sm text-gray-800 py-2 px-2  space-y-2 max-h-80 overflow-y-auto';
-
-        // Botão editar no canto superior direito
-        const btnEditar = document.createElement('button');
-        btnEditar.className = 'absolute top-0.5 right-0.5 p-1 hover:scale-110 transition-transform';
-        btnEditar.innerHTML = `
-          <img src="icons/icon-edit.svg" alt="Editar" class="w-8 h-8">
-        `;
-
-        btnEditar.addEventListener('click', () => {
-          abrirFormulario(item); // função definida no próprio formcomposto.js
-        });
-
-        card.addEventListener('click', (e) => {
-          if (e.target.closest('button') || e.target.closest('img')) return;
-          abrirVisualizacao(item); // item = dados do card
-        });
-
-
-        // Adiciona posição relativa ao card para o botão funcionar
-        card.classList.add('relative');
-        card.appendChild(btnEditar);
-
-
-        // LINHA 1 — Cabeçalho (dados principais da nota)
-        const linha1 = document.createElement('div');
-        linha1.className = 'flex justify-between items-center font-semibold border-b border-gray-300 bg-gray-200 text-[13px] px-3 py-1 rounded-t leading-tight';
-        linha1.innerHTML = `
-          <span class="whitespace-nowrap overflow-hidden text-ellipsis block mr-3">${item.finFornecedor || '—'} (${item.finNota || '—'})</span>
-          <span class="whitespace-nowrap overflow-hidden text-ellipsis block ml-auto max-w-[120px] text-green-600 text-right mr-6">R$ ${calcularTotal(item).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-        `;
-
-
-
-        // LINHA 2 — Produtos (tabela horizontal com visual limpo)
-        const linha2 = document.createElement('div');
-        linha2.innerHTML = `
-          <div class="grid grid-cols-5 gap-y-[4px] gap-x-2 text-[11px] px-3 my-3 py-2 bg-white border border-gray-200 rounded text-gray-700 leading-tight">
-            <div class="font-semibold uppercase">Produto</div>
-            <div class="font-semibold uppercase text-center">Quant</div>
-            <div class="font-semibold uppercase text-center">Preço</div>
-            <div class="font-semibold uppercase text-center">Total</div>
-            <div class="font-semibold uppercase text-center">Lote</div>
-            ${(item.finProduto || []).map(p => `
-              <div class="whitespace-nowrap overflow-hidden text-ellipsis block max-w-[120px]">${p.nome}</div>
-              <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis block max-w-[120px]">${p.quantidade}</div>
-              <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis block max-w-[120px]">R$ ${parseFloat(p.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits:2 })}</div>
-              <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis block max-w-[120px]">R$ ${(p.quantidade * p.preco).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits:2})}</div>
-              <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis block max-w-[120px]">${p.lote || '—'}</div>
-            `).join('')}
-          </div>
-        `;
-
-
-        // LINHA 3 — Parcelas (linhas destacadas por status)
-        const linha3 = document.createElement('div');
-        linha3.innerHTML = `
-          <div class="grid grid-cols-4 gap-x-2 text-[11px] px-3 my-3 py-2 border border-gray-200 rounded leading-tight">
-            <div class="font-semibold uppercase text-center">Parcela</div>
-            <div class="font-semibold uppercase text-center">Data</div>
-            <div class="font-semibold uppercase text-center">Valor</div>
-            <div class="font-semibold uppercase text-center">Status</div>
-
-            ${(item.finParcelas || []).map(p => {
-              const corLinha = p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900';
-              return `
-                <div class="col-span-4 grid grid-cols-4 gap-x-2 py-0.5 ${corLinha}">
-                  <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis">${p.parcela}ª</div>
-                  <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis">${formatarDataBR(p.vencimento).slice(0, 5)}</div>
-                  <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis">R$ ${parseFloat(p.valor).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits:2})}</div>
-                  <div class="text-center whitespace-nowrap overflow-hidden text-ellipsis font-bold">${p.status.toUpperCase()}</div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        `;
-
-
-
-        // LINHA 4 — Observação (se houver)
-        const linha4 = document.createElement('div');
-
-        if (item.finObservacao) {
-          linha4.innerHTML = `
-            <div class="mt-2 px-3 pb-1 text-xs text-gray-600 italic leading-tight">
-              <span class="font-semibold not-italic">Obs:</span> ${item.finObservacao}
-            </div>
-          `;
-        }
-
-
-        // Adiciona tudo ao card
-        card.appendChild(linha1);
-        card.appendChild(linha2);
-        card.appendChild(linha3);
-        if (item.finObservacao) card.appendChild(linha4);
-
-        // Adiciona ao container
-        lista.appendChild(card);
-      });
-
-
-    } else {
-      // Exibe a tabela normalmente para outros tipos
       document.querySelector('table').classList.remove('hidden');
-      renderizarCabecalho();
+
+      const tabelaCabecalho = document.getElementById('tabelaCabecalho');
+      tabelaCabecalho.innerHTML = `
+        <tr class="bg-gray-800 text-white text-sm uppercase">
+          <th class="px-2 py-2 text-left">Data</th>
+          <th class="px-2 py-2 text-left">Nota</th>
+          <th class="px-2 py-2 text-left">Fornecedor</th>
+          <th class="px-2 py-2 text-right">Total</th>
+          <th class="px-2 py-2 text-left">Tipo</th>
+          <th class="px-2 py-2 text-center">Status</th>
+        </tr>
+      `;
+
       const inicio = (paginaAtual - 1) * registrosPorPagina;
       const fim = inicio + registrosPorPagina;
       const registrosPaginados = registros.slice(inicio, fim);
 
-      registrosPaginados.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="border px-2 py-1 text-sm text-center">${item.data || '-'}</td>
-          <td class="border px-2 py-1 text-sm text-center">${item.descricao || '-'}</td>
-          <td class="border px-2 py-1 text-sm text-center">
-            <button class="text-blue-500 hover:underline" onclick="editarRegistro('${item.id}')">Editar</button>
-          </td>
+      const tabelaCorpo = document.getElementById('tabelaCorpo');
+      tabelaCorpo.innerHTML = '';
+
+      registrosPaginados.forEach((item) => {
+        const total = calcularTotal(item);
+        const statusGeral = definirStatusGeral(item.finParcelas || []);
+
+        const trResumo = document.createElement('tr');
+        trResumo.className = 'hover:bg-gray-100 border-b cursor-pointer';
+        trResumo.innerHTML = `
+          <td class="px-2 py-2">${formatarDataBR(item.finData)}</td>
+          <td class="px-2 py-2">${item.finNota || '—'}</td>
+          <td class="px-2 py-2">${item.finFornecedor || '—'}</td>
+          <td class="px-2 py-2 text-right text-green-700 font-medium">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+          <td class="px-2 py-2">${item.finTipo?.toUpperCase()}</td>
+          <td class="px-2 py-2 text-center font-bold ${statusGeral === 'PAGO' ? 'text-green-600' : 'text-red-600'}">${statusGeral}</td>
         `;
-        tabelaCorpo.appendChild(tr);
+
+        const trDetalhes = document.createElement('tr');
+        trDetalhes.className = 'hidden bg-gray-50';
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.className = 'p-4';
+        td.innerHTML = gerarDetalhesProdutosEParcelasLadoALado(item);
+        trDetalhes.appendChild(td);
+
+        trResumo.addEventListener('click', () => {
+          trDetalhes.classList.toggle('hidden');
+        });
+
+        tabelaCorpo.appendChild(trResumo);
+        tabelaCorpo.appendChild(trDetalhes);
       });
     }
+
+
+
   };
 
+
+  //Função que define o status geral do registro.
+    function definirStatusGeral(parcelas) {
+    if (parcelas.length === 0) return '—';
+    const pagas = parcelas.filter(p => p.status === 'pago').length;
+    return pagas === parcelas.length ? 'PAGO' : 'PENDENTE';
+  }
+
+  
   //***************************************************************************************
   // Função para abrir formulário composto (ainda será definida por tipo)
   const abrirFormulario = async (dados = null) => {
@@ -262,21 +176,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('formWrapper').className = 'bg-white rounded shadow-lg w-full max-w-5xl mx-4 p-6 relative transition-all duration-300';
 
 
-    // Se estiver editando, define o ID do registro atual
-    if (dados?.id) {
-      formConteudo.dataset.idRegistro = dados.id;
-    }
 
+    // Oculta o modal enquanto carrega tudo
+    formConteudo.innerHTML = ''; // limpa conteúdo anterior
+    formContainer.classList.add('hidden');
 
-  // Oculta o modal enquanto carrega tudo
-  formContainer.classList.add('hidden');
-  formConteudo.innerHTML = ''; // limpa conteúdo anterior
-
-    // Limpa o conteúdo anterior do formulário e cria a 1ª parte do formulário financeiro:
-    // Contém os campos de dados gerais da transação: data (gerada automaticamente),
-    // tipo (Receita ou Despesa), fornecedor, nota, categoria, subcategoria e observação.
-
-    // ---------------- 1ª PARTE - INFORMAÇÕES GERAIS ---------------- //
+        // ---------------- 1ª PARTE - INFORMAÇÕES GERAIS ---------------- //
 
     // Cria o contêiner principal do grupo1
     const grupo1 = document.createElement('div');
@@ -395,6 +300,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     await carregarSubcategorias();
     await carregarProdutos();
     await carregarFornecedores();
+
+
+    // Se estiver editando, define o ID do registro atual
+    if (dados?.id) {
+      formConteudo.dataset.idRegistro = dados.id;
+    }
 
     // Agora sim, exibe o formulário após tudo estar carregado
     formContainer.classList.remove('hidden');
@@ -529,9 +440,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       corpo.appendChild(tr);
       carregarLotesAtivos(tr.querySelector('select'));
-      atualizarTotal(); // Recalcula ao inserir
+      //atualizarTotal(); // Recalcula ao inserir
     };
-
+    
     // Evento para adicionar produto
     btnAdicionarItem.addEventListener('click', adicionarLinhaProduto);
 
@@ -641,11 +552,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const fornecedoresValidos = Array.from(document.getElementById('listaFornecedores').options).map(opt => opt.value.toLowerCase());
       const categoriasValidas = Array.from(document.getElementById('finCategoria').list.options).map(opt => opt.value.toLowerCase());
       const subcategoriasValidas = Array.from(document.getElementById('finSubcategoria').list.options).map(opt => opt.value.toLowerCase());
+      const parcelas = [];
+
 
       // Verifica e cadastra categoria, subcategoria e fornecedor se necessário
       await verificarCadastroSimples(categoria, 'bdcategorias', 'catNome', 'Categoria', categoriasValidas);
       await verificarCadastroSimples(subcategoria, 'bdsubcategorias', 'subCatNome', 'Subcategoria', subcategoriasValidas);
       await verificarCadastroSimples(fornecedor, 'bdfornecedores', 'forNome', 'Fornecedor', fornecedoresValidos);
+
+
 
 
       // Verifica se algum tipo foi selecionado
@@ -711,7 +626,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
         // Captura as parcelas existentes
-        const parcelas = [];
+        
         const linhasParcelas = document.querySelectorAll('#corpoParcelas > div.grid');
 
         // Verifica se todas as parcelas estão vazias (ou zeradas)
@@ -759,7 +674,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
         }
+        
+        // Verifica se soma das parcelas bate com o total de produtos
+        const totalProdutos = calcularTotalProdutos();
+        const somaParcelas = parcelas.reduce((soma, p) => soma + Number(p.valor || 0), 0);
+        const arredondado = (num) => Number(num.toFixed(2));
+        const diferenca = arredondado(totalProdutos - somaParcelas);
+
+        if (Math.abs(diferenca) > 0.05) {
+          mostrarAlerta(`A soma das parcelas (R$ ${formatarReal(somaParcelas)}) difere do total dos produtos (R$ ${formatarReal(totalProdutos)}).`, 'error');
+          return;
+        }
+
+        // Ajusta a última parcela se a diferença for pequena
+        if (parcelas.length > 0 && Math.abs(diferenca) > 0.001) {
+          const ultima = parcelas[parcelas.length - 1];
+          ultima.valor = arredondado(ultima.valor + diferenca);
+        }
+
         dados.finParcelas = parcelas;
+
 
 
         const idRegistro = formConteudo.dataset.idRegistro;
@@ -966,6 +900,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         }
         await carregarLotesAtivos(inputs[3], p.lote); // seleciona o lote correspondente
+        atualizarTotalGeral();
       }
 
       // Preenche parcelas
@@ -1163,13 +1098,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     linhas.forEach(tr => {
       const inputs = tr.querySelectorAll('input');
-      const qtd = parseFloat(inputs[1]?.value?.replace(',', '.') || 0);
-      const preco = parseFloat(inputs[2]?.value?.replace(/[^\d,]/g, '').replace(',', '.') || 0);
-      total += qtd * preco;
+      if (inputs.length < 3) return; // ignora linhas incompletas
+
+      const precoTexto = inputs[2]?.value || '0';
+      const preco = parseFloat(precoTexto.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+
+      const quantidade = parseFloat(inputs[1]?.value || '0') || 0;
+
+      total += preco * quantidade;
     });
 
     return Number(total.toFixed(2));
   }
+
 
   //***************************************************************************************
   //Função que recalcula os valores existentes proporcionalmente ao clicar em "+Parcela"
@@ -1303,10 +1244,58 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderizarTabela();
   }
 
+function gerarDetalhesProdutosEParcelasLadoALado(dados) {
+  const produtos = dados.finProduto?.map(p => `
+    <tr>
+      <td>${p.nome}</td>
+      <td class="text-center">${p.quantidade}</td>
+      <td class="text-center">${formatarReal(p.preco)}</td>
+      <td class="text-center">${formatarReal(p.preco * p.quantidade)}</td>
+      <td class="text-center">${p.lote || '-'}</td>
+    </tr>
+  `).join('') || '';
 
+  const parcelas = dados.finParcelas?.map(p => `
+    <tr class="${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">
+      <td>${p.parcela}ª</td>
+      <td>${formatarDataBR(p.vencimento)}</td>
+      <td>${formatarReal(p.valor)}</td>
+      <td>${p.status.toUpperCase()}</td>
+    </tr>
+  `).join('') || '';
 
+  return `
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-[11px] text-gray-700 leading-tight">
+      
+      <div>
+        <h4 class="mb-1 font-semibold text-gray-800">ITENS/SERVIÇOS</h4>
+        <table class="w-full border">
+          <thead class="bg-gray-100 text-center uppercase">
+            <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Lote</th></tr>
+          </thead>
+          <tbody class="text-center">${produtos}</tbody>
+        </table>
+      </div>
 
+      <div>
+        <h4 class="mb-1 font-semibold text-gray-800">PARCELAS</h4>
+        <table class="w-full border">
+          <thead class="bg-gray-100 text-center uppercase">
+            <tr><th>Parcela</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr>
+          </thead>
+          <tbody class="text-center">${parcelas}</tbody>
+        </table>
+      </div>
 
+          <div class="mt-4 col-span-2 text-center">
+        <button onclick='abrirFormulario(${JSON.stringify(dados)})'
+          class="bg-blue-500 text-white text-sm px-4 py-1.5 rounded shadow hover:bg-blue-600 transition">
+          Editar Registro
+        </button>
+      </div>
+    </div>
+  `;
+}
 
 
 
@@ -1324,5 +1313,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   //***************************************************************************************
   // Carregamento inicial
+  window.abrirFormulario = abrirFormulario;
   await carregarRegistros();
 });
