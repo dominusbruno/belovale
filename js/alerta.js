@@ -5,7 +5,7 @@ export function mostrarAlerta(mensagem, tipo = 'success') {
   texto.textContent = mensagem;
 
   // Reseta classes visuais
-  alerta.className = `fixed bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded text-white text-sm shadow-lg z-50 ${
+  alerta.className = `fixed bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded text-center text-white text-sm shadow-lg z-50 ${
     tipo === 'error' ? 'error' : 'success'
   } hidden`;
 
@@ -24,7 +24,7 @@ export function mostrarAlerta(mensagem, tipo = 'success') {
           alerta.classList.remove('ocultar');
           alerta.classList.add('hidden');
         }, 400); // tempo da animação de saída
-      }, 2000); // tempo que fica visível
+      }, 3000); // tempo que fica visível
     });
   });
 }

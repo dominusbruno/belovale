@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Estado local
   let registros = [];
-  let idEditando = null;
   let registrosOriginais = [];
   let paginaAtual = 1;
   const registrosPorPagina = 20;
@@ -71,7 +70,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderizarTabela();
   };
 
-
   // Função que soma o total da nota com base nos produtos
   function calcularTotal(item) {
     if (!item.finProduto) return 0;
@@ -79,16 +77,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   //Função para formatar data BR
-  function formatarDataBR(dataStr) {
-    if (!dataStr) return '—';
-    const data = new Date(dataStr);
-    const dia = String(data.getDate()).padStart(2, '0');
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const ano = String(data.getFullYear()); // apenas os dois últimos dígitos
-    return `${dia}/${mes}/${ano}`;
+  function formatarDataBR(data) {
+    if (!data) return '';
+
+    // Se for string ISO (ex: "2025-05-07"), transforma manualmente
+    if (typeof data === 'string' && /^\d{4}-\d{2}-\d{2}/.test(data)) {
+      const [ano, mes, dia] = data.split('T')[0].split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    // Se já for Date
+    const objData = new Date(data);
+    return objData.toLocaleDateString('pt-BR');
   }
 
-  //***************************************************************************************
   // Renderiza registros em cards (se for tipo financeiro)
   const renderizarTabela = () => {
     // Limpa a área da tabela (mantendo o contêiner fixo)
@@ -100,19 +102,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     registros.sort((a, b) => new Date(b.finData) - new Date(a.finData));
 
 
-    // Se for tipo financeiro, renderiza cards
+    
     if (tipo === 'financeiro') {
       document.querySelector('table').classList.remove('hidden');
 
       const tabelaCabecalho = document.getElementById('tabelaCabecalho');
       tabelaCabecalho.innerHTML = `
-        <tr class="bg-gray-800 text-white text-sm uppercase">
-          <th class="px-2 py-2 text-left">Data</th>
-          <th class="px-2 py-2 text-left">Nota</th>
-          <th class="px-2 py-2 text-left">Fornecedor</th>
-          <th class="px-2 py-2 text-right">Total</th>
-          <th class="px-2 py-2 text-left">Tipo</th>
-          <th class="px-2 py-2 text-center">Status</th>
+        <tr class="bg-gray-200 text-gray-700 text-sm uppercase leading-tight">
+            <th class="px-2 py-1 text-center">Data</th>
+            <th class="px-2 py-1 text-center">Nota</th>
+            <th class="px-2 py-1 text-left">Fornecedor</th>
+            <th class="px-2 py-1 text-center">Total</th>
+            <th class="px-2 py-1 text-center">Tipo</th>
+            <th class="px-2 py-1 text-center">Próx. Parcela</th>
+            <th class="px-2 py-1 text-center">Status</th>
         </tr>
       `;
 
@@ -128,47 +131,159 @@ document.addEventListener('DOMContentLoaded', async () => {
         const statusGeral = definirStatusGeral(item.finParcelas || []);
 
         const trResumo = document.createElement('tr');
-        trResumo.className = 'hover:bg-gray-100 border-b cursor-pointer';
+        trResumo.className = 'hover:bg-gray-300 border-b cursor-pointer whitespace-nowrap text-sm';
         trResumo.innerHTML = `
-          <td class="px-2 py-2">${formatarDataBR(item.finData)}</td>
-          <td class="px-2 py-2">${item.finNota || '—'}</td>
-          <td class="px-2 py-2">${item.finFornecedor || '—'}</td>
-          <td class="px-2 py-2 text-right text-green-700 font-medium">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-          <td class="px-2 py-2">${item.finTipo?.toUpperCase()}</td>
-          <td class="px-2 py-2 text-center font-bold ${statusGeral === 'PAGO' ? 'text-green-600' : 'text-red-600'}">${statusGeral}</td>
+          <td class="py-0.5 text-center w-20">${formatarDataBR(item.finData).slice(0,5)}</td>
+          <td class="py-0.5 text-center w-32">${item.finNota || '—'}</td>
+          <td class="py-0.5 text-left">${item.finFornecedor || '—'}</td>
+          <td class="py-0.5 text-center w-32 ${item.finTipo?.toUpperCase() === 'RECEITA' ? 'text-green-700' : 'text-red-700'}">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+          <td class="py-0.5 text-center w-32 ${item.finTipo?.toUpperCase() === 'RECEITA' ? 'text-green-700' : 'text-red-700'}">${item.finTipo?.toUpperCase()}</td>
+          <td class="py-0.5 text-center w-36 ${statusGeral === 'ATRASADO' ? 'text-red-700' : ''}">${obterProximaParcela(item.finParcelas)}</td>
+          <td class="py-0.5 text-center w-24 ${
+                                                      statusGeral === 'PAGO' ? 'bg-green-500 text-white' :
+                                                      statusGeral === 'ATRASADO' ? 'bg-red-500 text-white' :
+                                                      statusGeral === 'HOJE' ? 'bg-yellow-500 text-white' :
+                                                      'bg-gray-400 text-white'
+                                                    }">${statusGeral}</td>
         `;
+
 
         const trDetalhes = document.createElement('tr');
         trDetalhes.className = 'hidden bg-gray-50';
         const td = document.createElement('td');
-        td.colSpan = 6;
+        td.colSpan = 7;
         td.className = 'p-4';
         td.innerHTML = gerarDetalhesProdutosEParcelasLadoALado(item);
         trDetalhes.appendChild(td);
 
-        trResumo.addEventListener('click', () => {
-          trDetalhes.classList.toggle('hidden');
-        });
+// Evento para abrir/fechar detalhes
+  trResumo.addEventListener('click', () => {
+    const aberto = trDetalhes.classList.toggle('hidden');
 
-        tabelaCorpo.appendChild(trResumo);
-        tabelaCorpo.appendChild(trDetalhes);
-      });
+    // Troca a cor de fundo conforme o estado aberto/fechado
+    if (!aberto) {
+      trResumo.classList.add('bg-gray-300');
+      trResumo.classList.remove('hover:bg-gray-300');
+    } else {
+      trResumo.classList.remove('bg-gray-300');
+      trResumo.classList.add('hover:bg-gray-300');
+    }
+  });
+
+  tabelaCorpo.appendChild(trResumo);
+  tabelaCorpo.appendChild(trDetalhes);
+});
     }
 
 
 
   };
+  
+  // Função que define próximo pagamento/vencido
+  function obterProximaParcela(parcelas) {
+    if (!parcelas || parcelas.length === 0) return '—';
 
+    const hoje = new Date().toISOString().split('T')[0];
 
-  //Função que define o status geral do registro.
-    function definirStatusGeral(parcelas) {
-    if (parcelas.length === 0) return '—';
-    const pagas = parcelas.filter(p => p.status === 'pago').length;
-    return pagas === parcelas.length ? 'PAGO' : 'PENDENTE';
+    // Filtra apenas parcelas não pagas
+    const pendentes = parcelas.filter(p => p.status !== 'pago');
+
+    if (pendentes.length === 0) return '—';
+
+    // Ordena por vencimento (mais antiga primeiro)
+    pendentes.sort((a, b) => new Date(a.vencimento) - new Date(b.vencimento));
+
+    const proxima = pendentes[0];
+    return `${proxima.parcela}ª - ${formatarDataBR(proxima.vencimento)}`;
   }
 
-  
-  //***************************************************************************************
+  //Função que gera a tabela dentro do resumo/lista de registros
+  function gerarDetalhesProdutosEParcelasLadoALado(dados) {
+    const produtos = dados.finProduto?.map(p => `
+      <tr>
+        <td>${p.nome}</td>
+        <td class="text-center">${p.quantidade}</td>
+        <td class="text-center">${formatarReal(p.preco)}</td>
+        <td class="text-center">${formatarReal(p.preco * p.quantidade)}</td>
+        <td class="text-center">${p.lote || '-'}</td>
+      </tr>
+    `).join('') || '';
+
+    const parcelas = dados.finParcelas?.map(p => `
+      <tr class="${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">
+        <td>${p.parcela}ª</td>
+        <td>${formatarDataBR(p.vencimento).slice(0,5)}</td>
+        <td>${formatarReal(p.valor)}</td>
+        <td>${p.status.toUpperCase()}</td>
+      </tr>
+    `).join('') || '';
+
+    return `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] text-gray-700 leading-tight">
+        
+        <div>
+          <h4 class="mb-1 font-semibold text-gray-800">ITENS/SERVIÇOS</h4>
+          <table class="w-full border">
+            <thead class="bg-gray-100 text-center uppercase">
+              <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Lote</th></tr>
+            </thead>
+            <tbody class="text-center whitespace-nowrap overflow-hidden text-ellipsis w-24">${produtos}</tbody>
+          </table>
+        </div>
+
+        <div>
+          <h4 class="mb-1 font-semibold text-gray-800">PARCELAS</h4>
+          <table class="w-full border">
+            <thead class="bg-gray-100 text-center uppercase">
+              <tr><th>Parcela</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr>
+            </thead>
+            <tbody class="text-center">${parcelas}</tbody>
+          </table>
+        </div>
+
+            <div class="mt-2 col-span-2 text-center">
+          <button onclick='abrirFormulario(${JSON.stringify(dados)})'
+            class="bg-blue-500 text-white text-sm px-4 py-1.5 rounded shadow hover:bg-blue-600 transition">
+            Editar Registro
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  //Função de define o status geral do registro
+  function definirStatusGeral(parcelas) {
+    if (parcelas.length === 0) return '—';
+
+    const hoje = new Date();
+    const [anoH, mesH, diaH] = [hoje.getFullYear(), hoje.getMonth() + 1, hoje.getDate()];
+
+    const todasPagas = parcelas.every(p => p.status === 'pago');
+    if (todasPagas) return 'PAGO';
+
+    const algumaAtrasada = parcelas.some(p => {
+      if (p.status === 'pago') return false;
+      const [ano, mes, dia] = p.vencimento.split('T')[0].split('-').map(Number);
+      return (
+        ano < anoH ||
+        (ano === anoH && mes < mesH) ||
+        (ano === anoH && mes === mesH && dia < diaH)
+      );
+    });
+
+    if (algumaAtrasada) return 'ATRASADO';
+
+    const algumaVenceHoje = parcelas.some(p => {
+      if (p.status === 'pago') return false;
+      const [ano, mes, dia] = p.vencimento.split('T')[0].split('-').map(Number);
+      return ano === anoH && mes === mesH && dia === diaH;
+    });
+
+    if (algumaVenceHoje) return 'HOJE';
+
+    return 'EM DIA';
+  }
+
   // Função para abrir formulário composto (ainda será definida por tipo)
   const abrirFormulario = async (dados = null) => {
     // Limpa ID anterior, por segurança
@@ -185,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Cria o contêiner principal do grupo1
     const grupo1 = document.createElement('div');
-    grupo1.className = 'w-full space-y-4 uppercase'; // separa visualmente as linhas
+    grupo1.className = 'w-full space-y-1 uppercase'; // separa visualmente as linhas
 
     // LINHA 1 — já existente: Data + Tipo (metade do modal)
     const linha1 = document.createElement('div');
@@ -203,7 +318,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Campo de Tipo
     const divTipo = document.createElement('div');
-    divTipo.className = 'flex gap-4 items-center mt-4';
+    divTipo.className = 'flex gap-4 items-center mt-2';
     ['Receita', 'Despesa'].forEach(tipo => {
       const label = document.createElement('label');
       label.className = 'flex items-center gap-2 text-sm';
@@ -731,11 +846,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       linha.className = 'grid grid-cols-6 gap-1 items-center m-1';
 
       linha.innerHTML = `
-        <div class="col-span-1">
+        <div class="col-span-1 ">
           <input type="text" class="w-full text-sm text-center border px-2 py-1 rounded" value="${parcela}">
         </div>
         <div class="col-span-2">
-          <input type="date" class="w-full text-sm text-center border px-2 py-1 rounded" value="${vencimento}">
+          <input type="date" class="w-full text-sm text-center border px-2 py-1 rounded " value="${vencimento}">
         </div>
         <div class="col-span-1">
           <input type="text" class="w-full text-sm text-right border px-2 py-1 rounded" placeholder="Valor" value="${valor ? formatarReal(valor) : ''}">
@@ -882,6 +997,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       // Preenche produtos
+      await carregarProdutos()
       const produtos = dados.finProduto || [];
       const corpoProdutos = document.getElementById('tabelaItensCorpo');
       corpoProdutos.innerHTML = ''; // limpa as linhas padrão
@@ -940,78 +1056,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   }
 
-  //***************************************************************************************
-  // Função para abrir formulário de visualização
-  function abrirVisualizacao(dados) {
-    // Cria um modal visual (reutilizando formContainer)
-    formContainer.classList.remove('hidden');
-    formConteudo.innerHTML = ''; // limpa conteúdo anterior
-    document.getElementById('formWrapper').className = 'bg-white rounded shadow-lg w-full max-w-2xl mx-4 p-6 relative transition-all duration-300';
-    
-
-    const titulo = document.createElement('h2');
-    titulo.textContent = `${dados.finNota} - ${dados.finFornecedor} `;
-    titulo.className = 'text-lg font-semibold text-center mb-4';
-
-    // Exibição dos dados principais
-    const infoGeral = `
-      <div class="grid grid-cols-2 gap-1 text-sm text-gray-700 uppercase">
-        <div class="uppercase"><strong>Data:</strong> ${formatarDataBR(dados.finData)}</div>
-        <div><strong>Fornecedor:</strong> ${dados.finFornecedor}</div>
-        <div><strong>Categoria:</strong> ${dados.finCategoria}</div>
-        <div><strong>Subcategoria:</strong> ${dados.finSubCategoria}</div>
-        <div><strong>Tipo:</strong> ${dados.finTipo?.toUpperCase()}</div>
-        <div class="col-span-2"><strong>Observação:</strong> ${dados.finObservacao || '-'}</div>
-      </div>
-    `;
-
-    const listaProdutos = dados.finProduto?.map(p => `
-      <tr>
-        <td>${p.nome}</td>
-        <td class="text-center">${p.quantidade}</td>
-        <td class="text-center">${formatarReal(p.preco)}</td>
-        <td class="text-center">${formatarReal(p.preco * p.quantidade)}</td>
-        <td class="text-center">${p.lote || '-'}</td>
-      </tr>
-    `).join('') || '';
-    const tabelaProdutos = `
-      <h4 class="mt-3 mb-1 text-sm font-semibold uppercase text-gray-800 ">Itens</h4>
-      <table class="w-full text-sm border leading-tight">
-        <thead class="bg-gray-100 text-center uppercase">
-          <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Lote</th></tr>
-        </thead>
-        <tbody class="text-center text-xs">${listaProdutos}</tbody>
-      </table>
-    `;
-
-    const listaParcelas = dados.finParcelas?.map(p => `
-      <tr>
-        <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${p.parcela}</td>
-        <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${formatarDataBR(p.vencimento).slice(0,5)}</td>
-        <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${formatarReal(p.valor)}</td>
-        <td class="text-center ${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">${p.status.toUpperCase()}</td>
-      </tr>
-    `).join('') || '';
-
-    const tabelaParcelas = `
-      <h4 class="mt-3 mb-1 text-sm font-semibold uppercase text-gray-800">Pagamentos</h4>
-      <table class="w-full text-sm border">
-        <thead class="bg-gray-100 text-center uppercase">
-          <tr><th>Parcela</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr>
-        </thead>
-        <tbody class="text-center text-xs leading-tight">${listaParcelas}</tbody>
-      </table>
-    `;
-
-    formConteudo.innerHTML = `
-      ${titulo.outerHTML}
-      ${infoGeral}
-      ${tabelaProdutos}
-      ${tabelaParcelas}
-    `;
-  }
-
-  //***************************************************************************************
   // Função Converter o visual em R$
   function formatarReal(valor) {
     return new Intl.NumberFormat('pt-BR', {
@@ -1021,7 +1065,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).format(valor);
   }
 
-  //***************************************************************************************
   // Função para capturar clique no botão +Novo
   btnNovo?.addEventListener('click', () => abrirFormulario());
 
@@ -1031,7 +1074,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     formConteudo.innerHTML = '';
   });
 
-  //***************************************************************************************
   // Limpa o filtro
   btnLimparFiltros?.addEventListener('click', () => {
     document.getElementById('filtroStatus').value = 'todos';
@@ -1039,7 +1081,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     aplicarFiltros();
   });
 
-  //***************************************************************************************
   // Fechar o formulário ao clicar fora dele
   formContainer?.addEventListener('click', (e) => {
     // Garante que o clique não foi dentro do formulário em si
@@ -1049,7 +1090,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  //***************************************************************************************
   // Abre e fecha a barra de filtro
   btnToggleFiltros?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -1063,7 +1103,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  //***************************************************************************************
   /**Função reutilizazel de inserção de campos
    * Verifica se o valor já existe em uma lista local e cadastra se o usuário confirmar.
    * @param {string} valor - O texto digitado pelo usuário
@@ -1090,7 +1129,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  //***************************************************************************************
   //função auxiliar para calcular o total de produtos
   function calcularTotalProdutos() {
     const linhas = document.querySelectorAll('#tabelaItensCorpo tr');
@@ -1111,8 +1149,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return Number(total.toFixed(2));
   }
 
-
-  //***************************************************************************************
   //Função que recalcula os valores existentes proporcionalmente ao clicar em "+Parcela"
   function redistribuirValoresParcelas() {
     const corpo = document.getElementById('corpoParcelas');
@@ -1129,9 +1165,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  //FILTROS
-  //***************************************************************************************
-  //POR STATUS
+  //Filtro por status
   function criarFiltroPorStatus() {
     const container = document.getElementById('areaFiltros');
     if (!container) return;
@@ -1167,7 +1201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     container.appendChild(div);
   }
 
-  //POR VENCIMENTO
+  //Filtro por data de vencimento
   function criarFiltroPorDataVencimento() {
     const container = document.getElementById('areaFiltros');
     if (!container) return;
@@ -1203,7 +1237,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     div.appendChild(grupo);
     container.appendChild(div);
   }
-
   
   //Compara as datas para aplicar no filtro
   function compararDatas(data1, data2) {
@@ -1244,62 +1277,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderizarTabela();
   }
 
-function gerarDetalhesProdutosEParcelasLadoALado(dados) {
-  const produtos = dados.finProduto?.map(p => `
-    <tr>
-      <td>${p.nome}</td>
-      <td class="text-center">${p.quantidade}</td>
-      <td class="text-center">${formatarReal(p.preco)}</td>
-      <td class="text-center">${formatarReal(p.preco * p.quantidade)}</td>
-      <td class="text-center">${p.lote || '-'}</td>
-    </tr>
-  `).join('') || '';
-
-  const parcelas = dados.finParcelas?.map(p => `
-    <tr class="${p.status === 'pago' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}">
-      <td>${p.parcela}ª</td>
-      <td>${formatarDataBR(p.vencimento)}</td>
-      <td>${formatarReal(p.valor)}</td>
-      <td>${p.status.toUpperCase()}</td>
-    </tr>
-  `).join('') || '';
-
-  return `
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-[11px] text-gray-700 leading-tight">
-      
-      <div>
-        <h4 class="mb-1 font-semibold text-gray-800">ITENS/SERVIÇOS</h4>
-        <table class="w-full border">
-          <thead class="bg-gray-100 text-center uppercase">
-            <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Lote</th></tr>
-          </thead>
-          <tbody class="text-center">${produtos}</tbody>
-        </table>
-      </div>
-
-      <div>
-        <h4 class="mb-1 font-semibold text-gray-800">PARCELAS</h4>
-        <table class="w-full border">
-          <thead class="bg-gray-100 text-center uppercase">
-            <tr><th>Parcela</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr>
-          </thead>
-          <tbody class="text-center">${parcelas}</tbody>
-        </table>
-      </div>
-
-          <div class="mt-4 col-span-2 text-center">
-        <button onclick='abrirFormulario(${JSON.stringify(dados)})'
-          class="bg-blue-500 text-white text-sm px-4 py-1.5 rounded shadow hover:bg-blue-600 transition">
-          Editar Registro
-        </button>
-      </div>
-    </div>
-  `;
-}
-
-
-
-  //***************************************************************************************
   // Fecha o modal se pressionar Esc
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -1311,7 +1288,6 @@ function gerarDetalhesProdutosEParcelasLadoALado(dados) {
     }
   });
 
-  //***************************************************************************************
   // Carregamento inicial
   window.abrirFormulario = abrirFormulario;
   await carregarRegistros();
