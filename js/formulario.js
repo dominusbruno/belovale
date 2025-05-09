@@ -93,13 +93,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       .forEach(col => {
         const th = document.createElement('th');
         th.className = 'px-2 py-1 text-sm text-center uppercase whitespace-nowrap overflow-hidden text-ellipsis';
-
         th.textContent = col.label;
         tr.appendChild(th);
       });
   
     const thAcoes = document.createElement('th');
-    thAcoes.className = 'px-4 py-2 text-center uppercase';
+    thAcoes.className = 'px-2 py-1 text-sm text-center uppercase whitespace-nowrap overflow-hidden text-ellipsis';
     thAcoes.textContent = 'Ações';
     tr.appendChild(thAcoes);
   
@@ -134,8 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       .filter(col => col.eColuna)
       .forEach(col => {
         const td = document.createElement('td');
-        td.className = 'px-2 py-0.5 text-sm border-t text-center align-middle leading-tight whitespace-nowrap overflow-hidden text-ellipsis';
-        //td.className = 'px-2 py-1 border-t text-center align-middle';
+        td.className = `px-2 py-1 text-sm border-t text-center align-middle leading-tight whitespace-nowrap overflow-hidden text-ellipsis`;
 
         let valor = '';
 
@@ -180,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const paginacao = document.getElementById('paginacao');
     const totalPaginas = Math.ceil(registros.length / registrosPorPagina);
     paginacao.innerHTML = `
-      <div class="flex justify-center items-center gap-4 mt-6 text-sm">
+      <div class="flex justify-center items-center gap-4 mt-4 text-sm">
         <button id="btnAnterior" class="bg-blue-500 text-white px-3 py-1.5 rounded shadow disabled:opacity-50 hover:bg-blue-600">
           Anterior
         </button>
