@@ -84,8 +84,6 @@
     </div>
   </header>
 
-
-
   <!-- Menu Mobile com seções colapsáveis -->
   <div id="menuMobile" style="background-color: var(--color-bgnavbar);"
     class="md:hidden hidden px-4 py-2 pt-4 text-sm space-y-2">
@@ -165,41 +163,48 @@
   </div>
 
 
-
-
-
-
-
-
   <!-- Conteúdo dinâmico -->
-  <!-- Botão + Novo Registro -->
-  <div class="flex items-center justify-between px-6 pt-6">
-    <h2 id="tituloPagina" class="text-lg font-semibold text-slate-700 uppercase">Cadastro</h2>
-    <button id="btnNovoRegistro" class="bg-orange-500 text-white text-sm px-4 py-2 rounded shadow hover:bg-orange-600">
-      +Novo
-    </button>
-  </div>
 
-  <!-- Filtros -->
-  <div class="px-6 mt-4">
-    <div id="filtroContainer" class="bg-gray-800 rounded-t text-white">
-      <!-- Cabeçalho dos filtros -->
-      <div class="flex justify-between items-center px-4 py-2 border-b border-gray-700">
-        <a id="btnToggleFiltros" href="#" class="text-sm hover:underline">
-          FILTROS ▼
-        </a>
-        <button id="btnLimparFiltros" class="text-sm text-orange-200 hover:underline hidden">
-          Limpa
-        </button>
+
+  <!-- Formulário e Filtro accordion -->
+  <div class="px-6 mt-2">
+    <div class="overflow-hidden">
+      <div id="formTitulo" class="px-6 mt-8 mb-2">
+        <h2 class="flex items-center gap-2 text-lg font-semibold text-slate-700 uppercase tracking-wide">
+          <img src="icons/icon-archive.svg" alt="ícone" class="w-5 h-5 opacity-80" />
+          <span id="formTituloTexto">Cadastro</span>
+        </h2>
       </div>
 
-      <!-- Área dos filtros -->
-      <div id="areaFiltros" class="hidden px-4 py-4 flex justify-center flex-wrap gap-4">
-        <!-- filtros via JS -->
+
+      <!-- Accordion do formulário -->
+      <div id="formularioAccordion" class="bg-gray-800 text-white border-b border-gray-600">
+        <button id="btnToggleFormulario"
+          class="w-full bg-gray-800 text-white px-4 py-2 text-right text-sm font-semibold  hover:bg-gray-700">
+          + NOVO CADASTRO
+        </button>
+        <div id="formConteudo" class="p-4 hidden bg-white text-slate-700 text-sm space-y-4"></div>
+      </div>
+
+      <!-- Accordion dos filtros -->
+      <div id="filtroContainer" class="bg-gray-800 text-white">
+        <!-- Botão inteiro do cabeçalho clicável -->
+        <button id="btnToggleFiltros"
+          class="w-full text-left flex items-center px-4 py-2 text-sm font-semibold hover:bg-gray-700">
+          <span>FILTROS ▼</span>
+        </button>
+
+        <!-- Área dos filtros -->
+        <div id="areaFiltros"
+          class="hidden px-4 py-4 bg-gray-500 text-slate-800 text-sm flex justify-center flex-wrap gap-4">
+          <!-- Filtros serão renderizados aqui via JS -->
+        </div>
       </div>
 
     </div>
   </div>
+
+
 
   <!-- Tabela de registros -->
   <main class="pt-0 px-6 pb-6">
@@ -218,6 +223,7 @@
   </main>
 
   <!-- Modal de Formulário -->
+  <!--
   <div id="formContainer" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
     <div class="bg-white rounded shadow-lg w-full max-w-md mx-4 p-6 relative">
       <button id="btnFecharSlide" class="absolute top-2 right-2 text-slate-400 hover:text-red-500">
@@ -226,10 +232,10 @@
         </svg>
       </button>
       <div id="formConteudo">
-        <!-- Formulário será carregado aqui -->
       </div>
     </div>
   </div>
+-->
   </main>
 
 
