@@ -1,5 +1,5 @@
 import { db } from './firebaseConfig.js';
-import { mostrarAlerta } from './alerta.js';
+import { mostrarAlerta } from './utils.js';
 import { collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 
 const formLogin = document.getElementById('formLogin');

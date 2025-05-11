@@ -1,3 +1,18 @@
+// Retorna a data/hora atual no formato brasileiro "DD/MM/AAAA HH:mm:ss"
+export const dataHoraBR = () => {
+  const agora = new Date();
+  return agora.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+};
+
+
+// Mostra um popup de alerta no centro inferior da página
 export function mostrarAlerta(mensagem, tipo = 'success') {
   const alerta = document.getElementById('alertaCustom');
   const texto = document.getElementById('textoAlerta');

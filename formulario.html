@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
   <script type="module" src="./js/auth.js"></script>
+
 </head>
 
 <body class="bg-gray-50 font-['Roboto'] text-slate-700 min-h-screen">
@@ -42,11 +43,14 @@
         <div class="relative group">
           <button class="hover:text-orange-300">Cadastros</button>
           <div class="absolute hidden group-hover:block bg-white shadow text-gray-800 z-50 min-w-[200px]">
-            <a href="formulario.html?tipo=lotes" class="block px-4 py-2 hover:bg-gray-200">Lotes</a>
-            <a href="formulario.html?tipo=colaboradores" class="block px-4 py-2 hover:bg-gray-200">Colaboradores</a>
-            <a href="formcomposto.html?tipo=financeiro" class="block px-4 py-2 hover:bg-gray-200">Financeiro</a>
+            <a href="formulario.html?modo=simples&tipo=lotes" class="block px-4 py-2 hover:bg-gray-200">Lotes</a>
+            <a href="formulario.html?modo=simples&tipo=colaboradores"
+              class="block px-4 py-2 hover:bg-gray-200">Colaboradores</a>
+            <a href="formulario.html?modo=composto&tipo=financeiro"
+              class="block px-4 py-2 hover:bg-gray-200">Financeiro</a>
           </div>
         </div>
+
 
         <!-- Submenu RELATÓRIOS -->
         <div class="relative group">
@@ -169,37 +173,40 @@
   <!-- Formulário e Filtro accordion -->
   <div class="px-6 mt-2">
     <div class="overflow-hidden">
-      <div id="formTitulo" class="px-6 mt-8 mb-2">
+      <div id="formTitulo" class="px-4 mt-8 mb-1">
         <h2 class="flex items-center gap-2 text-lg font-semibold text-slate-700 uppercase tracking-wide">
-          <img src="icons/icon-archive.svg" alt="ícone" class="w-5 h-5 opacity-80" />
+          <img src="icons/icon-archive.svg" alt="ícone" class="w-8 h-8 opacity-100" />
           <span id="formTituloTexto">Cadastro</span>
         </h2>
       </div>
 
-
       <!-- Accordion do formulário -->
       <div id="formularioAccordion" class="bg-gray-800 text-white border-b border-gray-600">
-        <button id="btnToggleFormulario"
-          class="w-full bg-gray-800 text-white px-4 py-2 text-right text-sm font-semibold  hover:bg-gray-700">
-          + NOVO CADASTRO
-        </button>
-        <div id="formConteudo" class="p-4 hidden bg-white text-slate-700 text-sm space-y-4"></div>
+        <div id="barraFormulario"
+          class="w-full bg-gray-800 text-white px-4 py-2 text-right text-sm font-semibold cursor-pointer hover:bg-gray-700">
+          <span class="text-sm font-semibold cursor-pointer">+ NOVO CADASTRO</span>
+        </div>
+        <div id="formConteudo" class="px-4 hidden bg-gray-200 text-slate-700  text-sm space-y-4"></div>
       </div>
 
       <!-- Accordion dos filtros -->
       <div id="filtroContainer" class="bg-gray-800 text-white">
-        <!-- Botão inteiro do cabeçalho clicável -->
-        <button id="btnToggleFiltros"
-          class="w-full text-left flex items-center px-4 py-2 text-sm font-semibold hover:bg-gray-700">
-          <span>FILTROS ▼</span>
-        </button>
-
+        <!-- Toda a barra é clicável para abrir/fechar -->
+        <div id="barraFiltro" class="flex justify-between items-center px-4 py-2 cursor-pointer hover:bg-gray-700">
+          <span class="text-sm font-semibold">FILTROS ▼</span>
+          <!-- Botão real, não interfere na abertura -->
+          <button id="btnLimparFiltros" class="text-sm text-orange-200 hover:underline hidden">
+            Limpa
+          </button>
+        </div>
         <!-- Área dos filtros -->
         <div id="areaFiltros"
           class="hidden px-4 py-4 bg-gray-500 text-slate-800 text-sm flex justify-center flex-wrap gap-4">
-          <!-- Filtros serão renderizados aqui via JS -->
+          <!-- Filtros renderizados via JS -->
         </div>
       </div>
+
+
 
     </div>
   </div>
@@ -218,24 +225,9 @@
           <!-- Linhas serão inseridas dinamicamente aqui -->
         </tbody>
       </table>
+      <div id="paginacao" class="mt-4"></div>
     </div>
-    <div id="paginacao" class="mt-4"></div>
   </main>
-
-  <!-- Modal de Formulário -->
-  <!--
-  <div id="formContainer" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-    <div class="bg-white rounded shadow-lg w-full max-w-md mx-4 p-6 relative">
-      <button id="btnFecharSlide" class="absolute top-2 right-2 text-slate-400 hover:text-red-500">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <div id="formConteudo">
-      </div>
-    </div>
-  </div>
--->
   </main>
 
 
