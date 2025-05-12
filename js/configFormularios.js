@@ -27,9 +27,26 @@
 
 // 🔹 VISUAL E FORMATAÇÃO
 // - descricao: (string) legenda auxiliar exibida abaixo do campo
-// - mascara: (string) máscara IMask (ex: '000.000.000-00' ou '00/00/0000')
-// - formatoCondicional: (function) aplica classes CSS com base no valor ou no registro inteiro
-//   Exemplo: (valor, registro) => registro.loteStatus === 'INATIVO' ? 'bg-red-100 text-red-800 font-bold' : ''
+// - mascara: (string) máscara IMask (ex: 'cpf', 'telefone', 'cnpj', 'lote', etc...)
+// - formatoCondicionalCelula: (function) aplica classes CSS na CELULA com base no valor ou no registro inteiro
+//        Você pode usar o 'valor' quando quiser estilizar com base na célula atual, e o 'registro' quando quiser
+//        usar qualquer outro campo da linha.
+//            formatoCondicionalCelula: (valor, registro) => {
+//              if (registro.loteStatus === 'INATIVO') return 'bg-red-100 text-red-800 font-bold';
+//              if (registro.loteStatus === 'ATIVO') return 'bg-green-100 text-green-800 font-bold';
+//              if (registro.loteStatus === 'PENDENTE') return 'bg-yellow-100 text-yellow-800 font-bold';
+//              return '';
+//            }
+
+
+// - formatoCondicionalLinha: (function) aplica classes CSS na LINHA INTEIRA com base no valor da celula
+//        Abaixo segue um exemplo de uso
+//             formatoCondicionalLinha: (registro) => {
+//               let classes = '';
+//               if (registro.loteStatus === 'INATIVO') classes += 'bg-red-50 text-red-800';
+//               if (registro.loteStatus === 'ATIVO') classes += 'bg-green-50 text-green-800';
+//               return classes.trim();
+//             }
 
 // 🔹 TABELA (apresentação)
 // - eColuna: (boolean) define se o campo aparece na tabela de listagem
@@ -53,13 +70,16 @@ export const configuracoesFormularios = {
         {
           campo: 'loteStatus', label: 'Status', tipo: 'select', opcoes: ['ATIVO', 'INATIVO'],
           placeholder: 'Ativo ou Inativo?', required: true, defaultValue: 'ATIVO',
-          filtrar: true, eColuna: false
+          filtrar: true, eColuna: true
         },
         {
-          campo: 'loteIdentificador', label: 'Identificador', placeholder: 'EX: AL042025',
+          campo: 'loteIdentificador', mascara: 'lote' ,label: 'Identificador', placeholder: 'EX: AL042025',
           required: true, verificarDuplicidade: true, filtrar: false, eColuna: true,
-          formatoCondicional: (valor, registro) =>
-            registro.loteStatus === 'INATIVO' ? 'bg-red-100 text-red-800 font-bold' : ''
+          formatoCondicionalCelula: (valor, registro) => {
+            if (registro.loteStatus === 'INATIVO') return 'bg-red-100 text-red-800 font-bold';
+            if (registro.loteStatus === 'ATIVO') return 'bg-green-100 text-green-800 font-bold';
+            return '';
+          },
         },
         {
           campo: 'loteLinhagem', label: 'Linhagem', placeholder: 'Linhagem das aves',
@@ -76,14 +96,14 @@ export const configuracoesFormularios = {
           required: true, filtrar: true, eColuna: true
         },
         {
-          campo: 'loteDataNascimento', label: 'Nascimento', tipo: 'date',
+          campo: 'loteDataNascimento', label: 'Nascimento', tipo: 'date', defaultValue: 'hoje',
           required: true, filtrar: false, eColuna: true
         },
         {
           campo: '_idadeSemanas', label: 'Idade (sem)', calculado: true, eColuna: true
         },
         {
-          campo: 'loteDataChegada', label: 'Chegada', tipo: 'date',
+          campo: 'loteDataChegada', label: 'Chegada', tipo: 'date', defaultValue: 'hoje',
           required: true, filtrar: false, eColuna: true
         },
         {
@@ -109,12 +129,14 @@ export const configuracoesFormularios = {
         },
         {
           campo: 'colabTipo', label: 'Tipo', required: true, tipo: 'select',
-          opcoes: ['admin', 'Colaborador'], placeholder: 'Escolha um tipo...',
+          opcoes: ['admin', 'colaborador'], placeholder: 'Escolha um tipo...',
           filtrar: true, eColuna: true
         }
       ]
     }
   },
+
+
 
   // Configurações dos formulários COMPOSTOS
   composto: {
@@ -125,13 +147,13 @@ export const configuracoesFormularios = {
           tipo: 'cabecalho',
           titulo: 'Informações Gerais',
           campos: [
-            { campo: 'finData', label: 'Data', tipo: 'date', required: true },
-            { campo: 'finTipo', label: 'Tipo', tipo: 'select', opcoes: ['Receita', 'Despesa'], required: true },
-            { campo: 'finFornecedor', label: 'Fornecedor', placeholder: 'Razão Social/Nome Fantasia', required: true },
-            { campo: 'finNota', label: 'Nº da Nota', placeholder: 'Ex: 1001', required: true },
+            { campo: 'finData', label: 'Data', tipo: 'date', required: true, defaultValue: 'hoje' },
+            { campo: 'finTipo', label: 'Tipo', tipo: 'select', opcoes: ['RECEITA', 'DESPESA'], required: true },
+            { campo: 'finFornecedor', label: 'Fornecedor', placeholder: 'Fornecedor', required: true },
+            { campo: 'finNota', label: 'Nº da Nota', placeholder: 'Ex: 1001', defaultValue: 'S/N', required: true },
             { campo: 'finCategoria', label: 'Categoria', placeholder: 'Categoria', required: true },
             { campo: 'finSubCategoria', label: 'Subcategoria', placeholder: 'Subcategoria', required: true },
-            { campo: 'finObservacao', label: 'Observações', placeholder: 'Breve observação...' }
+            { campo: 'finObservacao', label: 'Observações', tipo: 'textarea' ,placeholder: 'Breve observação.' }
           ]
         },
         {
@@ -139,10 +161,11 @@ export const configuracoesFormularios = {
           id: 'finProduto',
           titulo: 'Itens',
           colunas: [
-            { campo: 'finProdDescricao', label: 'Descrição', tipo: 'text', required: true },
-            { campo: 'finProdQuant', label: 'Quant.', tipo: 'number', required: true },
-            { campo: 'finProdPreco', label: 'Preço', tipo: 'number', required: true },
-            { campo: 'finProdLote', label: 'Lote', required: true }
+            { campo: 'finProdDescricao', label: 'Descrição', tipo: 'text', required: true, placeholder: 'Produto ou serviço' },
+            { campo: 'finProdQuant', label: 'Quant.', tipo: 'number', required: true, placeholder: 'Quantidade' },
+            { campo: 'finProdPreco', label: 'Preço', mascara: 'moeda', required: true, placeholder: 'Preço' },
+            { campo: '_finProdvalorTotal', label: 'Total', mascara: 'moeda', required: true, placeholder: 'Total' },  // Esse campo
+            { campo: 'finProdLote', label: 'Lote', required: true, placeholder: 'Categoria' }
           ]
         },
         {
@@ -151,9 +174,9 @@ export const configuracoesFormularios = {
           titulo: 'Parcelas',
           colunas: [
             { campo: 'finParcNum', label: 'Parcela', tipo: 'number', required: true },
-            { campo: 'finParcValor', label: 'Valor', tipo: 'number', required: true },
-            { campo: 'finParcVencimento', label: 'Vencimento', tipo: 'date', required: true },
-            { campo: 'finParcStatus', label: 'Status', required: true }
+            { campo: 'finParcValor', label: 'Valor', mascara: 'moeda', required: true },
+            { campo: 'finParcVencimento', label: 'Vencimento', tipo: 'date', defaultValue: 'hoje', required: true, filtrar: true, eColuna: true },
+            { campo: 'finParcStatus', label: 'Status', tipo: 'select', opcoes: ['PAGO', 'PENDENTE'], required: true }
           ]
         }
       ]
@@ -161,7 +184,13 @@ export const configuracoesFormularios = {
   }
 };
 
-  
+
+
+
+
+
+
+
 
 
 //***************************************************************************************
@@ -169,6 +198,7 @@ export const configuracoesFormularios = {
 //***************************************************************************************
 export const camposCalculadosPersonalizados = {
   lotes: {
+    //Calcula a idade em semanas
     _idadeSemanas: (item) => {
       const nascimento = item.loteDataNascimento;
       if (!nascimento) return '-';
@@ -178,5 +208,14 @@ export const camposCalculadosPersonalizados = {
       return dias < 7 ? '1' : `${Math.ceil(dias / 7)}`;
     }
   },
-  // outros tipos de formulários podem ser adicionados aqui
+
+  financeiro: {
+    //Calcula o valor total dos produtos.
+    _finProdvalorTotal: (item) => {
+      const preco = parseFloat(item.finProdPreco?.toString().replace(',', '.') || '0');
+      const quant = parseFloat(item.finProdQuant?.toString().replace(',', '.') || '0');
+      const total = preco * quant;
+      return isNaN(total) ? '' : total;
+    }
+  }
 };

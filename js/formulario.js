@@ -1,7 +1,7 @@
 // Importações principais
 import { db } from './firebaseConfig.js';
-import { mostrarAlerta, dataHoraBR } from './utils.js';
-import { configuracoesFormularios, camposCalculadosPersonalizados  } from './configFormularios.js';
+import { mostrarAlerta, dataHoraBR, aplicarMascaraInput } from './utils.js';
+import { configuracoesFormularios, camposCalculadosPersonalizados } from './configFormularios.js';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 
 
@@ -66,7 +66,7 @@ const colecao = tipo === 'colaboradores' ? 'bdcolaboradores' : 'bd' + tipo;
   let registros = [];
   let idEditando = null;
   let paginaAtual = 1;
-  const registrosPorPagina = 5;
+  const registrosPorPagina = 20;
 
 
 
@@ -125,7 +125,7 @@ const colecao = tipo === 'colaboradores' ? 'bdcolaboradores' : 'bd' + tipo;
     else if (modo === 'composto') {
       const tr = document.createElement('tr');
       const th = document.createElement('th');
-      th.className = 'px-4 py-2 text-sm uppercase text-left text-slate-500';
+      th.className = 'px-4 text-sm uppercase text-left text-gray-100 bg-gray-400';
       th.colSpan = 100;
       th.textContent = 'Registros agrupados por seção (clique para expandir)';
       tr.appendChild(th);
@@ -147,23 +147,23 @@ const colecao = tipo === 'colaboradores' ? 'bdcolaboradores' : 'bd' + tipo;
       });
   
       // Ordena sempre com prioridade para 'criadoEm' (caso exista), senão por 'data'
-     // 🔄 Ordena com base na configuração padrão do formulário
-if (estruturaConfig.ordenacaoPadrao) {
-  const { campo, direcao } = estruturaConfig.ordenacaoPadrao;
-  registros.sort((a, b) => {
-    const valorA = a[campo] || '';
-    const valorB = b[campo] || '';
+      // 🔄 Ordena com base na configuração padrão do formulário
+      if (estruturaConfig.ordenacaoPadrao) {
+        const { campo, direcao } = estruturaConfig.ordenacaoPadrao;
+        registros.sort((a, b) => {
+          const valorA = a[campo] || '';
+          const valorB = b[campo] || '';
 
-    // Tenta ordenar como data, senão como string comum
-    const tipo = isNaN(Date.parse(valorA)) ? 'string' : 'date';
+          // Tenta ordenar como data, senão como string comum
+          const tipo = isNaN(Date.parse(valorA)) ? 'string' : 'date';
 
-    const comparacao = tipo === 'date'
-      ? new Date(valorA) - new Date(valorB)
-      : valorA.localeCompare(valorB);
+          const comparacao = tipo === 'date'
+            ? new Date(valorA) - new Date(valorB)
+            : valorA.localeCompare(valorB);
 
-    return direcao === 'desc' ? -comparacao : comparacao;
-  });
-}
+          return direcao === 'desc' ? -comparacao : comparacao;
+        });
+      }
 
 
   
@@ -217,7 +217,11 @@ if (estruturaConfig.ordenacaoPadrao) {
       // 🔹 Modo SIMPLES
       if (modo === 'simples') {
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-yellow-50 transition-colors';
+        // Verifica se algum campo da estrutura define formatação condicional para a linha
+        const classeLinha = estrutura.find(col => typeof col.formatoCondicionalLinha === 'function')
+        ?.formatoCondicionalLinha(item) || '';
+
+        tr.className = `hover:bg-yellow-50 transition-colors ${classeLinha}`;
 
         estrutura.filter(col => col.eColuna).forEach(col => {
           const td = document.createElement('td');
@@ -233,7 +237,7 @@ if (estruturaConfig.ordenacaoPadrao) {
             }
           }
 
-          const classeCondicional = col.formatoCondicional ? col.formatoCondicional(valor, item) : '';
+          const classeCondicional = col.formatoCondicionalCelula ? col.formatoCondicionalCelula(valor, item) : '';
           td.className = `px-2 py-1 text-sm border-t text-center align-middle leading-tight whitespace-nowrap overflow-hidden text-ellipsis ${classeCondicional}`;
           td.textContent = valor;
           tr.appendChild(td);
@@ -262,12 +266,12 @@ if (estruturaConfig.ordenacaoPadrao) {
         td.className = 'border-t';
 
         const details = document.createElement('details');
-        details.className = 'bg-white border rounded shadow-sm mb-2';
+        details.className = 'bg-white shadow-sm';
 
         const summary = document.createElement('summary');
-        summary.className = 'px-4 py-2 cursor-pointer select-none font-semibold bg-gray-100 hover:bg-gray-200 rounded';
+        summary.className = 'px-4 py-1 cursor-pointer select-none font-semibold bg-gray-300 hover:bg-gray-400';
         summary.textContent = item.finNota
-          ? `Nota ${item.finNota} - ${item.finTipo || ''} - ${item.finData || ''}`
+          ? `${new Date(item.finData).toLocaleDateString('pt-BR') || ''} - ${item.finFornecedor || ''} | Nota: ${item.finNota} `
           : `Registro ${index + 1}`;
 
         const conteudo = document.createElement('div');
@@ -282,7 +286,7 @@ if (estruturaConfig.ordenacaoPadrao) {
             secao.campos.forEach(campo => {
               const valor = item[campo.campo] || '';
               const div = document.createElement('div');
-              const classe = campo.formatoCondicional ? campo.formatoCondicional(valor, item) : '';
+              const classe = campo.formatoCondicionalCelula ? campo.formatoCondicionalCelula(valor, item) : '';
               div.className = classe;
               div.innerHTML = `<strong>${campo.label}:</strong> ${valor}`;
               grid.appendChild(div);
@@ -296,18 +300,21 @@ if (estruturaConfig.ordenacaoPadrao) {
             const dadosTabela = item[secao.id] || [];
             if (!Array.isArray(dadosTabela) || !dadosTabela.length) return;
 
+            //Título da tabela
             const div = document.createElement('div');
-            div.innerHTML = `<div class="font-semibold mb-1">${secao.titulo}</div>`;
+            div.innerHTML = `<div class="font-semibold uppercase">${secao.titulo}</div>`;
 
-            const table = document.createElement('table');
-            table.className = 'w-full border text-sm';
-
+            //Cabeçalho das tabelas
             const thead = document.createElement('thead');
-            thead.className = 'bg-gray-100';
+            thead.className = 'bg-gray-200 uppercase';
             thead.innerHTML = `
               <tr>
                 ${secao.colunas.map(col => `<th class="border px-2 py-1">${col.label}</th>`).join('')}
               </tr>`;
+            
+            const table = document.createElement('table');
+            table.className = 'w-full border text-sm';
+
 
             const tbody = document.createElement('tbody');
             dadosTabela.forEach(linha => {
@@ -410,7 +417,7 @@ if (estruturaConfig.ordenacaoPadrao) {
     const form = document.createElement('form');
     form.className = modo === 'simples'
       ? 'p-4 text-slate-700 text-sm grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 uppercase'
-      : 'p-4 bg-white text-slate-700 text-sm space-y-6 uppercase';
+      : 'p-4 text-slate-700 text-sm space-y-6 uppercase';
 
     formConteudo.appendChild(form);
 
@@ -420,7 +427,7 @@ if (estruturaConfig.ordenacaoPadrao) {
     if (modo === 'simples') {
       estrutura.filter(col => !col.calculado).forEach(col => {
         const div = document.createElement('div');
-
+        
         const label = document.createElement('label');
         label.className = 'block text-sm font-medium text-gray-700';
         label.setAttribute('for', col.campo);
@@ -452,34 +459,24 @@ if (estruturaConfig.ordenacaoPadrao) {
           input.type = col.tipo === 'date' ? 'date' : (col.tipo || 'text');
           input.className = 'w-full border border-gray-300 rounded px-3 py-2 text-sm';
           if (col.placeholder) input.placeholder = col.placeholder;
-          if (col.mascara) IMask(input, { mask: col.mascara });
         }
 
         input.id = col.campo;
         input.name = col.campo;
-        input.value = registro ? registro[col.campo] : (col.defaultValue || '');
+        
+        //Se o campo for data, insere da data de hoje
+        if (registro) {
+          input.value = registro[col.campo];
+        } else if (col.defaultValue === 'hoje' && col.tipo === 'date') {
+          input.value = new Date().toISOString().split('T')[0]; // Data de hoje no formato yyyy-mm-dd
+        } else {
+          input.value = col.defaultValue || '';
+        }
+        
 
         if (col.min) input.min = col.min;
         if (col.max) input.max = col.max;
-        if (col.mascara === 'moeda') {
-          IMask(input, {
-            mask: 'R$ num',
-            blocks: {
-              num: {
-                // Define formato de moeda com separador brasileiro
-                mask: Number,
-                thousandsSeparator: '.',
-                radix: ',',
-                mapToRadix: ['.'],
-                scale: 2,
-                normalizeZeros: true,
-                padFractionalZeros: true
-              }
-            }
-          });
-        } else if (col.mascara) {
-          IMask(input, { mask: col.mascara });
-        }
+        aplicarMascaraInput(input, col);
         
         if (col.readOnly) {
           if (col.tipo === 'select') input.disabled = true;
@@ -505,14 +502,16 @@ if (estruturaConfig.ordenacaoPadrao) {
     // MODO COMPOSTO
     //============================================
     if (modo === 'composto') {
-      estrutura.forEach(secao => {
+      const config = configuracoesFormularios.composto.financeiro;
+      config.seções.forEach(secao => {
+
         const fieldset = document.createElement('fieldset');
-        fieldset.className = 'col-span-full space-y-4';
+        fieldset.className = 'col-span-full';
 
         if (secao.titulo) {
           const legend = document.createElement('legend');
           legend.textContent = secao.titulo;
-          legend.className = 'text-base font-semibold text-gray-600 border-b pb-1';
+          legend.className = 'text-base font-semibold text-gray-600 border-b';
           fieldset.appendChild(legend);
         }
 
@@ -527,16 +526,40 @@ if (estruturaConfig.ordenacaoPadrao) {
             label.setAttribute('for', campo.campo);
             label.textContent = campo.label;
 
-            const input = document.createElement('input');
-            input.type = campo.tipo === 'date' ? 'date' : (campo.tipo || 'text');
+            let input;
+            if (campo.tipo === 'select') {
+              input = document.createElement('select');
+              campo.opcoes?.forEach(op => {
+                const opt = document.createElement('option');
+                opt.value = op;
+                opt.textContent = op;
+                input.appendChild(opt);
+              });
+            } else if (campo.tipo === 'textarea') {
+              input = document.createElement('textarea');
+              input.rows = 2;
+            } else {
+              input = document.createElement('input');
+              input.type = campo.tipo === 'date' ? 'date' : (campo.tipo || 'text');
+            }
+            // Define o valor do campo com base no registro ou valor padrão
+            if (registro && registro[campo.campo]) {
+              input.value = registro[campo.campo];
+            } else if (campo.defaultValue === 'hoje' && campo.tipo === 'date') {
+              input.value = new Date().toISOString().split('T')[0];
+            } else {
+              input.value = campo.defaultValue || '';
+            }
+            
+
+
             input.className = 'w-full border border-gray-300 rounded px-3 py-2 text-sm';
             input.id = campo.campo;
             input.name = campo.campo;
-            input.value = registro ? (registro[campo.campo] || '') : (campo.defaultValue || '');
-
             if (campo.placeholder) input.placeholder = campo.placeholder;
             if (campo.required) input.required = true;
             if (campo.readOnly) input.readOnly = true;
+            aplicarMascaraInput(input, campo);
 
             div.appendChild(label);
             div.appendChild(input);
@@ -545,39 +568,256 @@ if (estruturaConfig.ordenacaoPadrao) {
 
           fieldset.appendChild(grid);
         }
-
+        
+        // SEÇÃO DAS TABELAS
         if (secao.tipo === 'tabela') {
           const container = document.createElement('div');
           container.id = `secao-${secao.id}`;
-
+        
           const table = document.createElement('div');
           table.className = 'space-y-2';
+        
+          // ✅ Popula dados existentes, se houver
+          if (registro && Array.isArray(registro[secao.id])) {
+            registro[secao.id].forEach(item => {
+              const linha = document.createElement('div');
+              linha.className = 'grid gap-2 mb-1';
+              linha.style.gridTemplateColumns = `repeat(${secao.colunas.length}, minmax(0, 1fr))`;
+        
+              secao.colunas.forEach(col => {
+                let input;
+        
+                // Criação do campo com base no tipo
+                if (col.tipo === 'select') {
+                  input = document.createElement('select');
+                  col.opcoes?.forEach(op => {
+                    const opt = document.createElement('option');
+                    opt.value = op;
+                    opt.textContent = op;
+                    input.appendChild(opt);
+                  });
+                } else if (col.tipo === 'textarea') {
+                  input = document.createElement('textarea');
+                  input.rows = 2;
+                } else {
+                  input = document.createElement('input');
+                  input.type = col.tipo === 'date' ? 'date' : (col.tipo || 'text');
+                }
+        
+                // Define o valor salvo ou padrão
+                const ehCalculado = col.campo.startsWith('_') && camposCalculadosPersonalizados[tipo]?.[col.campo];
 
+                if (ehCalculado) {
+                  // Campo calculado: busca o valor na função correspondente
+                  const resultado = camposCalculadosPersonalizados[tipo][col.campo](item);
+
+                  input.value = typeof resultado === 'number'
+                    ? resultado.toLocaleString('pt-BR', {
+                        style: col.mascara === 'moeda' ? 'currency' : 'decimal',
+                        currency: 'BRL'
+                      })
+                    : resultado;
+
+                  input.readOnly = true;
+                } else if (item && item[col.campo]) {
+                  // Valor normal vindo do item
+                  input.value = item[col.campo];
+                } else if (col.defaultValue === 'hoje' && col.tipo === 'date') {
+                  // Valor padrão para campos de data
+                  input.value = new Date().toISOString().split('T')[0];
+                } else {
+                  input.value = col.defaultValue || '';
+                }
+
+        
+                input.name = `${secao.id}_${col.campo}`;
+                input.className = 'border border-gray-300 rounded px-2 py-1 text-sm';
+                if (col.placeholder) input.placeholder = col.label;
+                if (col.required) input.required = true;
+                if (col.readOnly) input.readOnly = true;
+        
+                aplicarMascaraInput(input, col);
+                linha.appendChild(input);
+
+                // 🧠 Detecta se existe algum campo calculado na seção
+                const existeCampoCalculado = secao.colunas.some(c =>
+                  c.campo.startsWith('_') && camposCalculadosPersonalizados[tipo]?.[c.campo]
+                );
+
+                // 🧠 Se houver, aplica listener para atualizar ao digitar
+                if (existeCampoCalculado && !col.campo.startsWith('_')) {
+                  input.addEventListener('input', () => {
+                    const linhaPai = input.closest('.grid');
+
+                    const camposLinha = Object.fromEntries(
+                      [...linhaPai.querySelectorAll('input, select, textarea')].map(input => {
+                        const nomeCampo = input.name.split('_').slice(1).join('_');
+                        let valor = input.value;
+
+                        if (input.classList.contains('mascara-moeda')) {
+                          valor = valor.replace(/[^\d,]/g, '').replace(',', '.');
+                        }
+
+                        return [nomeCampo, valor];
+                      })
+                    );
+
+                    secao.colunas.forEach(c => {
+                      if (c.campo.startsWith('_') && camposCalculadosPersonalizados[tipo]?.[c.campo]) {
+                        const campoCalculado = linhaPai.querySelector(`[name="${secao.id}_${c.campo}"]`);
+                        if (!campoCalculado) return;
+
+                        const resultado = camposCalculadosPersonalizados[tipo][c.campo](camposLinha);
+
+                        campoCalculado.value = typeof resultado === 'number'
+                          ? resultado.toLocaleString('pt-BR', {
+                              style: c.mascara === 'moeda' ? 'currency' : 'decimal',
+                              currency: 'BRL'
+                            })
+                          : resultado;
+                      }
+                    });
+                  });
+                }
+
+
+              });
+        
+              table.appendChild(linha);
+
+              // 🔁 Recalcula campos calculados após preencher a linha com valores salvos
+              const camposLinha = Object.fromEntries(
+                [...linha.querySelectorAll('input, select, textarea')].map(input => {
+                  const nomeCampo = input.name.split('_').slice(1).join('_');
+                  let valor = input.value;
+
+                  if (input.classList.contains('mascara-moeda')) {
+                    valor = valor.replace(/[^\d,]/g, '').replace(',', '.');
+                  }
+
+                  return [nomeCampo, valor];
+                })
+              );
+
+              secao.colunas.forEach(c => {
+                if (c.campo.startsWith('_') && camposCalculadosPersonalizados[tipo]?.[c.campo]) {
+                  const campoCalculado = linha.querySelector(`[name="${secao.id}_${c.campo}"]`);
+                  if (!campoCalculado) return;
+
+                  const resultado = camposCalculadosPersonalizados[tipo][c.campo](camposLinha);
+
+                  campoCalculado.value = typeof resultado === 'number'
+                    ? resultado.toLocaleString('pt-BR', {
+                        style: c.mascara === 'moeda' ? 'currency' : 'decimal',
+                        currency: 'BRL'
+                      })
+                    : resultado;
+                }
+              });
+
+
+            });
+          }
+        
+          // ✅ Botão de adicionar nova linha
           const btnAdd = document.createElement('button');
-          btnAdd.type = 'button';
           btnAdd.textContent = `+ ${secao.titulo}`;
-          btnAdd.className = 'px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600';
-
+          btnAdd.className = 'px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600';
+        
           btnAdd.addEventListener('click', () => {
+            btnAdd.remove();
             const linha = document.createElement('div');
-            linha.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-1';
+            linha.className = 'grid gap-2 mb-1';
+            linha.style.gridTemplateColumns = `repeat(${secao.colunas.length}, minmax(0, 1fr))`;
 
+        
             secao.colunas.forEach(col => {
-              const input = document.createElement('input');
-              input.type = col.tipo || 'text';
-              input.placeholder = col.label;
+              let input;
+        
+              // Criação do campo com base no tipo
+              if (col.tipo === 'select') {
+                input = document.createElement('select');
+                col.opcoes?.forEach(op => {
+                  const opt = document.createElement('option');
+                  opt.value = op;
+                  opt.textContent = op;
+                  input.appendChild(opt);
+                });
+              } else if (col.tipo === 'textarea') {
+                input = document.createElement('textarea');
+                input.rows = 2;
+              } else {
+                input = document.createElement('input');
+                input.type = col.tipo === 'date' ? 'date' : (col.tipo || 'text');
+              }
+        
+              // Define valor padrão
+              if (col.defaultValue === 'hoje' && col.tipo === 'date') {
+                input.value = new Date().toISOString().split('T')[0];
+              } else {
+                input.value = col.defaultValue || '';
+              }
+        
               input.name = `${secao.id}_${col.campo}`;
               input.className = 'border border-gray-300 rounded px-2 py-1 text-sm';
+              if (col.placeholder) input.placeholder = col.label;
+              if (col.required) input.required = true;
+              if (col.readOnly) input.readOnly = true;
+        
+              aplicarMascaraInput(input, col);
               linha.appendChild(input);
+
+              //Verifica existencia de campo calculado!
+              const existeCampoCalculado = secao.colunas.some(c =>
+                c.campo.startsWith('_') && camposCalculadosPersonalizados[tipo]?.[c.campo]
+              );
+              
+              if (existeCampoCalculado) {
+                input.addEventListener('input', () => {
+                  const linhaPai = input.closest('.grid');
+                  const camposLinha = Object.fromEntries(
+                    [...linhaPai.querySelectorAll('input, select, textarea')].map(input => {
+                      const nomeCampo = input.name.split('_').slice(1).join('_'); // remove prefixo da tabela
+                      let valor = input.value;
+              
+                      // Remove máscara de moeda se for o caso
+                      if (input.classList.contains('imask-field')) {
+                        valor = valor.replace(/[^\d,]/g, '').replace(',', '.');
+                      }
+              
+                      return [nomeCampo, valor];
+                    })
+                  );
+              
+                  // Atualiza todos os campos calculados daquela linha
+                  secao.colunas.forEach(c => {
+                    if (c.campo.startsWith('_') && camposCalculadosPersonalizados[tipo]?.[c.campo]) {
+                      const campoCalculado = linhaPai.querySelector(`[name="${secao.id}_${c.campo}"]`);
+                      if (!campoCalculado) return;
+                      const resultado = camposCalculadosPersonalizados[tipo][c.campo](camposLinha);
+              
+                      campoCalculado.value = typeof resultado === 'number'
+                        ? resultado.toLocaleString('pt-BR', { style: c.mascara === 'moeda' ? 'currency' : 'decimal', currency: 'BRL' })
+                        : resultado;
+                    }
+                  });
+                });
+              }
+              
+
             });
-
+        
+            
             table.appendChild(linha);
+            container.appendChild(btnAdd);
           });
-
+        
           container.appendChild(table);
           container.appendChild(btnAdd);
           fieldset.appendChild(container);
         }
+        
+        
 
         form.appendChild(fieldset);
       });
@@ -687,7 +927,7 @@ if (estruturaConfig.ordenacaoPadrao) {
 
           linhas?.forEach(linha => {
             const obj = {};
-            linha.querySelectorAll('input')?.forEach(input => {
+            linha.querySelectorAll('input, select, textarea')?.forEach(input => {
               const nomeCampo = input.name.replace(`${secao.id}_`, '');
               obj[nomeCampo] = input.value.trim();
             });
@@ -841,7 +1081,12 @@ if (estruturaConfig.ordenacaoPadrao) {
                 .filter(o => o.selected)
                 .map(o => o.value);
 
-              filtrosAtivos[filtro.campo] = selecionados;
+                if (selecionados.length > 0) {
+                  filtrosAtivos[filtro.campo] = selecionados;
+                } else {
+                  delete filtrosAtivos[filtro.campo]; // remove completamente o filtro vazio
+                }
+                
               aplicarFiltros();
             });
 
@@ -896,7 +1141,12 @@ if (estruturaConfig.ordenacaoPadrao) {
                 .filter(o => o.selected)
                 .map(o => o.value);
 
-              filtrosAtivos[filtro.campo] = selecionados;
+                if (selecionados.length > 0) {
+                  filtrosAtivos[filtro.campo] = selecionados;
+                } else {
+                  delete filtrosAtivos[filtro.campo]; // remove completamente o filtro vazio
+                }
+                
               aplicarFiltros();
             });
 
@@ -942,8 +1192,9 @@ if (estruturaConfig.ordenacaoPadrao) {
 
   //***************************************************************************************
   // Carrega a tabela de registros atualizada
-  await carregarRegistros();
-  gerarFiltros();  
+  await carregarRegistros(); // carrega todos os dados na variável registros
+  gerarFiltros(registros);  // agora gera os filtros com base no conjunto completo
+  
   //***************************************************************************************
 
 
